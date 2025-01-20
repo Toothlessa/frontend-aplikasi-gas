@@ -1,18 +1,18 @@
 <template>
-    <MasterItem />
+    <Stock />
 </template>
   
   <script>
   import { defineComponent } from 'vue';
   
   // Components
-  import MasterItem from '@/components/masteritems/MasterItem.vue';
+  import Stock from '@/components/stocks/Stock.vue';
   
   export default defineComponent({
-    name: 'MasterItemView',
+    name: 'StockView',
   
     components: {
-      MasterItem,
+      Stock,
     },
   });
   </script>

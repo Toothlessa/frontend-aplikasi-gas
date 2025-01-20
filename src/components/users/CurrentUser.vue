@@ -96,7 +96,8 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
               'Accept': 'application/json',
               'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
             }
-          })
+          }
+        )
           .then((response) => {
             this.result = response.data.data;
             });

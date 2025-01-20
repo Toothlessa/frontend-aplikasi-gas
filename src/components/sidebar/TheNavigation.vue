@@ -7,10 +7,15 @@
       <div class="text-center mt-5">
         <h1 class="text-teal text-lg-h5 font-weight-bold ">Aplikasi Gas</h1>
         <v-divider color="white" class="mt-4"></v-divider>
-        <v-avatar class="my-5" size="60"> <v-img src="https://cdn.vuetifyjs.com/images/lists/1.jpg" class="image"></v-img> </v-avatar>
-        <h1 class="text-black text-lg-h5 font-weight-bold ">Muhammad Renan</h1>
-        <h6 class="text-grey">muhrenan@gmail.com</h6>
-        <v-btn rounded color="#2EBFAF" variant="outlined" to="/users" >Transactions</v-btn>
+          <v-avatar class="my-5" size="60"> <v-img src="https://cdn.vuetifyjs.com/images/lists/1.jpg" class="image"></v-img> </v-avatar>
+            <h1 class="text-black text-lg-h5 font-weight-bold ">Muhammad Renan</h1>
+            <h6 class="text-grey">muhrenan@gmail.com</h6>
+            <v-btn 
+              rounded color="#2EBFAF" 
+              variant="outlined" 
+              to="/transaction" 
+            >Transactions
+          </v-btn>
       </div>
       
       <v-divider class="mx-10 mt-3" ></v-divider>
@@ -52,7 +57,13 @@
       </v-btn>
       
       <v-btn class="ml-2" icon  small color="#6B6C6E">
-        <v-icon dark large color='grey'> mdi-account </v-icon>
+        <!-- <v-icon dark large color='grey'> mdi-account </v-icon> -->
+        <v-avatar>
+          <v-img
+            alt="John"
+            src="https://cdn.vuetifyjs.com/images/john.jpg"
+          ></v-img>
+        </v-avatar>
       </v-btn>
     </v-app-bar>
   
@@ -60,26 +71,31 @@
 </template>
   
 <script>
-import { IS_USER_AUTHENTICATE_GETTER, LOGOUT_ACTION } from '@/store/storeconstant';
+import { 
+  GET_USER_TOKEN_GETTER,
+  // IS_USER_AUTHENTICATE_GETTER, 
+  LOGOUT_ACTION 
+} from '@/store/storeconstant';
 import { mapActions, mapGetters } from 'vuex';
 
   export default {
       data: () =>({
           selectedItem: 0,
           items: [
-          {icon: 'mdi-home', text: 'Dashboard', to:'/'},
-          {icon: 'mdi-finance', text: 'Transaction', to:'/'},
+          {icon: 'mdi-view-dashboard', text: 'Dashboard', to:'/'},
+          {icon: 'mdi-finance', text: 'Transaction', to:'/transaction'},
           {icon: 'mdi-ab-testing', text: 'Master Item', to:'/masteritem'},
-          {icon: 'mdi-content-paste', text: 'Customers', to:'/'},
+          {icon: 'mdi-content-paste', text: 'Customers', to:'/customer'},
           {icon: 'mdi-account-outline', text: 'Users', to: '/users'},
-          {icon: 'mdi-calendar-outline', text: 'Stocks', to:'/'},
+          {icon: 'mdi-calendar-outline', text: 'Stocks', to:'/stock'},
           {icon: 'mdi-cogs', text: 'Settings', to:'/'},
         ],
       }),
 
   computed: {
     ...mapGetters('auth', {
-      isAuthenticated: IS_USER_AUTHENTICATE_GETTER,
+      GET_USER_TOKEN_GETTER,
+      // isAuthenticated: IS_USER_AUTHENTICATE_GETTER,
     }),
   },
   

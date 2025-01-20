@@ -1,18 +1,18 @@
 <template>
-    <MasterItem />
+    <Customer />
 </template>
   
   <script>
   import { defineComponent } from 'vue';
   
   // Components
-  import MasterItem from '@/components/masteritems/MasterItem.vue';
+  import Customer from '@/components/customers/Customer.vue';
   
   export default defineComponent({
-    name: 'MasterItemView',
+    name: 'CustomerView',
   
     components: {
-      MasterItem,
+        Customer,
     },
   });
   </script>

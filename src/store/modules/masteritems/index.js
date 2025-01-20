@@ -5,13 +5,7 @@ import mutations from "./mutations";
 export default {
     namespaced: true,
     state() {
-        return {
-            userId: '',
-            email: '',
-            token: '',
-            expiresIn: 'sdsds',
-            autoLogout: false,
-        };
+        return {};
     },
     mutations,
     getters,

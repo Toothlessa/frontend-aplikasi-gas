@@ -6,12 +6,14 @@ const Login = () => import( /* webpackChunkName: "Login" */ '@/views/auth/LoginV
 const Dashboard = () => import('@/views/dashboard');
 const User = () => import('@/views/users/UserView.vue');
 const MasterItem = () => import('@/views/masteritems/MasterItemView.vue')
+const Customer = () => import('@/views/customers/CustomerView.vue')
+const Transaction = () => import('@/views/transaction/TransactionView.vue')
+const Stock = () => import('@/views/stocks/StockView.vue')
 
 import store from '@/store/store'
 import {
     IS_USER_AUTHENTICATE_GETTER
 } from '@/store/storeconstant'
-
 
 const routes = [{
         path: '/',
@@ -39,6 +41,27 @@ const routes = [{
     {
         path: '/masteritem',
         component: MasterItem,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        path: '/customer',
+        component: Customer,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        path: '/transaction',
+        component: Transaction,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        path: '/stock',
+        component: Stock,
         meta: {
             auth: true
         }
