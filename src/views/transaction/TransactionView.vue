@@ -1,18 +1,18 @@
 <template>
-    <MasterItem />
+    <Transacation />
 </template>
   
   <script>
   import { defineComponent } from 'vue';
   
   // Components
-  import MasterItem from '@/components/masteritems/MasterItem.vue';
+  import Transacation from '@/components/transactions/Transaction.vue';
   
   export default defineComponent({
-    name: 'MasterItemView',
+    name: 'TransacationView',
   
     components: {
-      MasterItem,
+      Transacation,
     },
   });
   </script>
