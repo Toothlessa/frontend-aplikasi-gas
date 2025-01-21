@@ -1,119 +1,165 @@
 <template>
-    <v-card flat>
-        <v-card-title class="text-teal d-flex align-center pe-2">
-            <v-icon icon="mdi-alien-outline"></v-icon> &nbsp; Master Item
-
-            <v-spacer></v-spacer>
-            <v-text-field 
-                v-model="search" 
-                density="compact" 
-                label="search by name" 
-                prepend-inner-icon="mdi-magnify" 
-                variant="solo-filled" 
-                flat 
-                >
-            </v-text-field>
-        </v-card-title>
-        <!-- <v-divider class="mx-4" inset vertical></v-divider> -->
-         <v-spacer></v-spacer>
-         <div class="text-right">
-        <v-dialog v-model="dialog" max-width="500px">
-                <template v-slot:activator="{ props }">
-                    <v-btn class="text-teal mb-2" variant="tonal" v-bind="props">
-                      <v-icon size="40">mdi-new-box</v-icon>
-                    </v-btn>
-                </template>
-                <v-card>
-            <v-card-title>
-              <span class="text-h5">{{ formTitle }}</span>
-            </v-card-title>
-
-            <v-card-text>
-              <v-alert 
-                    class="text-teal"
-                    v-model="alert"
-                    border="start"
-                    variant="tonal"
-                    closable
-                    v-if="error"
-                    > 
-                    {{ error }} 
-                </v-alert>
-              <v-container>
-               
-               
-                    <v-text-field
-                      v-model="editedItem.item_name"
-                      label="Nama Barang"
-                    ></v-text-field>
-                    <v-text-field
-                      v-model="editedItem.category"
-                      label="Kategori"
-                    ></v-text-field>
-                <v-row>
-                  <v-col cols="12" md="6" sm="6">
-                    <v-text-field
-                      v-model="editedItem.cost_of_goods_sold"
-                      label="Harga Pokok"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" md="6" sm="6">
-                    <v-text-field
-                      v-model="editedItem.selling_price"
-                      label="Harga Jual"
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue-darken-1" variant="text" @click="close">
-                Cancel
-              </v-btn>
-              <v-btn color="blue-darken-1" variant="text" @click.prevent="save">
-                Save
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-         </v-dialog>
-         <v-dialog v-model="dialogDelete" max-width="500px">
-          <v-card>
-            <v-card-title class="text-h5"
-              >Are you sure you want to delete this item?</v-card-title
+  <v-card
+    class="elevation-12"  
+    color="white" 
+    variant="elevated"
+  >
+    <v-card-title class="text-white bg-grey-darken-2 d-flex align-center pe-2">
+      <v-icon icon="mdi-chart-pie"></v-icon>  &nbsp; Master Item
+      <v-spacer></v-spacer>
+      <v-spacer></v-spacer>
+      <v-text-field 
+          v-model="search" 
+          density="compact" 
+          label="search by name" 
+          prepend-inner-icon="mdi-magnify" 
+          variant="solo-filled" 
+          flat 
+          >
+      </v-text-field>
+      <v-snackbar
+        class="text-center"
+        v-model="hasSaved"
+        :timeout="2000"
+        location="center"
+      >
+      Data telah tesimpan
+      </v-snackbar>
+    </v-card-title>
+    <v-divider class="mt-1"></v-divider>
+    <!-- <div class="text-right"> -->
+      <v-dialog v-model="dialog" max-width="500px">
+        <template v-slot:activator="{ props }">
+            <v-btn class="text-white mb-2" color="grey-darken-2" variant="elevated" v-bind="props">
+              <v-icon size="40">mdi-new-box</v-icon>
+            </v-btn>
+        </template>
+    <v-card
+      class="elevation-12"  
+      color="white" 
+      variant="elevated"
+    >
+      <v-card-title class="text-h5 font-weight-regular bg-grey-darken-2">
+        <v-icon size="40">{{ formTitle }}</v-icon>
+      </v-card-title>
+        <v-card-text>
+          <v-alert 
+            class="text-teal"
+            v-model="alert"
+            border="start"
+            variant="tonal"
+            closable
+            v-if="error"
+            > 
+            {{ error }} 
+        </v-alert>
+        <v-container>
+          <v-text-field
+            v-model="editedItem.item_name"
+            label="Nama Barang"
+            variant="outlined"
+          ></v-text-field>
+          <v-text-field
+            v-model="editedItem.category"
+            label="Kategori"
+            variant="outlined"
+          >
+          </v-text-field>
+        <v-row>
+          <v-col cols="12" md="6" sm="6">
+            <v-text-field
+              v-model="editedItem.cost_of_goods_sold"
+              label="Harga Pokok"
+              variant="outlined"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="6" sm="6">
+            <v-text-field
+              v-model="editedItem.selling_price"
+              label="Harga Jual"
+              variant="outlined"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="grey-darken-2" variant="outlined" @click="close">
+              <v-icon size="30">mdi-cancel</v-icon>
+            </v-btn>
+            <v-btn label="Save" color="grey-darken-2" variant="outlined" @click.prevent="save">
+              <v-icon size="30">mdi-content-save</v-icon>
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+          </v-dialog>
+          <v-dialog v-model="dialogDelete" max-width="500px">
+            <v-card
+            class="elevation-12"
+            variant="elevated"
+          >
+            <v-card-title 
+              class="bg-grey-darken-2 text-h5"
+            >Anda yakin ingin menonaktifkan item ini?</v-card-title
             >
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue-darken-1" variant="text" @click="closeDelete"
-                >Cancel</v-btn
+              <v-btn 
+                color="grey" 
+                variant="text" 
+                @click="closeDelete"
+              >
+              <v-icon size="30">mdi-cancel</v-icon>
+              </v-btn
               >
               <v-btn
-                color="blue-darken-1"
+                color="grey"
                 variant="text"
                 @click="deleteItemConfirm"
-                >OK</v-btn
               >
+              <v-icon size="30">mdi-pokeball</v-icon>
+              </v-btn>
               <v-spacer></v-spacer>
             </v-card-actions>
           </v-card>
         </v-dialog>
+           <!-- </div> -->
+    <v-data-table 
+      v-model:search="search" 
+      :filter-keys="['item_name']" 
+      :headers="headers"
+      :items="masterItems"
+      loading-text="Loading... Please wait"
+      :loading="loadingData"
+    >
+      <template v-slot:[`item.stock`]="{ item }">
+        <div class="text-center">
+          <v-chip
+            :color="item.stock ? 'green' : 'red'"
+            :text="item.stock ? 'In stock' : 'Out of stock'"
+            class="text-uppercase"
+            size="small"
+            label
+          ></v-chip>
         </div>
-
-        <v-divider></v-divider>
-        <v-data-table 
-        v-model:search="search" 
-        :filter-keys="['item_name']" 
-        :headers="headers"
-        :items="masterItems">
-
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-icon class="me-2" size="small" @click="editItem(item)"> mdi-pencil-outline </v-icon>
-          <v-icon size="small" @click="deleteItem(item)"> mdi-delete-outline </v-icon>
-        </template>
-
-        </v-data-table>
-    </v-card>
+      </template>
+      <template v-slot:[`item.statusItem`]="{ item }">
+        <div class="text-center">
+          <v-chip
+            :color="item.statusItem ? 'green' : 'black'"
+            :text="item.statusItem ? 'Active' : 'Inactive'"
+            class="text-uppercase"
+            size="small"
+            label
+          ></v-chip>
+        </div>
+      </template>
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-icon class="me-2" size="small" @click="editItem(item)"> mdi-pencil-outline </v-icon>
+        <v-icon size="small" @click="deleteItem(item)">mdi-radioactive</v-icon>
+      </template>
+    </v-data-table>
+  </v-card>
 </template>
 
 <script>
@@ -122,42 +168,42 @@ import Validations from '@/services/Validations';
 import store from '@/store/store';
 import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
 
-    export default {
-    data() {
-        return {
-            search: '',
-            headers: [
-                { title: 'Nama Barang', align: 'start', key: 'item_name' },
-                { title: 'Kode Barang', align: 'start', key: 'item_code' },
-                { title: 'Kategori', align: 'start', key: 'category' },
-                { title: 'Harga Pokok', align: 'center', key: 'cost_of_goods_sold' },
-                { title: 'Harga Jual', align: 'center', key: 'selling_price'},
-                { title: 'Actions', key: 'actions', sortable: false },
-            ],
-            masterItems: [],
-            dialog: false,
-            dialogDelete: false,
-            editedIndex: -1,
-            error:'',
-            editedItem: {
-                item_name: '',
-                item_code: '',
-                category: '',
-                cost_of_goods_sold: 0,
-                selling_price: 0,
-            },
-            defaultItem: {
-                item_name: '',
-                item_code: '',
-                category: '',
-                cost_of_goods_sold: 0,
-                selling_price: 0,
-            },
-            }
+export default {
+data() {
+    return {
+        search: '',
+        headers: [
+            { title: 'Nama Barang', align: 'start', key: 'item_name' },
+            { title: 'Kode Barang', align: 'start', key: 'item_code' },
+            { title: 'Kategori', align: 'start', key: 'category' },
+            { title: 'Harga Pokok', align: 'center', key: 'cost_of_goods_sold' },
+            { title: 'Harga Jual', align: 'center', key: 'selling_price'},
+            { title: 'Stock', align: 'center', key: 'stock'},
+            { title: 'Status', align: 'center', key: 'statusItem'},
+            { title: 'Actions', key: 'actions', sortable: false },
+        ],
+        editedItem: {
+            item_name: '',
+            item_code: '',
+            category: '',
+            cost_of_goods_sold: 0,
+            selling_price: 0,
+            stock: true,
+            statusItem: true,
         },
+        masterItems: [],
+        dialog: false,
+        dialogDelete: false,
+        editedIndex: -1,
+        hasSaved: false,
+        loadingData: true,
+        alert: true,
+        error:'',
+        }
+    },
     computed: {
       formTitle() {
-        return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+        return this.editedIndex === -1 ? 'mdi-new-box' : 'mdi-update'
         },
     },
 
@@ -183,6 +229,10 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
         )
             .then((response) => {
                 this.getAllData(response.data.data);
+                
+            if(response.status == 200){
+                this.loadingData = false
+            }
         });
     },
 
@@ -249,7 +299,9 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
               let postData = this.editedItem;
 
               try{ 
-                await AxiosInstance
+                let response = '';
+
+                response = await AxiosInstance
                 .put('http://127.0.0.1:8000/api/masteritems/'+this.editedItem.id, postData,
                     {
                     headers: {
@@ -258,14 +310,17 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
                     'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
                     },
                 })
-
-                Object.assign(this.masterItems[this.editedIndex], this.editedItem)
-                this.close()
-                console.log(this.editedItem)
-                // console.log('renanS')
+                if (response.status == 200) {
+                  Object.assign(this.masterItems[this.editedIndex], this.editedItem);
+                  this.close();
+                  this.hasSaved = true;
+                }
+                // console.log(this.editedItem)
                 } catch (error) {
                 this.error = Validations.getErrorMessageFromCode(
                     error.response.data.errors[0],
+                
+                this.alert = true
                 );
                 }
             } else {
@@ -284,13 +339,15 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
                 })
 
                 if (response.status == 201) {
-                  this.masterItems.push(this.editedItem)
-                  this.getAllData()
-                  this.close()
+                  this.masterItems.push(this.editedItem);
+                  this.close();
+                  this.hasSaved = true;
                 }
                 } catch (error) {
                 this.error = Validations.getErrorMessageFromCode(
                     error.response.data.errors[0],
+                
+                this.alert = true
                 );
                 }
             }

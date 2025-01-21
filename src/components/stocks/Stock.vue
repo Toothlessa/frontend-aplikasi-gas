@@ -9,14 +9,13 @@
                     color="#f0f5ff"
                     width="280"
                 >
-                <v-card-title class="text-h5 font-weight-regular bg-grey-darken-1">
-                    <v-icon>fas fa-procedures</v-icon>
-                    Input Stock
+                <v-card-title class="text-h6 font-weight-regular bg-grey-darken-1">
+                    <v-icon size="30">mdi-archive</v-icon>&nbsp;Input Stock
                 </v-card-title>
                     <v-col cols="12">
                         <v-autocomplete
-                            v-model="selectedItem"
                             label="Item"
+                            v-model="selectedItem"
                             :items="mItems"
                             item-title="item_name"
                             item-value="id"
@@ -49,6 +48,7 @@
                             color="grey-darken-1"
                             rounded="lg"
                             :disabled="isSaveDisabled"
+                            :loading="loadingButton"
                             @click="inputStock"
                         >
                         Input
@@ -68,6 +68,8 @@
                         :headers="headers"
                         :items="stocks"
                         :search="search"
+                        loading-text="Loading... Please wait"
+                        :loading="loadingData"
                     >
                     </v-data-table>
             </v-card>
@@ -97,9 +99,11 @@ export default{
           { key: 'total_stock', title: 'Running Stock', align: 'center' },
         ],
         search: '',
-        input: '',
         selectedItem: '',
+        input: '',
         hasSaved: false,
+        loadingData: true,
+        loadingButton: false,
         error: '',
         stocks:[],
         mItems:[],
@@ -138,6 +142,10 @@ export default{
         )
             .then((response) => {
                 this.getCurrStock(response.data.data);
+            
+                if(response.status == 200){
+                this.loadingData = false
+            }
         });
     },
 
@@ -175,7 +183,7 @@ export default{
             if (response.status == 201) {
                 // Object.assign(this.mItems, response.data)
                 this.hasSaved = true
-                this.selectedItem= null
+                this.selectedItem = null
                 this.input = null
             }
 
@@ -184,6 +192,8 @@ export default{
                 error.response.data.errors[0],
             );
             }
+            this.loadingButton = true
+            setTimeout(() => (this.loadingButton = false), 500)
         }
     },
 }
