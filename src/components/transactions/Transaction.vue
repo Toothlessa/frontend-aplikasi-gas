@@ -8,7 +8,6 @@
         width="280" 
         color="white" 
         variant="elevated"
-        
       >
         <v-card-title 
           class="text-h5 font-weight-regular bg-blue-grey"
@@ -18,15 +17,15 @@
         </v-card-title>
           <v-card-item>
             <v-alert 
-                  class="text-teal"
-                  v-model="alert"
-                  border="start"
-                  variant="tonal"
-                  closable
-                  v-if="error"
-                  > 
-                  {{ error }} 
-              </v-alert>
+                class="text-teal"
+                v-model="alert"
+                border="start"
+                variant="tonal"
+                closable
+                v-if="error"
+                > 
+                {{ error }} 
+            </v-alert>
               <v-divider class="mt-1"></v-divider>
                   <v-autocomplete
                     label="Pelanggan"
@@ -60,7 +59,8 @@
                     :items="status" 
                     item-title="name" 
                     color="cyan-lighten-2"
-                    clearable                    >
+                    clearable                    
+                  >
                   </v-text-field>
                   <v-autocomplete
                     v-model="editedItem.amount"
@@ -109,8 +109,9 @@
                       rounded="lg"
                       color="cyan-lighten-2"
                       :disabled="isSaveDisabled"
+                      :loading="loadingButton"
                       @click="save"
-                        >
+                    >
                         Save
                       <!-- <v-icon size="30">mdi-content-save</v-icon> -->
                     </v-btn>
@@ -173,7 +174,10 @@
                   v-model:search="search" 
                   :filter-keys="['description']" 
                   :headers="headers"
-                  :items="transactions">
+                  :items="transactions"
+                  loading-text="Loading... Please wait"
+                  :loading="loadingData"
+                >
                 <template v-slot:[`item.input`]></template>
                   <template v-slot:[`item.actions`]="{ item }">
                     <v-icon class="me-2" size="small" @click="editItem(item)"> mdi-pencil-outline </v-icon>
@@ -213,9 +217,10 @@ export default {
             isEditing: false,
             alert: true,
             error:'',
-            loading: false,
             hasSaved: false,
             isSend: false,
+            loadingButton: false,
+            loadingData: true,
             editedIndex: -1,
             editedItem: {
                 customer_name: '',
@@ -252,9 +257,9 @@ export default {
         },
 
     computed: {
-      formTitle() {
-        return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
-      },
+      // formTitle() {
+      //   return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+      // },
 
       isSaveDisabled(){
         return !(this.selectedCustomer && this.editedItem.quantity && this.editedItem.description)
@@ -275,6 +280,10 @@ export default {
         )
             .then((response) => {
                 this.getAllData(response.data.data);
+            
+            if(response.status == 200){
+                this.loadingData = false
+            }
         });
        
         //get all customer data
@@ -408,6 +417,8 @@ export default {
                 this.alert = true
                 }
               }
+              this.loadingButton = true
+              setTimeout(() => (this.loadingButton = false), 500)
             },
 
             checkIsSend() {
