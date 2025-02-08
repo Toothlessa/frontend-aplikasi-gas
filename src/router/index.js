@@ -9,6 +9,8 @@ const MasterItem = () => import('@/views/masteritems/MasterItemView.vue')
 const Customer = () => import('@/views/customers/CustomerView.vue')
 const Transaction = () => import('@/views/transaction/TransactionView.vue')
 const Stock = () => import('@/views/stocks/StockView.vue')
+const Debt = () => import('@/views/debts/DebtView.vue')
+const Asset = () => import('@/views/assets/AssetView.vue')
 
 import store from '@/store/store'
 import {
@@ -66,6 +68,20 @@ const routes = [{
             auth: true
         }
     },
+    {
+        path: '/debt',
+        component: Debt,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        path: '/asset',
+        component: Asset,
+        meta: {
+            auth: true
+        }
+    },
 ]
 
 const router = createRouter({
@@ -85,7 +101,7 @@ router.beforeEach((to, from, next) => {
         !to.meta.auth &&
         store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`]
     ) {
-        next('/');
+        next('/login'); //default /
     } else {
         next();
     }

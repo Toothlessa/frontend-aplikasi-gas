@@ -1,53 +1,48 @@
 <template>
-  <v-toolbar flat color="rgba(0,0,0,0)" class="mt-n5">
-    <v-toolbar-title class="text-teal text-lg-h5 font-weight-bold">Data Penjualan Gas</v-toolbar-title>
+  <!-- <v-card variant="tonal"> -->
+   <v-toolbar flat color="rgba(0,0,0,0)" class="mt-n5">
+    <v-toolbar-title class="text-center text-teal text-lg-h5 font-weight-bold">Top 7 Customer</v-toolbar-title>
   </v-toolbar>
   <v-card height="" flat color="transparent" class="mt-n5">
-    <Line 
-      :data="data" 
-      width="100px"
-                  height="200px"
-                  :css-classes="cssClasses"
-                  :styles="styles"
-                  :plugins="plugins"
-      :options="options" 
-      />
-    </v-card>
+  <PolarArea 
+    :data="data" 
+    :options="options"
+    :width="width"
+    height="300px"
+    :css-classes="cssClasses"
+    :styles="styles"
+    :plugins="plugins"
+  />
+</v-card>
+<!-- </v-card> -->
 </template>
 
 <script>
 import {
   Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  RadialLinearScale,
+  ArcElement,
   Tooltip,
   Legend
 } from 'chart.js'
-import { Line } from 'vue-chartjs'
-import * as chartConfig from '../../chart/LineChart.js'
+import { PolarArea } from 'vue-chartjs'
+import * as chartConfig from '../../chart/PolarChart.js'
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-)
+ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend)
 
 export default {
   name: 'App',
-  width: {
+  components: {
+    PolarArea
+  },
+  props: {
+      width: {
         type: Number,
-        default: 100,
+        default: 400,
       },
       height: {
         type: Number,
-        default: 50,
+        default: 100,
       },
       cssClasses: {
         default: "",
@@ -61,9 +56,7 @@ export default {
         type: Array,
         default: () => {},
       },
-  components: {
-    Line
-  },
+    },
   data() {
     return chartConfig
   }

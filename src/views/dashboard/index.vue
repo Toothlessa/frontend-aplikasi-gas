@@ -11,8 +11,7 @@
             <v-toolbar-title class="text-teal text-lg-h5 font-weight-bold ">Dashboard</v-toolbar-title>
             <v-spacer></v-spacer>
           </v-toolbar>
-
-          <v-row class="px-5 mt-n6 ml-5" style="height: 250px">
+          <v-row class="px-5 mt-n6 ml-5">
             <v-col cols="12" sm="3" v-for="list in lists" :key="list">
               <v-card
                 align="center"
@@ -25,18 +24,16 @@
                 <v-icon size="60" color="#2EBFAF">
                   {{ list.icon }}
                 </v-icon>
-
                 <v-card-text class="text-grey text-lg-h6">
                   {{ list.title }}
                 </v-card-text>
-
+     
                 <v-btn
+                  class="text-white"
                   absolute
                   color="#2EBFAF"
-                  class="text-white"
-                  fab
-                  left
-                  top
+                  elevation="8"
+                  rounded="lg"
                 >
                   <h2>{{ list.count }}</h2>
                 </v-btn>
@@ -45,14 +42,19 @@
           </v-row>
           <v-row >
             <v-col cols="12" sm="7">
-             <TopBuyer />
+              <SalesData /> 
             </v-col>
             <v-col cols="12" sm="5">
-              <SalesData />
+              <TopBuyer />
             </v-col>
           </v-row>
+          <v-divider></v-divider>
           <v-row class="mt-n12">
-            <v-col cols="12" sm="12">
+            <v-col cols="12" sm="7">
+              <TableOutstandingTrx />
+            </v-col>
+            <v-col cols="12" sm="5">
+              <TableDebt />
             </v-col>
           </v-row>
         </v-col>
@@ -63,30 +65,32 @@
 
 <script>
 import SalesData from "@/components/chart/SalesData";
+import TableDebt from "@/components/chart/TableDebt.vue";
+import TableOutstandingTrx from "@/components/chart/TableOutstandingTrx.vue";
 import TopBuyer from "@/components/chart/TopBuyer";
 export default {
   name: "Dashboard",
   data: () => ({
-   
+    dialogue: false,
     lists: [
       {
-        icon: "fas fa-user-md",
+        icon: "mdi-run-fast",
         title: "Running Stock",
         count: 21,
       },
       {
-        icon: "fas fa-procedures",
+        icon: "mdi-hamburger",
         title: "Yesterday Stock",
         count: 41,
       },
       {
-        icon: "fas fa-user-nurse",
-        title: "Empty Gas Stock",
+        icon: "mdi-fire",
+        title: "Empty Gas",
         count: 35,
       },
       {
-        icon: "fas fa-hospital",
-        title: "Gas Owned",
+        icon: "mdi-matrix",
+        title: "Owned Gas",
         count: 578,
       },
     ],
@@ -95,10 +99,39 @@ export default {
   components: {
     SalesData,
     TopBuyer,
+    TableOutstandingTrx,
+    TableDebt,
   },
+
+  methods : {
+    openDialog() {
+      this.dialogue = true;
+    },
+  }
 };
 </script>
 <style scoped>
+.v-btn{
+    border-radius:28px!important;
+ } 
+.border {
+  border: 2px solid #2ebfaf !important;
+}
+.left {
+  left: -26px !important;
+}
+.top{
+  top: 65px !important;
+}
+.v-btn--fab.v-size--default.v-btn--absolute.v-btn--top {
+  top: 65px !important;
+}
+.v-btn--absolute.v-btn--left,
+.v-btn--fixed.v-btn--left {
+  left: -26px !important;
+}
+</style>
+<!-- <style scoped>
 .border {
   border: 2px solid #2ebfaf !important;
 }
@@ -109,4 +142,4 @@ export default {
 .v-btn--fixed.v-btn--left {
   left: -26px !important;
 }
-</style>
+</style> -->
