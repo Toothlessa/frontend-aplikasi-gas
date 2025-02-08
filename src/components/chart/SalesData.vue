@@ -1,46 +1,53 @@
 <template>
-   <v-toolbar flat color="rgba(0,0,0,0)" class="mt-n5">
-    <v-toolbar-title class="text-center text-teal text-lg-h5 font-weight-bold">Top 7 Pelanggan</v-toolbar-title>
+  <v-toolbar flat color="rgba(0,0,0,0)" class="mt-n5">
+    <v-toolbar-title class="text-teal text-lg-h5 font-weight-bold">Gas Sales data</v-toolbar-title>
   </v-toolbar>
   <v-card height="" flat color="transparent" class="mt-n5">
-  <PolarArea 
-  :data="data" 
-  :options="options"
-  :width="width"
-                  height="300px"
-                  :css-classes="cssClasses"
-                  :styles="styles"
-                  :plugins="plugins"
-                   />
-</v-card>
+    <Line 
+      :data="data" 
+      width="100px"
+      height="200px"
+      :css-classes="cssClasses"
+      :styles="styles"
+      :plugins="plugins"
+      :options="options" 
+      />
+    </v-card>
 </template>
 
 <script>
 import {
   Chart as ChartJS,
-  RadialLinearScale,
-  ArcElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
   Tooltip,
   Legend
 } from 'chart.js'
-import { PolarArea } from 'vue-chartjs'
-import * as chartConfig from '../../chart/PolarChart.js'
+import { Line } from 'vue-chartjs'
+import * as chartConfig from '../../chart/LineChart.js'
 
-ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend)
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+)
 
 export default {
   name: 'App',
-  components: {
-    PolarArea
-  },
-  props: {
-      width: {
+  width: {
         type: Number,
-        default: 400,
+        default: 100,
       },
       height: {
         type: Number,
-        default: 100,
+        default: 50,
       },
       cssClasses: {
         default: "",
@@ -54,7 +61,9 @@ export default {
         type: Array,
         default: () => {},
       },
-    },
+  components: {
+    Line
+  },
   data() {
     return chartConfig
   }

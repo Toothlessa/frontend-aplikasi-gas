@@ -34,6 +34,7 @@ export default {
   },
 
   created() {
+    console.log("renan")
     this.$store.dispatch(`auth/${AUTO_LOGIN_ACTION}`);
   },
 }

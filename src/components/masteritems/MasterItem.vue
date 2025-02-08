@@ -5,7 +5,7 @@
     variant="elevated"
   >
     <v-card-title class="text-white bg-grey-darken-2 d-flex align-center pe-2">
-      <v-icon icon="mdi-chart-pie"></v-icon>  &nbsp; Master Item
+      <v-icon icon="mdi-blur-linear"></v-icon>  &nbsp; Master Item
       <v-spacer></v-spacer>
       <v-spacer></v-spacer>
       <v-text-field 
@@ -59,12 +59,15 @@
             label="Nama Barang"
             variant="outlined"
           ></v-text-field>
-          <v-text-field
-            v-model="editedItem.category"
+          <v-autocomplete
             label="Kategori"
-            variant="outlined"
+            v-model="this.editedItem.category"
+            variant="outlined"       
+            :items="category"
+            item-title="name"
+            clearable
           >
-          </v-text-field>
+          </v-autocomplete>
         <v-row>
           <v-col cols="12" md="6" sm="6">
             <v-text-field
@@ -93,21 +96,21 @@
           </v-card-actions>
         </v-card>
           </v-dialog>
-          <v-dialog v-model="dialogDelete" max-width="500px">
+          <v-dialog v-model="dialogUpdateItem" max-width="500px">
             <v-card
             class="elevation-12"
             variant="elevated"
           >
             <v-card-title 
               class="bg-grey-darken-2 text-h5"
-            >Anda yakin ingin menonaktifkan item ini?</v-card-title
+            >Anda yakin ingin mengubah status item ini?</v-card-title
             >
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn 
                 color="grey" 
                 variant="text" 
-                @click="closeDelete"
+                @click="closeUpdateStatus"
               >
               <v-icon size="30">mdi-cancel</v-icon>
               </v-btn
@@ -115,7 +118,7 @@
               <v-btn
                 color="grey"
                 variant="text"
-                @click="deleteItemConfirm"
+                @click="updateStatusItem"
               >
               <v-icon size="30">mdi-pokeball</v-icon>
               </v-btn>
@@ -131,23 +134,24 @@
       :items="masterItems"
       loading-text="Loading... Please wait"
       :loading="loadingData"
+      color="blue"
     >
-      <template v-slot:[`item.stock`]="{ item }">
+      <template v-slot:[`item.in_stock`]="{ item }">
         <div class="text-center">
           <v-chip
-            :color="item.stock ? 'green' : 'red'"
-            :text="item.stock ? 'In stock' : 'Out of stock'"
+            :color="item.in_stock ? 'green' : 'red'"
+            :text="item.in_stock ? 'In stock' : 'Out of stock'"
             class="text-uppercase"
             size="small"
             label
           ></v-chip>
         </div>
       </template>
-      <template v-slot:[`item.statusItem`]="{ item }">
+      <template v-slot:[`item.active_flag`]="{ item }">
         <div class="text-center">
           <v-chip
-            :color="item.statusItem ? 'green' : 'black'"
-            :text="item.statusItem ? 'Active' : 'Inactive'"
+            :color="item.active_flag ? 'green' : 'black'"
+            :text="item.active_flag ? 'Active' : 'Inactive'"
             class="text-uppercase"
             size="small"
             label
@@ -156,7 +160,7 @@
       </template>
       <template v-slot:[`item.actions`]="{ item }">
         <v-icon class="me-2" size="small" @click="editItem(item)"> mdi-pencil-outline </v-icon>
-        <v-icon size="small" @click="deleteItem(item)">mdi-radioactive</v-icon>
+        <v-icon size="small" @click="updateItem(item)">mdi-radioactive</v-icon>
       </template>
     </v-data-table>
   </v-card>
@@ -173,27 +177,32 @@ data() {
     return {
         search: '',
         headers: [
-            { title: 'Nama Barang', align: 'start', key: 'item_name' },
-            { title: 'Kode Barang', align: 'start', key: 'item_code' },
-            { title: 'Kategori', align: 'start', key: 'category' },
-            { title: 'Harga Pokok', align: 'center', key: 'cost_of_goods_sold' },
-            { title: 'Harga Jual', align: 'center', key: 'selling_price'},
-            { title: 'Stock', align: 'center', key: 'stock'},
-            { title: 'Status', align: 'center', key: 'statusItem'},
-            { title: 'Actions', key: 'actions', sortable: false },
+          { title: 'Nama Barang', align: 'start', key: 'item_name' },
+          { title: 'Kode Barang', align: 'start', key: 'item_code' },
+          { title: 'Kategori', align: 'start', key: 'category' },
+          { title: 'Harga Pokok', align: 'center', key: 'cost_of_goods_sold' },
+          { title: 'Harga Jual', align: 'center', key: 'selling_price'},
+          { title: 'Stock', align: 'center', key: 'in_stock'},
+          { title: 'Status', align: 'center', key: 'active_flag'},
+          { title: 'Actions', key: 'actions', sortable: false },
         ],
         editedItem: {
-            item_name: '',
-            item_code: '',
-            category: '',
-            cost_of_goods_sold: 0,
-            selling_price: 0,
-            stock: true,
-            statusItem: true,
+          item_name: '',
+          item_code: '',
+          category: '',
+          cost_of_goods_sold: 0,
+          selling_price: 0,
+          in_stock: '',
+          active_flag: '',
         },
+        category: [
+          {
+            name: "Bahan Pokok",
+          },
+        ],
         masterItems: [],
         dialog: false,
-        dialogDelete: false,
+        dialogUpdateItem: false,
         editedIndex: -1,
         hasSaved: false,
         loadingData: true,
@@ -201,6 +210,12 @@ data() {
         error:'',
         }
     },
+
+    created() {
+      
+      this.getAllData();
+    },
+
     computed: {
       formTitle() {
         return this.editedIndex === -1 ? 'mdi-new-box' : 'mdi-update'
@@ -211,147 +226,146 @@ data() {
       dialog(val) {
         val || this.close()
       },
-      dialogDelete(val) {
-        val || this.closeDelete()
+      dialogUpdateItem(val) {
+        val || this.closeUpdateStatus()
       },
     },
 
-    mounted() 
-    {
-        AxiosInstance.get(`http://127.0.0.1:8000/api/masteritems/all`,
+    methods: {
+      editItem(item) {
+        this.editedIndex = this.masterItems.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialog = true
+      },
+
+      updateItem(item) {
+        this.editedIndex = this.masterItems.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialogUpdateItem = true
+      },
+
+      close() {
+        this.dialog = false
+        this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+        })
+      },
+
+      closeUpdateStatus() {
+        this.dialogUpdateItem = false
+        this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+        })
+      },
+
+      async getAllData() {
+
+        try {
+          await AxiosInstance.get(`http://127.0.0.1:8000/api/masteritems/all`,
         {
-            headers: {
+          headers: {
+            'Content-Type': 'application/json', 
+            'Accept': 'application/json',
+            'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+          }
+        })
+          .then((response) => {
+            if(response.status == 200){
+              for(let i=0; i<response.data.data.length; i++) {
+                if(response.data.data[i].active_flag =='N') {
+                  response.data.data[i].active_flag = null;
+                }
+
+                if(response.data.data[i].in_stock =='N') {
+                  response.data.data[i].in_stock = null;
+                }
+
+                this.masterItems.push(response.data.data[i])
+              }
+            this.loadingData = false
+          }
+        })
+        }catch (error) {
+          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],)
+          this.alert = true
+        } 
+      },
+
+      async save() {
+        if (this.editedIndex > -1) {
+          let postData = this.editedItem;
+
+        try{ 
+          let response = '';
+
+          response = await AxiosInstance
+          .put('http://127.0.0.1:8000/api/masteritems/'+this.editedItem.id, postData,
+              {
+              headers: {
               'Content-Type': 'application/json', 
               'Accept': 'application/json',
               'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+              },
+          })
+            if (response.status == 200) {
+              Object.assign(this.masterItems[this.editedIndex], this.editedItem);
+              this.close();
+              this.hasSaved = true;
             }
-          }
-        )
-            .then((response) => {
-                this.getAllData(response.data.data);
-                
-            if(response.status == 200){
-                this.loadingData = false
-            }
-        });
+            // console.log(this.editedItem)
+        }catch (error) {
+          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
+          this.alert = true
+        }
+        } else {
+          let postData = this.editedItem;
+
+        try{ 
+          let response = '';
+            response = await AxiosInstance
+            .post('http://127.0.0.1:8000/api/masteritems', postData, {
+              headers: {
+              'Content-Type': 'application/json', 
+              'Accept': 'application/json',
+              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+              },
+            })
+
+              if (response.status == 201) {
+                this.masterItems.push(this.editedItem);
+                this.close();
+                this.hasSaved = true;
+              }
+        }catch (error) {
+          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
+          this.alert = true
+        }
+      }
     },
 
-    methods: 
-    {
-        getAllData(masterItems) {
-            for(let key in masterItems) {
-                this.masterItems.push({ ...masterItems[key]})
+    async updateStatusItem() {
+      try{ 
+        await AxiosInstance
+        .patch('http://127.0.0.1:8000/api/masteritems/inactive/'+this.editedItem.id, [],
+            {
+            headers: {
+            'Content-Type': 'application/json', 
+            'Accept': 'application/json',
+            'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+            },
+          })
+          .then((response) => {
+            if(response.status == 200) {
+              this.getAllData();
             }
-        },
-
-        editItem(item) {
-            this.editedIndex = this.masterItems.indexOf(item)
-            this.editedItem = Object.assign({}, item)
-            this.dialog = true
-        },
-
-        deleteItem(item) {
-            this.editedIndex = this.masterItems.indexOf(item)
-            this.editedItem = Object.assign({}, item)
-            this.dialogDelete = true
-        },
-
-        async deleteItemConfirm() {
-          try{ 
-                await AxiosInstance
-                .delete('http://127.0.0.1:8000/api/masteritems/'+this.editedItem.id,
-                    {
-                    headers: {
-                    'Content-Type': 'application/json', 
-                    'Accept': 'application/json',
-                    'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-                    },
-                })
-
-                this.masterItems.splice(this.editedIndex, 1)
-                console.log('renanS')
-                } catch (error) {
-                this.error = Validations.getErrorMessageFromCode(
-                    error.response.data.errors[0],
-                );
-                }
-            this.closeDelete()
-        },
-
-        close() {
-            this.dialog = false
-            this.$nextTick(() => {
-            this.editedItem = Object.assign({}, this.defaultItem)
-            this.editedIndex = -1
-            })
-        },
-
-        closeDelete() {
-            this.dialogDelete = false
-            this.$nextTick(() => {
-            this.editedItem = Object.assign({}, this.defaultItem)
-            this.editedIndex = -1
-            })
-        },
-
-        async save() {
-            if (this.editedIndex > -1) {
-              let postData = this.editedItem;
-
-              try{ 
-                let response = '';
-
-                response = await AxiosInstance
-                .put('http://127.0.0.1:8000/api/masteritems/'+this.editedItem.id, postData,
-                    {
-                    headers: {
-                    'Content-Type': 'application/json', 
-                    'Accept': 'application/json',
-                    'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-                    },
-                })
-                if (response.status == 200) {
-                  Object.assign(this.masterItems[this.editedIndex], this.editedItem);
-                  this.close();
-                  this.hasSaved = true;
-                }
-                // console.log(this.editedItem)
-                } catch (error) {
-                this.error = Validations.getErrorMessageFromCode(
-                    error.response.data.errors[0],
-                
-                this.alert = true
-                );
-                }
-            } else {
-            let postData = this.editedItem;
-
-                try{ 
-                let response = '';
-                response = await AxiosInstance
-                .post('http://127.0.0.1:8000/api/masteritems', postData,
-                    {
-                    headers: {
-                    'Content-Type': 'application/json', 
-                    'Accept': 'application/json',
-                    'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-                    },
-                })
-
-                if (response.status == 201) {
-                  this.masterItems.push(this.editedItem);
-                  this.close();
-                  this.hasSaved = true;
-                }
-                } catch (error) {
-                this.error = Validations.getErrorMessageFromCode(
-                    error.response.data.errors[0],
-                
-                this.alert = true
-                );
-                }
-            }
-        },
+          });
+        this.masterItems.splice(this.editedIndex, 1)
+        } catch (error) {this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
+        }
+          this.closeUpdateStatus()
+      },
     },
 }
 </script>

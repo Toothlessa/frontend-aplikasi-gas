@@ -51,10 +51,12 @@
                 variant="solo"
                 clearable
                 counter
+                :loading="loading"
                 :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
                 :type="visible ? 'text' : 'password'"
                 @click:append-inner="visible = !visible"
                 prepend-inner-icon="mdi-lock-outline"
+                @keyup.enter="load(); onLogin();"
                 >
               </v-text-field>
               <v-row >
@@ -73,14 +75,17 @@
                     </v-btn>
                 </v-col>
                 <v-col class="text-right" cols="12" sm="5">
-                  <a
+                  <!-- <a -->
+                   <v-btn
                     class="text-caption text-decoration-none text-teal"
+                    variant="text" 
                     @click="step++"
                     rel="noopener noreferrer"
                     target="_blank"
                     >
                     Don't have account yet?,<br> please register!
-                  </a>
+                  </v-btn>
+                  <!-- </a> -->
                 </v-col>
               </v-row>
             </v-form>
@@ -177,6 +182,7 @@
                         variant="flat"
                         :loading="loading"
                         @click.prevent="onSignUp()"
+                        @keyup.enter="load(); onSignUp()"
                         @click=load
                         >
                       SIGNUP
@@ -235,6 +241,7 @@ export default{
         this.error = error;
         this.alert= true;
       }
+      console.log("renanss");
       this.$router.push('/');
     },
 

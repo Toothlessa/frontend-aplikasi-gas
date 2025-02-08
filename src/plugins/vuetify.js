@@ -19,5 +19,5 @@ export default createVuetify({
                 background: '#F5F6FA'
             }
         }
-    }
+    },
 })

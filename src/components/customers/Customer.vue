@@ -27,12 +27,16 @@
       </v-snackbar>
     </v-card-title>
   <v-divider class="mt-1"></v-divider>
-    <v-dialog v-model="dialog" max-width="500px">
-      <template v-slot:activator="{ props }">
-          <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" v-bind="props">
+          <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" @click="dialog=true">
             <v-icon size="40">mdi-new-box</v-icon>
           </v-btn>
-      </template>
+    <v-dialog v-model="dialog" max-width="500px">
+      <!-- <template v-slot:activator="{ props }"> -->
+          <!-- <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" v-bind="props"> -->
+          <!-- <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated">
+            <v-icon size="40">mdi-new-box</v-icon>
+          </v-btn> -->
+      <!-- </template> -->
   <v-card
     class="elevation-12"
     variant="elevated"
@@ -120,7 +124,7 @@
               <v-btn
                 color="blue-darken-2"
                 variant="text"
-                @click="deleteItemConfirm"
+                @click="updateStatusCustomerConfirm"
               >
               <v-icon size="30">mdi-pokeball</v-icon>
               </v-btn>
@@ -136,9 +140,20 @@
       loading-text="Loading... Please wait"
       :loading="loadingData"
     >
+    <template v-slot:[`item.active_flag`]="{ item }">
+        <div class="text-center">
+          <v-chip
+            :color="item.active_flag ? 'green' : 'black'"
+            :text="item.active_flag ? 'Active' : 'Inactive'"
+            class="text-uppercase"
+            size="small"
+            label
+          ></v-chip>
+        </div>
+      </template>
       <template v-slot:[`item.actions`]="{ item }">
-        <v-icon class="me-2" size="small" @click="editItem(item)"> mdi-pencil-outline </v-icon>
-        <v-icon size="small" @click="deleteItem(item)"> mdi-delete-outline </v-icon>
+        <v-icon size="small" @click="editItem(item)"> mdi-pencil-outline </v-icon>
+        <v-icon size="small" @click="updateStatusCustomer(item)"> mdi-radioactive </v-icon>
       </template>
     </v-data-table>
   </v-card>
@@ -152,33 +167,40 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
 
     export default {
     data() {
-        return {
-            headers: [
-                { title: 'Nama Customer', align: 'start', key: 'customer_name' },
-                { title: 'NIK', align: 'start', key: 'nik' },
-                { title: 'E-mail', align: 'start', key: 'email' },
-                { title: 'Alamat', align: 'start', key: 'address' },
-                { title: 'Handphone', align: 'center', key: 'phone'},
-                { title: 'Actions', key: 'actions', sortable: false },
-            ],
-            editedItem: {
-                customer_name: '',
-                nik: '',
-                email: '',
-                address: '',
-                phone: 0,
-            },
-            editedIndex: -1,
-            search: '',
-            customers: [],
-            dialog: false,
-            dialogDelete: false,
-            alert: true,
-            hasSaved: false,
-            loadingData: true,
-            error:'',
-            }
+      return {
+        headers: [
+          { title: 'Nama Customer', align: 'start', key: 'customer_name' },
+          { title: 'NIK', align: 'start', key: 'nik' },
+          { title: 'E-mail', align: 'start', key: 'email' },
+          { title: 'Alamat', align: 'start', key: 'address' },
+          { title: 'Handphone', align: 'center', key: 'phone'},
+          { title: 'Status', align: 'center', key: 'active_flag'},
+          { title: 'Actions', key: 'actions', sortable: false },
+        ],
+        editedItem: {
+          customer_name: '',
+          nik: 0,
+          email: '',
+          address: '',
+          phone: 0,
+          active_flag: '',
         },
+        editedIndex: -1,
+        search: '',
+        customers: [],
+        dialog: false,
+        dialogDelete: false,
+        alert: true,
+        hasSaved: false,
+        loadingData: true,
+        error:'',
+        }
+      },
+    
+    created() {
+      this.getCustomerAll();
+    },
+
     computed: {
       formTitle() {
         return this.editedIndex === -1 ? 'mdi-new-box' : 'mdi-update'
@@ -194,143 +216,155 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
       },
     },
 
-    mounted() 
+    methods: 
     {
-        AxiosInstance.get(`http://127.0.0.1:8000/api/customers/all`,
-        {
-            headers: {
+
+      editItem(item) {
+        this.editedIndex = this.customers.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialog = true
+      },
+
+      updateStatusCustomer(item) {
+        this.editedIndex = this.customers.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialogDelete = true
+      },
+
+      close() {
+        this.dialog = false
+        this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+        })
+      },
+
+      closeDelete() {
+        this.dialogDelete = false
+        this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+        })
+      },
+
+      async getCustomerAll() {
+
+        try {
+          AxiosInstance.get(`http://127.0.0.1:8000/api/customers/all`,
+          {
+              headers: {
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json',
+                'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+              }
+            })
+              .then((response) => {
+
+                if(response.status == 200){
+                  for(let i=0; i<response.data.data.length; i++) {
+                    if(response.data.data[i].active_flag =='N') {
+                      response.data.data[i].active_flag = null;
+                    }
+                    this.customers = response.data.data[i];
+                }
+                this.customers = response.data.data;
+                this.loadingData = false
+              }
+          });
+        }catch(error) {
+          this.error = Validations.getErrorMessageFromCodeCustomer(error.response.data.errors[0],);
+          this.alert = true
+        }
+      },
+
+      async updateStatusCustomerConfirm() {
+        try{ 
+          await AxiosInstance
+          .patch('http://127.0.0.1:8000/api/customers/inactive/'+this.editedItem.id, [],
+            {
+              headers: {
               'Content-Type': 'application/json', 
               'Accept': 'application/json',
               'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-            }
-          }
-        )
-            .then((response) => {
-                this.getAllData(response.data.data);
+              },
+          })
+          .then((response) => {
 
             if(response.status == 200){
-              this.loadingData = false
+              this.getCustomerAll();
             }
-        });
-    },
+          })
 
-    methods: 
-    {
-        getAllData(customers) {
-            for(let key in customers) {
-                this.customers.push({ ...customers[key]})
-            }
-        },
+          this.customers.splice(this.editedIndex, 1)
+        } catch (error) {
+        this.error = Validations.getErrorMessageFromCodeCustomer(error.response.data.errors[0],);
+        this.alert = true
+        }
+        
+        this.closeDelete()
+      },
 
-        editItem(item) {
-            this.editedIndex = this.customers.indexOf(item)
-            this.editedItem = Object.assign({}, item)
-            this.dialog = true
-        },
-
-        deleteItem(item) {
-            this.editedIndex = this.customers.indexOf(item)
-            this.editedItem = Object.assign({}, item)
-            this.dialogDelete = true
-        },
-
-        async deleteItemConfirm() {
+      async save() {
+        if (this.editedIndex > -1) {
+          let postData = {
+            customer_name: this.editedItem.customer_name,
+            nik: this.editedItem.nik,
+            email: this.editedItem.email,
+            address: this.editedItem.address,
+            phone: this.editedItem.phone,
+          }
           try{ 
-                await AxiosInstance
-                .delete('http://127.0.0.1:8000/api/customers/'+this.editedItem.id,
-                    {
-                    headers: {
-                    'Content-Type': 'application/json', 
-                    'Accept': 'application/json',
-                    'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-                    },
-                })
-
-                this.customers.splice(this.editedIndex, 1)
-                console.log('renanS')
-                } catch (error) {
-                this.error = Validations.getErrorMessageFromCode(
-                    error.response.data.errors[0],
-                this.alert = true
-                );
-                }
-            this.closeDelete()
-        },
-
-        close() {
-            this.dialog = false
-            this.$nextTick(() => {
-            this.editedItem = Object.assign({}, this.defaultItem)
-            this.editedIndex = -1
-            })
-        },
-
-        closeDelete() {
-            this.dialogDelete = false
-            this.$nextTick(() => {
-            this.editedItem = Object.assign({}, this.defaultItem)
-            this.editedIndex = -1
-            })
-        },
-
-        async save() {
-            if (this.editedIndex > -1) {
-              let postData = this.editedItem;
-
-              try{ 
-              
-              let response = '';
-                
-              response = await AxiosInstance
-                .put('http://127.0.0.1:8000/api/customers/'+this.editedItem.id, postData,
-                    {
-                    headers: {
-                    'Content-Type': 'application/json', 
-                    'Accept': 'application/json',
-                    'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-                    },
-                });
-
-                if(response.status == 200){
-                  Object.assign(this.customers[this.editedIndex], this.editedItem);
-                  this.close();
-                  this.hasSaved = true;
-                }
-                // console.log(this.editedItem.id)
-                } catch (error) {
-                this.error = Validations.getErrorMessageFromCode(
-                    error.response.data.errors[0],
-                this.alert = true
-                );
-                }
-            } else {
-            let postData = this.editedItem;
-
-                try{ 
-                let response = '';
-                response = await AxiosInstance
-                .post('http://127.0.0.1:8000/api/customers', postData,
-                    {
-                    headers: {
-                    'Content-Type': 'application/json', 
-                    'Accept': 'application/json',
-                    'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-                    },
-                })
-
-                if (response.status == 201) {
-                  this.customers.push(this.editedItem)
-                  this.close()
-                  this.hasSaved = true
-                }
-                } catch (error) {
-                this.error = Validations.getErrorMessageFromCode(
-                    error.response.data.errors[0],
-                this.alert = true
-                );
-                }
+          let response = '';
+          response = await AxiosInstance.put('http://127.0.0.1:8000/api/customers/'+this.editedItem.id, postData,
+            {
+            headers: {
+            'Content-Type': 'application/json', 
+            'Accept': 'application/json',
+            'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+            },
+          });
+          
+          if(response.status == 200){
+            Object.assign(this.customers[this.editedIndex], this.editedItem);
+            this.close();
+            this.hasSaved = true;
+            this.getCustomerAll();
             }
-        },
+            
+          } catch (error) {
+            this.error = Validations.getErrorMessageFromCodeCustomer(error.response.data.errors[0],);
+            this.alert = true
+            }
+          } else {
+            let postData = {
+              customer_name: this.editedItem.customer_name,
+              nik: this.editedItem.nik,
+              email: this.editedItem.email,
+              address: this.editedItem.address,
+              phone: this.editedItem.phone,
+            }
+            try{ 
+              let response = '';
+              response = await AxiosInstance.post('http://127.0.0.1:8000/api/customers', postData,
+                {
+                headers: {
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json',
+                'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+                },
+            })
+
+              if (response.status == 201) {
+                this.getCustomerAll();
+                this.hasSaved = true
+                this.close()
+              }
+              } catch (error) {
+              this.error = Validations.getErrorMessageFromCodeCustomer(error.response.data.errors);
+              this.alert = true
+              }
+        }
+      },
     },
 }
 </script>
