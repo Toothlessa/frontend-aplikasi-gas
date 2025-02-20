@@ -158,6 +158,7 @@
                 :type="visible ? 'text' : 'password'"
                 @click:append-inner="visible = !visible"
                 prepend-inner-icon="mdi-lock-outline"
+                @keyup.enter="load(); onSignUp()"
                 >
               </v-text-field>
               
@@ -182,7 +183,6 @@
                         variant="flat"
                         :loading="loading"
                         @click.prevent="onSignUp()"
-                        @keyup.enter="load(); onSignUp()"
                         @click=load
                         >
                       SIGNUP

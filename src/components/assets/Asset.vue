@@ -79,7 +79,7 @@
               label="Description"
               v-model="assets.description"
               variant="solo-inverted"
-              @keyup.enter="loading = !loading;createAsset"
+              @keyup.enter="createAsset();loading = !loading"
             >
             </v-text-field>
           </v-col>
@@ -121,7 +121,7 @@
               </tr>
             </template>
             <template v-slot:[`item.actions`]="{ item }">
-              <v-icon class="me-2" size="small" @click="editItem(item)"> 
+              <v-icon class="me-2" size="small" @click="detailAsset(item)"> 
                 mdi-developer-board
               </v-icon>
             </template>
@@ -207,6 +207,7 @@
               </v-col>
         </v-card>
       </v-dialog>
+      <!-- Dialog Update Owner -->
       <v-dialog
         v-model="dialogUpdateOwner"
         transition="dialog-bottom-transition"
@@ -249,13 +250,14 @@
             </div>
         </v-card>
       </v-dialog>
+      <!-- Dialog Inactive Owner -->
       <v-dialog v-model="dialogInactive" max-width="500px">
           <v-card
             class="elevation-12"
             variant="elevated"
           >
             <v-card-title 
-              class="bg-cyan-darken-2 text-h5"
+              class="bg-blue-darken-2 text-h5"
             >Change the status of Owner?</v-card-title
             >
             <v-card-actions>
@@ -278,6 +280,126 @@
               <v-spacer></v-spacer>
             </v-card-actions>
           </v-card>
+      </v-dialog>
+      <!-- Dialog Detail Assets -->
+      <v-dialog
+        v-model="dialogDetailAsset"
+        transition="dialog-bottom-transition"
+        width="auto"
+      >
+      <v-card
+          class="elevation-12"
+          variant="elevated"
+        > 
+          <v-card-title class="text-h6 font-weight-regular bg-blue-darken-1">
+            <v-icon size="30" >mdi-details</v-icon>&nbsp; Detail Asset
+            <v-alert 
+              class="text-red"
+              v-model="alert"
+              border="start"
+              variant="tonal"
+              closable
+              v-if="error"
+            > 
+              {{ error }} 
+            </v-alert>
+          </v-card-title>
+            <v-data-table
+              :headers="detailHeaders"
+              :items="getDetailAssets"
+              hide-default-footer
+            >
+              <template v-slot:[`item.number`]="{index}">
+                <tr>
+                  <td>{{index + 1}}</td>
+                </tr>
+              </template>
+              <template v-slot:[`item.actions`]="{ item }">
+                <v-icon class="me-2" size="small" @click="updateAsset(item)"> 
+                  mdi-update
+                </v-icon>
+              </template>
+            </v-data-table>
+        </v-card>
+      </v-dialog>
+      <!-- Dialog Update Asset -->
+      <v-dialog
+        v-model="dialogUpdateAsset"
+        transition="dialog-bottom-transition"
+        width="auto"
+      >
+      <v-card
+          class="elevation-12"
+          variant="elevated"
+        > 
+          <v-card-title class="text-h6 font-weight-regular bg-blue-darken-1">
+            <v-icon size="30" >mdi-sync</v-icon>&nbsp; Update Owner
+            <v-alert 
+              class="text-red"
+              v-model="alert"
+              border="start"
+              variant="tonal"
+              closable
+              v-if="error"
+            > 
+              {{ error }} 
+            </v-alert>
+          </v-card-title>
+          <v-card-item>
+            <v-divider class="mt-1"></v-divider>
+            <v-autocomplete 
+              label="Owner"
+              v-model="updateAssets.owner_name"
+              variant="outlined"
+              :items="assetOwners"
+              item-title="name"
+              item-value="id"
+            >
+            </v-autocomplete>
+            <v-text-field
+              label="Asset Name"
+              v-model="updateAssets.asset_name"
+              variant="outlined"
+            >
+            </v-text-field>
+            <v-text-field
+              label="Quantity"
+              v-model="updateAssets.quantity"
+              variant="outlined"
+            >
+            </v-text-field>
+            <v-text-field
+              label="Cost of Goods"
+              v-model="updateAssets.cogs"
+              variant="outlined"
+            >
+            </v-text-field>
+            <v-text-field
+              label="Selling Price"
+              v-model="updateAssets.selling_price"
+              variant="outlined"
+            >
+            </v-text-field>
+            <v-textarea
+              label="Description"
+              v-model="updateAssets.description"
+              variant="outlined"       
+              color="blue-grey"
+              clearable
+            >
+            </v-textarea>
+          </v-card-item>
+            <div class="text-center">
+              <v-btn
+                class="bg-blue-darken-1"
+                prepend-icon="mdi-update"
+                text="Update"
+                variant="outlined"
+                @click="updateOwner"
+              >
+              </v-btn>
+            </div>
+        </v-card>
       </v-dialog>
     </v-container>
   </template>
@@ -302,9 +424,14 @@ export default {
     assetOwners: [],
     updateOwners: [],
     assetSummary: [],
+    detailAssets: [],
+    updateAssets: [],
+    getDetailAssets: [],
     dialogOwner: false,
     dialogUpdateOwner: false,
     dialogInactive: false,
+    dialogDetailAsset: false,
+    dialogUpdateAsset: false,
     ownerName: '',
     search: '',
     hasSaved: false,
@@ -323,6 +450,17 @@ export default {
       { title: 'Quantity', align: 'center', key: 'quantity' },
       { title: 'Buying Price', align: 'center', key: 'cogs' },
       { title: 'Selling Price', align: 'center', key: 'selling_price' },
+      { title: 'Action', align: 'end', key: 'actions' },
+    ],
+    detailHeaders: [
+      { title: 'No', align: 'start', key: 'number'},
+      { title: 'Owner', align: 'start', key: 'owner_name'},
+      { title: 'Asset Name', align: 'start', key: 'asset_name' },
+      { title: 'Quantity', align: 'start', key: 'quantity' },
+      { title: 'Buying Price', align: 'start', key: 'cogs' },
+      { title: 'Selling Price', align: 'start', key: 'selling_price' },
+      { title: 'Descrtiption', align: 'start', key: 'description'},
+      { title: 'Created Date', align: 'start', key: 'created_at'},
       { title: 'Action', align: 'end', key: 'actions' },
     ],
   }),
@@ -352,6 +490,18 @@ export default {
       this.dialogInactive = true;
     },
 
+    detailAsset(item) {
+      this.detailAssets = item;
+      console.log(this.detailAssets.owner_id);
+      this.getDetailAsset();
+      this.dialogDetailAsset = true;
+    },
+
+    updateAsset(item) {
+      this.updateAssets = item;
+      this.dialogUpdateAsset = true;
+    },
+
     async assetOwnerLoad() {
 
       try {
@@ -363,7 +513,7 @@ export default {
               'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
           }
       })
-      .then((response) => { //this.assetOwners = response.data.data; 
+      .then((response) => { 
 
         if(response.status == 200){
           for(let i=0; i<response.data.data.length; i++) {
@@ -416,7 +566,7 @@ export default {
               'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
           }
       })
-      .then((response) => { //this.assetOwners = response.data.data; 
+      .then((response) => { 
 
         if(response.status == 201) {
           this.hasSaved = true;
@@ -432,63 +582,63 @@ export default {
       }
     },
   
-  async updateOwner() {
+    async updateOwner() {
 
-    let postData = {
-      name: this.updateOwners.name,
-    }
-
-    try {
-        await AxiosInstance.patch(`http://127.0.0.1:8000/api/assetowners/` +this.updateOwners.id, postData,
-        {
-            headers: {
-            'Content-Type': 'application/json', 
-            'Accept': 'application/json',
-            'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-        }
-    })
-    .then((response) => { 
-
-      if(response.status == 200) {
-        this.hasSaved = true;
-        this.dialogUpdateOwner = false;
-        this.assetOwnerLoad();
+      let postData = {
+        name: this.updateOwners.name,
       }
-    });
 
-    } catch(error) {
-        this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
-        this.alert = true
-    }
-  },
+      try {
+          await AxiosInstance.patch(`http://127.0.0.1:8000/api/assetowners/` +this.updateOwners.id, postData,
+          {
+              headers: {
+              'Content-Type': 'application/json', 
+              'Accept': 'application/json',
+              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+          }
+      })
+      .then((response) => { 
 
-  async inactiveOwner() {
-
-    try {
-        await AxiosInstance.patch(`http://127.0.0.1:8000/api/assetowners/inactive/` +this.updateOwners.id, [],
-        {
-            headers: {
-            'Content-Type': 'application/json', 
-            'Accept': 'application/json',
-            'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+        if(response.status == 200) {
+          this.hasSaved = true;
+          this.dialogUpdateOwner = false;
+          this.assetOwnerLoad();
         }
-    })
-    .then((response) => { 
+      });
 
-      if(response.status == 200) {
-        this.hasSaved = true;
-        this.dialogInactive = false;
-        this.assetOwnerLoad();
+      } catch(error) {
+          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
+          this.alert = true
       }
-    });
+    },
 
-    } catch(error) {
-        this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
-        this.alert = true
-    }
-  },
+    async inactiveOwner() {
 
-  async createAsset() {
+      try {
+          await AxiosInstance.patch(`http://127.0.0.1:8000/api/assetowners/inactive/` +this.updateOwners.id, [],
+          {
+              headers: {
+              'Content-Type': 'application/json', 
+              'Accept': 'application/json',
+              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+          }
+      })
+      .then((response) => { 
+
+        if(response.status == 200) {
+          this.hasSaved = true;
+          this.dialogInactive = false;
+          this.assetOwnerLoad();
+        }
+      });
+
+      } catch(error) {
+          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
+          this.alert = true
+      }
+    },
+
+    async createAsset() {
 
       let postData = this.assets;
 
@@ -504,7 +654,7 @@ export default {
       .then((response) => {
 
         if(response.status == 201) {
-          this.assets = [];
+          this.assets = {};
           this.hasSaved = true;
           this.assetSummaryLoad();
         }
@@ -515,6 +665,31 @@ export default {
           this.alert = true
       }
     },
+
+    async getDetailAsset() {
+
+      try {
+          await AxiosInstance.get(`http://127.0.0.1:8000/api/assets/detail/` + this.detailAssets.owner_id,
+          {
+              headers: {
+              'Content-Type': 'application/json', 
+              'Accept': 'application/json',
+              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+          }
+      })
+      .then((response) => {
+
+        if(response.status == 200) {
+          this.getDetailAssets = response.data.data;
+        }
+      });
+
+      } catch(error) {
+          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
+          this.alert = true
+      }
+    },
+  
   }
 }
 </script>
