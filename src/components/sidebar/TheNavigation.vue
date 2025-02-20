@@ -35,6 +35,8 @@
                   v-bind="props"
                   title="Master"
                   prepend-icon="mdi-chart-pie"
+                  :rail="rail"
+                  @click="rail = false"
                 ></v-list-item>
               </template>
 
