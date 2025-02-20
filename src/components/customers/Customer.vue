@@ -31,12 +31,6 @@
             <v-icon size="40">mdi-new-box</v-icon>
           </v-btn>
     <v-dialog v-model="dialog" max-width="500px">
-      <!-- <template v-slot:activator="{ props }"> -->
-          <!-- <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" v-bind="props"> -->
-          <!-- <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated">
-            <v-icon size="40">mdi-new-box</v-icon>
-          </v-btn> -->
-      <!-- </template> -->
   <v-card
     class="elevation-12"
     variant="elevated"
@@ -109,7 +103,7 @@
           >
             <v-card-title 
               class="bg-cyan-darken-2 text-h5"
-            >Apa anda yakin ingin menghapus item ini?</v-card-title
+            >Change the status of this cutomer?</v-card-title
             >
             <v-card-actions>
               <v-spacer></v-spacer>
