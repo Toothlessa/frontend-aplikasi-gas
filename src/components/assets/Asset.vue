@@ -349,7 +349,7 @@
             <v-divider class="mt-1"></v-divider>
             <v-autocomplete 
               label="Owner"
-              v-model="updateAssets.owner_name"
+              v-model="updateOwnerAsset"
               variant="outlined"
               :items="assetOwners"
               item-title="name"
@@ -386,6 +386,7 @@
               variant="outlined"       
               color="blue-grey"
               clearable
+              @keyup.enter="updateDetailAsset()"
             >
             </v-textarea>
           </v-card-item>
@@ -395,7 +396,7 @@
                 prepend-icon="mdi-update"
                 text="Update"
                 variant="outlined"
-                @click="updateOwner"
+                @click="updateDetailAsset"
               >
               </v-btn>
             </div>
@@ -423,6 +424,7 @@ export default {
     },
     assetOwners: [],
     updateOwners: [],
+    updateOwnerAsset: '',
     assetSummary: [],
     detailAssets: [],
     updateAssets: [],
@@ -499,6 +501,7 @@ export default {
 
     updateAsset(item) {
       this.updateAssets = item;
+      this.updateOwnerAsset = item.owner_id;
       this.dialogUpdateAsset = true;
     },
 
@@ -669,7 +672,7 @@ export default {
     async getDetailAsset() {
 
       try {
-          await AxiosInstance.get(`http://127.0.0.1:8000/api/assets/detail/` + this.detailAssets.owner_id,
+          await AxiosInstance.get(`http://127.0.0.1:8000/api/assets/details/` + this.detailAssets.owner_id + `/assets/` + this.detailAssets.asset_name,
           {
               headers: {
               'Content-Type': 'application/json', 
@@ -689,7 +692,42 @@ export default {
           this.alert = true
       }
     },
-  
+
+    async updateDetailAsset() {
+
+      let postData = {
+        owner_id : this.updateOwnerAsset,
+        asset_name: this.updateAssets.asset_name,
+        quantity: this.updateAssets.quantity,
+        cogs: this.updateAssets.cogs,
+        selling_price: this.updateAssets.selling_price,
+        description: this.updateAssets.description
+      }
+
+      try {
+          await AxiosInstance.patch(`http://127.0.0.1:8000/api/assets/` + this.updateAssets.id, postData,
+          {
+              headers: {
+              'Content-Type': 'application/json', 
+              'Accept': 'application/json',
+              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+          }
+      })
+      .then((response) => {
+
+        if(response.status == 200) {
+          this.hasSaved = true;
+          this.getDetailAsset();
+          this.assetSummaryLoad();
+          this.dialogUpdateAsset = false;
+        }
+      });
+
+      } catch(error) {
+          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
+          this.alert = true
+      }
+    },
   }
 }
 </script>

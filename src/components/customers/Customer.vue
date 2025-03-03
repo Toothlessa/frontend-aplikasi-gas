@@ -27,9 +27,24 @@
       </v-snackbar>
     </v-card-title>
   <v-divider class="mt-1"></v-divider>
-          <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" @click="dialog=true">
-            <v-icon size="40">mdi-new-box</v-icon>
-          </v-btn>
+        <v-row>
+          <div class="text-left pa-2 ma-2">
+            <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" @click="dialog=true">
+              <v-icon size="40">mdi-new-box</v-icon>
+            </v-btn>
+          </div>
+          <v-spacer></v-spacer>
+          <div class="text-end pa-2 ma-2">
+            <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" @click="uploadCustomer=true">
+              <v-icon size="40">mdi-cloud-upload</v-icon>
+            </v-btn>
+          </div>
+      </v-row>
+      <v-dialog v-model="uploadCustomer">
+        <template>
+          <v-file-upload scrim="primary"></v-file-upload>
+        </template>
+      </v-dialog>
     <v-dialog v-model="dialog" max-width="500px">
   <v-card
     class="elevation-12"
@@ -52,8 +67,9 @@
         <v-container>
           <v-text-field
             v-model="editedItem.customer_name"
-            label="Nama Customer"
+            label="Customer Name"
             variant="outlined"
+            @keyup.enter="save"
           >
           </v-text-field>
           <v-row>
@@ -75,7 +91,7 @@
           </v-row>
               <v-text-field
                 v-model="editedItem.address"
-                label="Alamat"
+                label="Address"
                 variant="outlined"
               >
             </v-text-field>
@@ -83,6 +99,7 @@
                 v-model="editedItem.phone"
                 label="Handphone"
                 variant="outlined"
+                @keyup.enter="save"
               ></v-text-field>
         </v-container>
         </v-card-text>
@@ -163,10 +180,10 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
     data() {
       return {
         headers: [
-          { title: 'Nama Customer', align: 'start', key: 'customer_name' },
+          { title: 'Customer Name', align: 'start', key: 'customer_name' },
           { title: 'NIK', align: 'start', key: 'nik' },
           { title: 'E-mail', align: 'start', key: 'email' },
-          { title: 'Alamat', align: 'start', key: 'address' },
+          { title: 'Address', align: 'start', key: 'address' },
           { title: 'Handphone', align: 'center', key: 'phone'},
           { title: 'Status', align: 'center', key: 'active_flag'},
           { title: 'Actions', key: 'actions', sortable: false },
@@ -184,13 +201,14 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
         customers: [],
         dialog: false,
         dialogDelete: false,
+        uploadCustomer: false,
         alert: true,
         hasSaved: false,
         loadingData: true,
         error:'',
         }
       },
-    
+
     created() {
       this.getCustomerAll();
     },

@@ -68,30 +68,33 @@ import SalesData from "@/components/chart/SalesData";
 import TableDebt from "@/components/chart/TableDebt.vue";
 import TableOutstandingTrx from "@/components/chart/TableOutstandingTrx.vue";
 import TopBuyer from "@/components/chart/TopBuyer";
+import AxiosInstance from "@/services/AxiosInstance";
+import Validations from "@/services/Validations";
+import store from "@/store/store";
+import { GET_USER_TOKEN_GETTER } from "@/store/storeconstant";
 export default {
   name: "Dashboard",
   data: () => ({
-    dialogue: false,
     lists: [
       {
         icon: "mdi-run-fast",
         title: "Running Stock",
-        count: 21,
+        count: '',
       },
       {
         icon: "mdi-hamburger",
         title: "Yesterday Stock",
-        count: 41,
+        count: '',
       },
       {
         icon: "mdi-fire",
         title: "Empty Gas",
-        count: 35,
+        count: '',
       },
       {
         icon: "mdi-matrix",
         title: "Owned Gas",
-        count: 578,
+        count: '',
       },
     ],
   }),
@@ -103,13 +106,43 @@ export default {
     TableDebt,
   },
 
+  created() {
+    this.getDisplayStock();
+  },
+
   methods : {
-    openDialog() {
-      this.dialogue = true;
+
+    async getDisplayStock() {
+
+      try {
+          await AxiosInstance.get(`http://127.0.0.1:8000/api/stockitems/displaystock`,
+          {
+              headers: {
+              'Content-Type': 'application/json', 
+              'Accept': 'application/json',
+              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+          }
+      })
+      .then((response) => { 
+
+          if(response.status == 200){
+
+            this.lists[0].count = response.data.running_stock;
+            this.lists[1].count = response.data.yesterday_stock;
+            this.lists[2].count = response.data.empty_gas;
+            this.lists[3].count = response.data.empty_gas_owned;
+          }
+      });
+
+      } catch(error) {
+          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
+          this.alert = true
+      }
     },
   }
 };
 </script>
+
 <style scoped>
 .v-btn{
     border-radius:28px!important;
@@ -131,15 +164,3 @@ export default {
   left: -26px !important;
 }
 </style>
-<!-- <style scoped>
-.border {
-  border: 2px solid #2ebfaf !important;
-}
-.v-btn--fab.v-size--default.v-btn--absolute.v-btn--top {
-  top: 65px !important;
-}
-.v-btn--absolute.v-btn--left,
-.v-btn--fixed.v-btn--left {
-  left: -26px !important;
-}
-</style> -->

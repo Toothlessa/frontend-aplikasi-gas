@@ -9,11 +9,11 @@
                    width="280"
                >
                <v-card-title class="text-h6 font-weight-regular bg-teal">
-                   <v-icon size="30">mdi-cash</v-icon>&nbsp;Input Hutang
+                   <v-icon size="30">mdi-cash</v-icon>&nbsp;Input Debt
                 </v-card-title>
                    <v-col cols="12">
                         <v-autocomplete
-                           label="Nama Pelanggan"
+                           label="Customer Name"
                            v-model="selectedCustomer"
                            :items="customers"
                            item-title="customer_name"
@@ -31,7 +31,7 @@
                         </v-autocomplete>
                         <v-text-field
                            v-model="editedDebt.amount"
-                           label="Jumlah Hutang"
+                           label="Total Debt"
                            type="number"
                            align="center"
                            variant="outlined"
@@ -44,13 +44,13 @@
                            variant="outlined"
                        >
                         </v-textarea>
-
                         <v-checkbox
                             v-model="isPay"
-                            label="Bayar Hutang?"
+                            label="Pay Debt??"
                             color="teal"
                             value="teal"
                             hide-details
+                            @keyup.enter="saveDebt"
                         ></v-checkbox>
                        <v-snackbar
                            class="text-center text-teal"
@@ -58,7 +58,7 @@
                            :timeout="2000"
                            location="top center"
                        >
-                       Data telah tesimpan
+                       Data have been saved
                        </v-snackbar>
                    <v-col class="text-right">
                        <v-btn
@@ -108,11 +108,11 @@
                                 <thead class="bg-teal">
                                 <tr>
                                     <!-- <th class="text-left">No</th> -->
-                                    <th class="text-left">Nama</th>
+                                    <th class="text-left">Customer Name</th>
                                     <th class="text-left">Description</th>
-                                    <th class="text-left">Bayar</th>
-                                    <th class="text-left">Total Hutang</th>
-                                    <th class="text-left">Tanggal</th>
+                                    <th class="text-left">Pay</th>
+                                    <th class="text-left">Total Debt</th>
+                                    <th class="text-left">Created Date</th>
                                     <th class="text-left">Actions</th>
                                 </tr>
                                 </thead>
@@ -145,11 +145,11 @@
                                     width="300"
                                 >
                                 <v-card-title class="text-h6 font-weight-regular bg-teal">
-                                    <v-icon size="30">mdi-cash</v-icon>&nbsp;Edit Hutang
+                                    <v-icon size="30">mdi-cash</v-icon>&nbsp;Edit Debt
                                 </v-card-title>
                                     <v-col cols="12">
                                         <v-autocomplete
-                                            label="Nama Pelanggan"
+                                            label="Customer Name"
                                             v-model="updateCustomer"
                                             :items="customers"
                                             item-title="customer_name"
@@ -166,8 +166,8 @@
                                             </template>
                                         </v-autocomplete>
                                         <v-text-field
+                                            label="Pay"
                                             v-model="updatedDebt.amount_pay"
-                                            label="Bayar"
                                             type="number"
                                             variant="outlined"
                                             :disabled="!disableAmountPay"
@@ -175,18 +175,18 @@
                                         </v-text-field>
                                         <v-text-field
                                             v-model="updatedDebt.total"
-                                            label="Total Hutang"
+                                            label="Total Debt"
                                             type="number"
                                             variant="outlined"
                                             :disabled="!disableTotal"
                                         >
                                         </v-text-field>
-                                            <v-textarea
+                                        <v-text-field
                                             v-model="updatedDebt.description"
                                             label="Description"
                                             variant="outlined"
                                         >
-                                        </v-textarea>
+                                        </v-text-field>
                                     </v-col>
                                     <v-card-actions>
                                         <v-btn class="text-white mb-2" color="teal" variant="elevated"  @click="dialogUpdate = false">
@@ -216,11 +216,11 @@ export default{
             {
             align: 'start',
             key: 'customer_name',
-            title: 'Nama Pelanggan',
+            title: 'Customer Name',
             },
-            { key: 'total_debt', title: 'Total Hutang', align: 'center'},
-            { key: 'total_pay', title: 'Total Bayar', align: 'center' },
-            { key: 'debt_left', title: 'Sisa Hutang', align: 'center'},       
+            { key: 'total_debt', title: 'Total Debt', align: 'center'},
+            { key: 'total_pay', title: 'Total Pay', align: 'center' },
+            { key: 'debt_left', title: 'Debt Left', align: 'center'},       
             { key: 'actions', title: 'Details', align:'center', sortable: false },
         ],
         editedDebt: {
