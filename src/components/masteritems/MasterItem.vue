@@ -23,7 +23,7 @@
         :timeout="2000"
         location="center"
       >
-      Data telah tesimpan
+      Data have been saved
       </v-snackbar>
     </v-card-title>
     <v-divider class="mt-1"></v-divider>
@@ -56,31 +56,48 @@
         <v-container>
           <v-text-field
             v-model="editedItem.item_name"
-            label="Nama Barang"
+            label="Item Name"
             variant="outlined"
           ></v-text-field>
+        <v-row>
+          <v-col cols="12" md="6" sm="6">
           <v-autocomplete
-            label="Kategori"
-            v-model="this.editedItem.category"
+            label="Item Type"
+            v-model="this.editedItem.item_type"
             variant="outlined"       
-            :items="category"
+            :items="item_type"
             item-title="name"
             clearable
           >
           </v-autocomplete>
+          </v-col>
+          <v-col cols="12" md="6" sm="6">
+          <v-autocomplete
+            label="Category"
+            v-model="this.editedItem.category_id"
+            variant="outlined"       
+            :items="categoryItems"
+            item-title="name"
+            item-value="id"
+            clearable
+          >
+          </v-autocomplete>
+          </v-col>
+        </v-row>
         <v-row>
           <v-col cols="12" md="6" sm="6">
             <v-text-field
               v-model="editedItem.cost_of_goods_sold"
-              label="Harga Pokok"
+              label="Cost of Goods"
               variant="outlined"
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="6" sm="6">
             <v-text-field
               v-model="editedItem.selling_price"
-              label="Harga Jual"
+              label="Selling Price"
               variant="outlined"
+              @keyup.enter="save"
             ></v-text-field>
           </v-col>
         </v-row>
@@ -103,7 +120,7 @@
           >
             <v-card-title 
               class="bg-grey-darken-2 text-h5"
-            >Anda yakin ingin mengubah status item ini?</v-card-title
+            >Are you sure to change the status of this item?</v-card-title
             >
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -177,11 +194,12 @@ data() {
     return {
         search: '',
         headers: [
-          { title: 'Nama Barang', align: 'start', key: 'item_name' },
-          { title: 'Kode Barang', align: 'start', key: 'item_code' },
-          { title: 'Kategori', align: 'start', key: 'category' },
-          { title: 'Harga Pokok', align: 'center', key: 'cost_of_goods_sold' },
-          { title: 'Harga Jual', align: 'center', key: 'selling_price'},
+          { title: 'Item Name', align: 'start', key: 'item_name' },
+          { title: 'Item Code', align: 'start', key: 'item_code' },
+          { title: 'Item Type', align: 'start', key: 'item_type' },
+          { title: 'Category', align: 'start', key: 'category' },
+          { title: 'Cost of Goods', align: 'center', key: 'cost_of_goods_sold' },
+          { title: 'Selling Price', align: 'center', key: 'selling_price'},
           { title: 'Stock', align: 'center', key: 'in_stock'},
           { title: 'Status', align: 'center', key: 'active_flag'},
           { title: 'Actions', key: 'actions', sortable: false },
@@ -189,17 +207,23 @@ data() {
         editedItem: {
           item_name: '',
           item_code: '',
+          item_type: '',
+          category_id: '',
           category: '',
           cost_of_goods_sold: 0,
           selling_price: 0,
           in_stock: '',
           active_flag: '',
         },
-        category: [
+        item_type : [
           {
-            name: "Bahan Pokok",
+            name: "Asset",
+          },
+          {
+            name: "Item",
           },
         ],
+        categoryItems: [],
         masterItems: [],
         dialog: false,
         dialogUpdateItem: false,
@@ -214,6 +238,7 @@ data() {
     created() {
       
       this.getAllData();
+      this.getAllCategory();
     },
 
     computed: {
@@ -233,6 +258,7 @@ data() {
 
     methods: {
       editItem(item) {
+        console.log(item);
         this.editedIndex = this.masterItems.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
@@ -242,6 +268,7 @@ data() {
         this.editedIndex = this.masterItems.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialogUpdateItem = true
+        
       },
 
       close() {
@@ -281,16 +308,39 @@ data() {
                 if(response.data.data[i].in_stock =='N') {
                   response.data.data[i].in_stock = null;
                 }
-
-                this.masterItems.push(response.data.data[i])
               }
-            this.loadingData = false
+
+            this.masterItems = response.data.data;
+            this.loadingData = false;
           }
         })
         }catch (error) {
           this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],)
           this.alert = true
         } 
+      },
+
+      async getAllCategory() {
+
+        try {
+          await AxiosInstance
+           .get('http://127.0.0.1:8000/api/categoryitems/all',
+              {
+              headers: {
+              'Content-Type': 'application/json', 
+              'Accept': 'application/json',
+              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+              },
+            })
+            .then((response) => {
+              if (response.status == 200) {
+                this.categoryItems = response.data.data;
+              }
+            })
+        } catch(error) {
+          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
+          this.alert = true;
+        }
       },
 
       async save() {

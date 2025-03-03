@@ -57,6 +57,7 @@
                     color="blue-grey"
                     :reverse="false"
                     controlVariant="split"
+                    @keyup.enter='save'
                   ></v-number-input>
                   <v-textarea
                     label="Description"
@@ -98,7 +99,7 @@
                     :timeout="2000"
                     location="top center"
                   >
-                  Data telah tesimpan
+                  Data have been saved
                   </v-snackbar>
                 <v-row>
                   <v-col>
@@ -135,10 +136,8 @@
             <v-icon>mdi-chart-timeline</v-icon>
               Pick The Item
             </v-card-title>
-
             <v-card-text>
               <div class="text-caption pa-3"></div>
-
               <v-autocomplete
                 v-model="selectedItem"
                 :items="mItems"
@@ -359,11 +358,11 @@ export default {
         return {
             search: '',
             headers: [
-                { title: 'Pelanggan', align: 'start', key: 'customer_name'},
+                { title: 'Customer', align: 'start', key: 'customer_name'},
                 { title: 'NIK', align: 'center', key: 'nik' },
-                { title: 'Deskripsi', align: 'center', key: 'description'},
+                { title: 'Description', align: 'center', key: 'description'},
                 { title: 'Qty', align: 'center', key: 'quantity' },
-                { title: 'Harga', align: 'start', key: 'amount' },
+                { title: 'Price', align: 'start', key: 'amount' },
                 { title: 'Total', align: 'start', key: 'total' },
                 { title: 'Created', aligh: 'start', key: 'created_at'},
                 { title: 'Actions', align: 'center', key: 'actions', sortable: false },
@@ -437,7 +436,8 @@ export default {
     computed: {
 
       isSaveDisabled(){
-        return !(this.selectedCustomer && this.editedItem.quantity && this.editedItem.description)
+        // return !(this.selectedCustomer && this.editedItem.quantity && this.editedItem.description)
+        return !(this.selectedCustomer && this.editedItem.quantity)
       },
 
       isUpdateDisabled(){
@@ -457,7 +457,7 @@ export default {
       this.getTransactionByDate();
       this.getMasterItem();
 
-      this.selectedItem = 800;
+      this.selectedItem = 3308;
       this.editedItem.amount = 19000;
     },
     
@@ -465,9 +465,10 @@ export default {
     methods: {
 
         editItem(item) {
-            this.editedIndex = this.transactions.indexOf(item);
-            this.updateTrx = Object.assign({}, item);
-            this.dialogUpdate = true;
+          console.log(item);
+          this.editedIndex = this.transactions.indexOf(item);
+          this.updateTrx = Object.assign({}, item);
+          this.dialogUpdate = true;
         },
 
         close() {
@@ -588,6 +589,15 @@ export default {
               this.alert = true;
               }
           } else {
+
+            if (this.editedItem.quantity == null) {
+              this.editedItem.quantity = 1;
+            }
+
+            if (this.editedItem.description == null) {
+              this.editedItem.description = 'Umum';
+            }
+
             let postData = {
               quantity: this.editedItem.quantity,
               description: this.editedItem.description,
