@@ -2,6 +2,9 @@
 import '@mdi/font/css/materialdesignicons.css'
 import 'vuetify/styles'
 import '@fortawesome/fontawesome-free/css/all.css'
+import {
+    VFileUpload
+} from 'vuetify/labs/VFileUpload'
 
 // Vuetify
 import {
@@ -18,5 +21,8 @@ export default createVuetify({
                 background: '#F5F6FA'
             }
         }
+    },
+    components: {
+        VFileUpload,
     },
 })

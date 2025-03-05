@@ -38,7 +38,6 @@
                     item-title="customer_name"
                     item-value="id"
                     color="blue-grey"
-                    clearable
                   >
                   <template v-slot:item="{ props, item }">
                     <v-list-item
@@ -65,7 +64,6 @@
                     variant="outlined"       
                     :disabled="!fieldDisabled"
                     color="blue-grey"
-                    clearable
                   >
                 </v-textarea>
                   <v-autocomplete
@@ -258,7 +256,7 @@
                               item-title="customer_name"
                               item-value="id"
                               color="blue-grey"
-                              clearable
+                              @keyup.enter="save"
                             >
                             <template v-slot:item="{ props, item }">
                               <v-list-item
@@ -277,6 +275,7 @@
                               color="blue-grey"
                               :reverse="false"
                               controlVariant="split"
+                              @keyup.enter="save"
                             ></v-number-input>
                             <v-textarea
                               label="Description"
@@ -284,7 +283,6 @@
                               variant="outlined"       
                               :disabled="!fieldDisabled"
                               color="blue-grey"
-                              clearable
                             >
                           </v-textarea>
                             <v-autocomplete
@@ -457,7 +455,7 @@ export default {
       this.getTransactionByDate();
       this.getMasterItem();
 
-      this.selectedItem = 3308;
+      this.selectedItem = 1;
       this.editedItem.amount = 19000;
     },
     
@@ -518,7 +516,7 @@ export default {
         async getMasterItem() {
 
           try {
-          await AxiosInstance.get(`http://127.0.0.1:8000/api/masteritems/all`,
+          await AxiosInstance.get(`http://127.0.0.1:8000/api/masteritems/itemtype/` + 'ITEM',
             {
                 headers: {
                   'Content-Type': 'application/json', 

@@ -38,13 +38,15 @@
             </v-autocomplete>
           </v-col>
           <v-col order="2">
-            <v-text-field 
+            <v-autocomplete
               class="pa-2 ma-2"
               label="Asset Name"
               v-model="assets.asset_name"
               variant="solo-inverted"
+              :items="masterItems"
+              item-title="item_name"
             >
-            </v-text-field>
+            </v-autocomplete>
           </v-col>
           <v-col order="3">
             <v-text-field 
@@ -235,7 +237,7 @@
               v-model="updateOwners.name"
               label="Owner Name"
               variant="solo-inverted"
-              @keyup.enter="createOwner"
+              @keyup.enter="updateOwner"
             >
             </v-text-field>
             <div class="text-center">
@@ -385,7 +387,6 @@
               v-model="updateAssets.description"
               variant="outlined"       
               color="blue-grey"
-              clearable
               @keyup.enter="updateDetailAsset()"
             >
             </v-textarea>
@@ -422,6 +423,7 @@ export default {
       selling_price: '',
       description: '',
     },
+    masterItems: [],
     assetOwners: [],
     updateOwners: [],
     updateOwnerAsset: '',
@@ -470,6 +472,7 @@ export default {
   created() {
     this.assetOwnerLoad();
     this.assetSummaryLoad();
+    this.getItemAsset();
   },
 
   watch: {
@@ -504,6 +507,28 @@ export default {
       this.updateOwnerAsset = item.owner_id;
       this.dialogUpdateAsset = true;
     },
+
+    async getItemAsset() {
+
+        try {
+          await AxiosInstance.get(`http://127.0.0.1:8000/api/masteritems/itemtype/` + 'ASSET',
+        {
+          headers: {
+            'Content-Type': 'application/json', 
+            'Accept': 'application/json',
+            'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+          }
+        })
+          .then((response) => {
+            if(response.status == 200){
+              this.masterItems = response.data.data;
+          }
+        })
+        }catch (error) {
+          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],)
+          this.alert = true
+        } 
+      },
 
     async assetOwnerLoad() {
 
