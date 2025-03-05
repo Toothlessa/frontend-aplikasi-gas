@@ -620,8 +620,10 @@ data() {
             },
           })
           .then((response) => {
-            if(response.status == 200) {
+            if(response.status == 201) {
               this.getAllCategory();
+              this.hasSaved = true;
+              this.dialogCategory = false;
             }
           });
 
@@ -650,6 +652,7 @@ data() {
             if(response.status == 200) {
               this.getAllCategory();
               this.dialogEditCategory = false;
+              this.hasSaved = true;
             }
           });
 
