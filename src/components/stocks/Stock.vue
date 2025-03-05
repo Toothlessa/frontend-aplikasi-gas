@@ -28,6 +28,7 @@
                             type="number"
                             variant="outlined"
                             color="black"
+                            @keyup.enter="inputStock"
                         >
                         </v-text-field>
                         <v-snackbar
@@ -144,6 +145,7 @@
                                         type="number"
                                         variant="outlined"
                                         color="black"
+                                        @keyup.enter="updateStock"
                                     >
                                     </v-text-field>
                                 </v-col>
@@ -217,7 +219,7 @@ export default{
         async getMasterItem() {
 
             try{
-                await AxiosInstance.get(`http://127.0.0.1:8000/api/masteritems/all`,
+                await AxiosInstance.get(`http://127.0.0.1:8000/api/masteritems/itemtype/` + 'ITEM',
                 {
                     headers: {
                     'Content-Type': 'application/json', 

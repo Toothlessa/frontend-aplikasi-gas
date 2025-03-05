@@ -35,84 +35,120 @@
           </div>
           <v-spacer></v-spacer>
           <div class="text-end pa-2 ma-2">
-            <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" @click="uploadCustomer=true">
+            <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" @click="dialogUploadCustomer=true">
               <v-icon size="40">mdi-cloud-upload</v-icon>
             </v-btn>
           </div>
       </v-row>
-      <v-dialog v-model="uploadCustomer">
-        <template>
-          <v-file-upload scrim="primary"></v-file-upload>
-        </template>
-      </v-dialog>
-    <v-dialog v-model="dialog" max-width="500px">
-  <v-card
-    class="elevation-12"
-    variant="elevated"
-  >
-    <v-card-title class="text-h5 font-weight-regular bg-cyan-darken-2">
-      <v-icon size="40">{{ formTitle }}</v-icon>
-    </v-card-title>
-      <v-card-text>
-        <v-alert 
-          class="text-cyan-darken-2"
-          v-model="alert"
-          border="start"
-          variant="tonal"
-          closable
-          v-if="error"
-        > 
-          {{ error }} 
-        </v-alert>
+      <v-dialog v-model="dialogUploadCustomer">
         <v-container>
-          <v-text-field
-            v-model="editedItem.customer_name"
-            label="Customer Name"
-            variant="outlined"
-            @keyup.enter="save"
-          >
-          </v-text-field>
-          <v-row>
-            <v-col cols="12" md="6" sm="6">
-              <v-text-field
-                v-model="editedItem.nik"
-                label="NIK"
-                variant="outlined"
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" md="6" sm="6">
-              <v-text-field
-                v-model="editedItem.email"
-                label="E-mail"
-                variant="outlined"
-              ></v-text-field>
+          <v-row justify="center">
+            <v-col cols="12" sm="8" md="6">
+              <v-card>
+                <v-card-title text-center>Upload CSV</v-card-title>
+                <v-card-text>
+                  <v-file-upload 
+                    scrim="primary"
+                    v-model="csvFile"
+                    accept=".csv"
+                    @change="uploadFile"
+                  >
+                  </v-file-upload>
+                  <v-progress-linear
+                    v-if="uploading"
+                    indeterminate
+                    color="primary"
+                  ></v-progress-linear>
+                  <v-alert
+                    v-if="uploadError"
+                    type="error"
+                    dismissible
+                  >
+                    {{ uploadError }}
+                  </v-alert>
+                  <v-alert
+                    v-if="uploadSuccess"
+                    type="success"
+                    dismissible
+                  >
+                    {{ uploadSuccess }}
+                  </v-alert>
+                </v-card-text>
+              </v-card>
             </v-col>
           </v-row>
+        </v-container>
+      </v-dialog>
+    <v-dialog 
+      v-model="dialog" 
+      max-width="500px">
+      <v-card
+        class="elevation-12"
+        variant="elevated"
+      >
+        <v-card-title class="text-h5 font-weight-regular bg-cyan-darken-2">
+          <v-icon size="40">{{ formTitle }}</v-icon>
+        </v-card-title>
+          <v-card-text>
+            <v-alert 
+              class="text-cyan-darken-2"
+              v-model="alert"
+              border="start"
+              variant="tonal"
+              closable
+              v-if="error"
+            > 
+              {{ error }} 
+            </v-alert>
+            <v-container>
               <v-text-field
-                v-model="editedItem.address"
-                label="Address"
-                variant="outlined"
-              >
-            </v-text-field>
-              <v-text-field
-                v-model="editedItem.phone"
-                label="Handphone"
+                v-model="editedItem.customer_name"
+                label="Customer Name"
                 variant="outlined"
                 @keyup.enter="save"
-              ></v-text-field>
-        </v-container>
-        </v-card-text>
-          <v-card-actions>
-            <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" @click="close">
-              Cancel
-            </v-btn>
-            <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" @click.prevent="save">
-              Save
-            </v-btn>
-          </v-card-actions>
-      </v-card>
-      </v-dialog>
+              >
+              </v-text-field>
+              <v-row>
+                <v-col cols="12" md="6" sm="6">
+                  <v-text-field
+                    v-model="editedItem.nik"
+                    label="NIK"
+                    variant="outlined"
+                  >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" md="6" sm="6">
+                  <v-text-field
+                    v-model="editedItem.email"
+                    label="E-mail"
+                    variant="outlined"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+                  <v-text-field
+                    v-model="editedItem.address"
+                    label="Address"
+                    variant="outlined"
+                  >
+                </v-text-field>
+                  <v-text-field
+                    v-model="editedItem.phone"
+                    label="Handphone"
+                    variant="outlined"
+                    @keyup.enter="save"
+                  ></v-text-field>
+            </v-container>
+            </v-card-text>
+              <v-card-actions>
+                <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" @click="close">
+                  Cancel
+                </v-btn>
+                <v-btn class="text-white mb-2" color="cyan-darken-2" variant="elevated" @click.prevent="save">
+                  Save
+                </v-btn>
+              </v-card-actions>
+          </v-card>
+        </v-dialog>
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card
             class="elevation-12"
@@ -142,6 +178,87 @@
               <v-spacer></v-spacer>
             </v-card-actions>
           </v-card>
+      </v-dialog>
+      <!-- Dialog add category -->
+      <v-dialog
+        v-model="dialogOwner"
+        transition="dialog-bottom-transition"
+        width="auto"
+      >
+        <v-card
+          class="elevation-12"
+          variant="elevated"
+        > 
+          <v-card-title class="text-h6 font-weight-regular bg-blue-darken-1">
+            <v-icon size="30" >mdi-account-circle</v-icon>&nbsp; Owners
+            <v-alert 
+            class="text-red"
+            v-model="alert"
+            border="start"
+            variant="tonal"
+            closable
+            v-if="error"
+            > 
+            {{ error }} 
+          </v-alert>
+          </v-card-title>
+            <v-text-field 
+              class="pa-2 ma-2"
+              v-model="ownerName"
+              label="Owner Name"
+              variant="solo-inverted"
+              @keyup.enter="createOwner"
+            >
+            </v-text-field>
+            <div class="text-center">
+              <v-btn
+                class="bg-blue-darken-1"
+                prepend-icon="mdi-copyright"
+                text="Create"
+                variant="outlined"
+                @click="createOwner"
+              >
+              </v-btn>
+              <v-btn
+                class="bg-blue-darken-1"
+                prepend-icon="mdi-close-circle-outline"
+                text="Close"
+                variant="outlined"
+                @click="dialogOwner=false"
+              >
+              </v-btn>
+            </div>
+            <v-divider></v-divider>
+              <v-col>
+                <v-data-table
+                  :headers="ownerHeaders"
+                  :items="assetOwners"
+                >
+                  <template v-slot:[`item.number`]="{ index}">
+                    <tr>
+                      <td>{{index + 1}}</td>
+                    </tr>
+                  </template>
+                  <template v-slot:[`item.actions`]="{ item }">
+                    <div class="text-end">
+                      <v-icon size="small" @click="editOwner(item)"> mdi-pencil-outline </v-icon>
+                      <v-icon size="small" @click="updateStatusOwner(item)"> mdi-radioactive </v-icon>
+                    </div>
+                  </template>
+                  <template v-slot:[`item.active_flag`]="{ item }">
+                  <div class="text-center">
+                    <v-chip
+                      :color="item.active_flag ? 'green' : 'black'"
+                      :text="item.active_flag ? 'Active' : 'Inactive'"
+                      class="text-uppercase"
+                      size="small"
+                      label
+                    ></v-chip>
+                  </div>
+                </template>
+                </v-data-table>
+              </v-col>
+        </v-card>
       </v-dialog>
     <v-data-table 
       v-model:search="search" 
@@ -201,11 +318,16 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
         customers: [],
         dialog: false,
         dialogDelete: false,
-        uploadCustomer: false,
+        dialogUploadCustomer: false,
         alert: true,
         hasSaved: false,
         loadingData: true,
         error:'',
+        //csv
+        csvFile: null,
+        uploading: false,
+        uploadError: null,
+        uploadSuccess: null,
         }
       },
 
@@ -375,6 +497,37 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
               this.error = Validations.getErrorMessageFromCodeCustomer(error.response.data.errors);
               this.alert = true
               }
+        }
+      },
+
+      async uploadFile() {
+        if (!this.csvFile) return;
+
+          this.uploading = true;
+          this.uploadError = null;
+          this.uploadSuccess = null;
+
+          const formData = new FormData();
+          formData.append('csvFile', this.csvFile);
+
+        try {
+
+          const response = await AxiosInstance.post('http://127.0.0.1:8000/api/customers/import-csv', formData, {
+                headers: {
+                'Content-Type': 'multipart/form-data',
+                'Accept': 'application/json',
+                'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+                },
+            })
+            if (response.status == 200) {
+                this.getCustomerAll();
+              }
+
+            this.uploadSuccess = response.data.message;
+        } catch (error) {
+          this.uploadError = error.response?.data?.message || 'An error occurred.';
+        } finally {
+          this.uploading = false;
         }
       },
     },

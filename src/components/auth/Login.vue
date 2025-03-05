@@ -25,10 +25,9 @@
             <v-form>
               <v-text-field
               label="Email"
-              v-model="email"
+              v-model="loginEmail"
               density="compact"
               variant="solo"
-              clearable
               prepend-inner-icon="mdi-email-outline"
               >
               <!-- :rules="[rules.required]" -->
@@ -45,11 +44,10 @@
               
               <v-text-field
                 label="Password"
-                v-model="password"
+                v-model="loginPassword"
                 placeholder="Enter your password"
                 density="compact"
                 variant="solo"
-                clearable
                 counter
                 :loading="loading"
                 :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
@@ -116,7 +114,6 @@
               label="Username"
               density="compact"
               variant="solo"
-              clearable
               prepend-inner-icon="mdi-account-outline"
               >
               </v-text-field>
@@ -126,7 +123,6 @@
               label="Email"
               density="compact"
               variant="solo"
-              clearable
               prepend-inner-icon="mdi-email-outline"
               >
               </v-text-field>
@@ -137,7 +133,6 @@
                 label="Password"
                 density="compact"
                 variant="solo"
-                clearable
                 counter
                 :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
                 :type="visible ? 'text' : 'password'"
@@ -152,7 +147,6 @@
                 label="Password"
                 density="compact"
                 variant="solo"
-                clearable
                 counter
                 :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
                 :type="visible ? 'text' : 'password'"
@@ -214,6 +208,8 @@ export default{
       loading: false,
       step: 1,
       alert: true,
+      loginEmail: '',
+      loginPassword: '',
       username: '',
       email: '',
       password: '',
@@ -234,8 +230,8 @@ export default{
     async onLogin() {
       try{
         await this.login({
-          email: this.email,
-          password: this.password,
+          email: this.loginEmail,
+          password: this.loginPassword,
         })
       } catch (error) {
         this.error = error;

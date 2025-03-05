@@ -7,8 +7,8 @@ import {
     AUTH_ACTION,
     SET_USER_TOKEN_DATA_MUTATION,
     LOGOUT_ACTION,
-    AUTO_LOGOUT_ACTION,
-    SET_AUTO_LOGOUT_MUTATION,
+    // AUTO_LOGOUT_ACTION,
+    // SET_AUTO_LOGOUT_MUTATION,
     GET_USER_TOKEN_GETTER,
 } from "@/store/storeconstant";
 import store from "@/store/store";
@@ -30,36 +30,36 @@ export default {
         });
     },
 
-    [AUTO_LOGIN_ACTION](context) {
-        let userDataString = localStorage.getItem('userData');
-
-        if (userDataString) {
-            let userData = JSON.parse(userDataString);
-            let expirationTime = userData.expiresIn - new Date().getMilliseconds();
-
-            if (expirationTime < 5000) {
-                console.log("first condition Expires In= " + userData.expiresIn)
-                console.log("first condition New Date= " + new Date().getMilliseconds())
-                console.log("first condition Expiration Time= " + expirationTime)
-                context.dispatch(AUTO_LOGOUT_ACTION);
-                context.dispatch(LOGOUT_ACTION);
-            } else {
-                timer = setTimeout(() => {
-                    context.dispatch(AUTO_LOGOUT_ACTION);
-                    context.dispatch(LOGOUT_ACTION);
-                }, expirationTime);
-            }
-
-            context.commit(SET_USER_TOKEN_DATA_MUTATION, userData);
-        }
-    },
-
     // [AUTO_LOGIN_ACTION](context) {
-    //     let userData = localStorage.getItem('userData');
-    //     if (userData) {
-    //         context.commit(SET_USER_TOKEN_DATA_MUTATION, JSON.parse(userData));
+    //     let userDataString = localStorage.getItem('userData');
+
+    //     if (userDataString) {
+    //         let userData = JSON.parse(userDataString);
+    //         let expirationTime = userData.expiresIn - new Date().getMilliseconds();
+
+    //         if (expirationTime < 5000) {
+    //             console.log("first condition Expires In= " + userData.expiresIn)
+    //             console.log("first condition New Date= " + new Date().getMilliseconds())
+    //             console.log("first condition Expiration Time= " + expirationTime)
+    //             context.dispatch(AUTO_LOGOUT_ACTION);
+    //             context.dispatch(LOGOUT_ACTION);
+    //         } else {
+    //             timer = setTimeout(() => {
+    //                 context.dispatch(AUTO_LOGOUT_ACTION);
+    //                 context.dispatch(LOGOUT_ACTION);
+    //             }, expirationTime);
+    //         }
+
+    //         context.commit(SET_USER_TOKEN_DATA_MUTATION, userData);
     //     }
     // },
+
+    [AUTO_LOGIN_ACTION](context) {
+        let userData = localStorage.getItem('userData');
+        if (userData) {
+            context.commit(SET_USER_TOKEN_DATA_MUTATION, JSON.parse(userData));
+        }
+    },
 
     async [LOGOUT_ACTION](context) {
         await Axios.delete('http://127.0.0.1:8000/api/users/logout', {
@@ -83,10 +83,10 @@ export default {
         }
     },
 
-    [AUTO_LOGOUT_ACTION](context) {
-        context.dispatch(LOGOUT_ACTION);
-        context.commit(SET_AUTO_LOGOUT_MUTATION);
-    },
+    // [AUTO_LOGOUT_ACTION](context) {
+    //     context.dispatch(LOGOUT_ACTION);
+    //     context.commit(SET_AUTO_LOGOUT_MUTATION);
+    // },
 
     async [AUTH_ACTION](context, payload) {
         let postData = {
@@ -108,10 +108,10 @@ export default {
         }
 
         if (response.status === 200 || response.status === 201) {
-            let expirationTime = +response.data.data.expiresIn * 1000;
+            let expirationTime = +response.data.data.expiresIn * 1000000000;
 
             timer = setTimeout(() => {
-                context.dispatch(AUTO_LOGOUT_ACTION);
+                // context.dispatch(AUTO_LOGOUT_ACTION);
                 context.dispatch(LOGOUT_ACTION);
             }, expirationTime);
 
