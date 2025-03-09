@@ -102,7 +102,7 @@
                 <v-row>
                   <v-col>
                     <v-checkbox
-                      label="Send?"
+                      label="Delivery?"
                       v-model="isSend"
                       color="blue-grey"
                       @click="checkIsSend"
@@ -164,7 +164,7 @@
           </v-card>
         </v-col>
         <v-col>
-          <v-card class="elevation-12 font-weight-regular" width="mx-auto" color="white" variant="elevated">
+          <v-card class="elevation-12 font-weight-regular" width="850" color="white" variant="elevated">
             <v-card-title class="d-flex align-center pe-2 bg-teal-lighten-1" color="cyan-lighten-2">
               <v-icon icon="mdi-book-open" color="black"></v-icon> &nbsp; Data Transaksi
             <v-spacer></v-spacer>
@@ -197,7 +197,7 @@
               </v-row>
             </v-container>
           </v-dialog>
-                <v-data-table 
+                <v-data-table-virtual
                   class="text-black"
                   v-model:search="search" 
                   :filter-keys="['description']" 
@@ -220,7 +220,7 @@
                       mdi-pencil-outline
                      </v-icon>
                   </template>
-                </v-data-table>
+                </v-data-table-virtual>
                 <v-dialog
                   v-model="dialogUpdate"
                   transition="dialog-top-transition"
@@ -312,7 +312,7 @@
                           <v-row>
                             <v-col>
                               <v-checkbox
-                                label="Send?"
+                                label="Delivery?"
                                 v-model="isSend"
                                 color="blue-grey"
                                 @click="checkIsSend"
@@ -451,10 +451,13 @@ export default {
     },
 
     created() {
+      this.editedIndex = -1;
       this.getCustomer();
       this.getTransactionByDate();
       this.getMasterItem();
 
+      // this.editedIndex = -1;
+      console.log("created: " + this.editedIndex);
       this.selectedItem = 1;
       this.editedItem.amount = 19000;
     },
@@ -467,9 +470,11 @@ export default {
           this.editedIndex = this.transactions.indexOf(item);
           this.updateTrx = Object.assign({}, item);
           this.dialogUpdate = true;
+          console.log("edit Item: " + this.editedIndex);
         },
 
         close() {
+            this.editedIndex = -1;
             this.dialog = false;
         },
 
@@ -585,6 +590,7 @@ export default {
               } catch (error) {
               this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
               this.alert = true;
+              this.editedIndex = -1;
               }
           } else {
 
@@ -636,6 +642,7 @@ export default {
         getTransactionByDate() {
           
           try {
+            console.log("transacation by data : " + this.editedIndex);
             AxiosInstance.get(`http://127.0.0.1:8000/api/transactions/today/`+ this.getDateOptions(this.pickDate),
               {
                 headers: {
