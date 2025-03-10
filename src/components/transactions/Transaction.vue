@@ -447,7 +447,6 @@ export default {
     watch: {
       dialog(val) {
         val || this.close()
-        console.log(this.dialog);
       },
 
       dialogUpdate(val) {
@@ -471,7 +470,6 @@ export default {
     methods: {
 
         editItem(item) {
-          console.log(item);
           this.editedIndex = this.transactions.indexOf(item);
           this.updateTrx = Object.assign({}, item);
           this.dialogUpdate = true;
