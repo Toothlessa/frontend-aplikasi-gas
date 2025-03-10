@@ -171,6 +171,7 @@
                                             type="number"
                                             variant="outlined"
                                             :disabled="!disableAmountPay"
+                                            @keyup.enter="updateDebt"
                                         >
                                         </v-text-field>
                                         <v-text-field
@@ -179,12 +180,14 @@
                                             type="number"
                                             variant="outlined"
                                             :disabled="!disableTotal"
+                                            @keyup.enter="updateDebt"
                                         >
                                         </v-text-field>
                                         <v-text-field
                                             v-model="updatedDebt.description"
                                             label="Description"
                                             variant="outlined"
+                                            @keyup.enter="updateDebt"
                                         >
                                         </v-text-field>
                                     </v-col>
@@ -411,10 +414,10 @@ export default{
                 )
                     .then((response) => {
 
-                    // Object.freeze(this.debts);
                     if(response.status === 200) {
                         this.detailDebt(postData);
                         this.debtSummaryLoad();
+                        this.editedDebt.description = null;
                         this.dialogUpdate = false;
                         this.hasSaved = true;
                     }

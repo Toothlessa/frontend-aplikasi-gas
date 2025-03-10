@@ -447,6 +447,11 @@ export default {
     watch: {
       dialog(val) {
         val || this.close()
+        console.log(this.dialog);
+      },
+
+      dialogUpdate(val) {
+        val || this.close()
       },
     },
 
@@ -476,6 +481,7 @@ export default {
         close() {
             this.editedIndex = -1;
             this.dialog = false;
+            this.dialogUpdate = false;
         },
 
         checkIsSend() {
@@ -626,8 +632,10 @@ export default {
                 this.getTransactionByDate();
                 this.hasSaved = true
                 this.selectedCustomer= null
-                this.editedItem.quantity = null
-                this.editedItem.description = null
+                this.editedItem = [];
+                this.isSend = false;
+                // this.editedItem.quantity = null
+                // this.editedItem.description = null
               }
               } catch (error) {
               this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
