@@ -11,6 +11,7 @@
               <tr>
                 <th class="text-left">No</th>
                 <th class="text-left">Nama</th>
+                <th class="text-left">Quantity</th>
                 <th class="text-left">Deskripsi</th>
                 <th class="text-left">Total</th>
                 <th class="text-left">Tanggal</th>
@@ -20,6 +21,7 @@
               <tr v-for="(item, index) in outsTransaction" :key="item.id">
                 <td>{{ index + 1 }}</td>
                 <td>{{ item.customer_name }}</td>
+                <td>{{ item.quantity }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.total }}</td>
                 <td>{{ item.created_at }}</td>
