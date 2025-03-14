@@ -1,10 +1,9 @@
 <template>
-    <v-container class="bg-">
+    <!-- <v-container class="bg-"> -->
         <v-row no-gutters>
-            <v-col>
+            <v-div>
                 <v-card
-                    align="center"
-                    class="elevation-12"
+                    class="elevation-12 pa-1 ma-1"
                     color="blue-grey-lighten-5"
                     width="280"
                 >
@@ -31,15 +30,6 @@
                             @keyup.enter="inputStock"
                         >
                         </v-text-field>
-                        <v-snackbar
-                            class="text-center"
-                            v-model="hasSaved"
-                            color="orange"
-                            :timeout="2000"
-                            location="top center"
-                        >
-                        Data telah tesimpan
-                        </v-snackbar>
                     <v-col class="text-right">
                         <v-btn
                             class="text-white"
@@ -55,11 +45,11 @@
                     </v-col>
                 </v-col>
                 </v-card>
-            </v-col>
+            </v-div>
             <v-col>
                 <v-card 
-                    class="elevation-12 font-weight-regular" 
-                    width="810" 
+                    class="elevation-12 font-weight-regular pa-1 ma-1" 
+                    max-width="auto"
                     variant="elevated"
                     color="#f0f5ff"
                 >
@@ -78,7 +68,10 @@
                         <v-icon size="20" @click="detailsStock(item)">mdi-developer-board </v-icon>
                     </template>
                     </v-data-table>
-                    <v-dialog v-model="dialogDetails" width="800">
+                    <v-dialog 
+                        v-model="dialogDetails" 
+                        max-width="auto"
+                    >
                             <v-card
                                 class="elevation-12"
                                 variant="elevated"
@@ -162,7 +155,16 @@
             </v-card>
         </v-col>
         </v-row>
-    </v-container>
+        <v-snackbar
+            class="text-center"
+            v-model="hasSaved"
+            color="orange"
+            :timeout="2000"
+            location="top center"
+        >
+        Data telah tesimpan
+        </v-snackbar>
+    <!-- </v-container> -->
 </template>
 <script>
 import AxiosInstance from '@/services/AxiosInstance';

@@ -111,12 +111,22 @@
               <v-row>
                 <v-col cols="12" md="6" sm="6">
                   <v-text-field
+                    v-model="editedItem.type"
+                    label="Type"
+                    variant="outlined"
+                  >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" md="6" sm="6">
+                  <v-text-field
                     v-model="editedItem.nik"
                     label="NIK"
                     variant="outlined"
                   >
                   </v-text-field>
                 </v-col>
+              </v-row> 
+              <v-row>
                 <v-col cols="12" md="6" sm="6">
                   <v-text-field
                     v-model="editedItem.email"
@@ -124,19 +134,21 @@
                     variant="outlined"
                   ></v-text-field>
                 </v-col>
-              </v-row>
-                  <v-text-field
-                    v-model="editedItem.address"
-                    label="Address"
-                    variant="outlined"
-                  >
-                </v-text-field>
-                  <v-text-field
+                <v-col cols="12" md="6" sm="6">
+                <v-text-field
                     v-model="editedItem.phone"
                     label="Handphone"
                     variant="outlined"
                     @keyup.enter="save"
                   ></v-text-field>
+                </v-col>
+              </v-row>
+                <v-textarea
+                    v-model="editedItem.address"
+                    label="Address"
+                    variant="outlined"
+                  >
+                  </v-textarea>
             </v-container>
             </v-card-text>
               <v-card-actions>
@@ -298,6 +310,7 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
       return {
         headers: [
           { title: 'Customer Name', align: 'start', key: 'customer_name' },
+          { title: 'Type', align: 'start', key: 'type' },
           { title: 'NIK', align: 'start', key: 'nik' },
           { title: 'E-mail', align: 'start', key: 'email' },
           { title: 'Address', align: 'start', key: 'address' },
@@ -307,6 +320,7 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
         ],
         editedItem: {
           customer_name: '',
+          type: '',
           nik: 0,
           email: '',
           address: '',
@@ -442,6 +456,7 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
         if (this.editedIndex > -1) {
           let postData = {
             customer_name: this.editedItem.customer_name,
+            type: this.editedItem.type,
             nik: this.editedItem.nik,
             email: this.editedItem.email,
             address: this.editedItem.address,
@@ -472,6 +487,7 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
           } else {
             let postData = {
               customer_name: this.editedItem.customer_name,
+              type: this.editedItem.type,
               nik: this.editedItem.nik,
               email: this.editedItem.email,
               address: this.editedItem.address,
