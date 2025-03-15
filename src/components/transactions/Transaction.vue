@@ -1,27 +1,21 @@
 <template>
-  <v-container>
-  <v-spacer></v-spacer>
-    <v-row>
-      <v-col
-        xs="12"
-      >
+    <v-row no-gutters>
+      <v-div>
       <v-card 
-        class="elevation-12 text-left" 
-        width="280" 
+        class="elevation-12 text-left pa-1 ma-1" 
+        width="350" 
         color="white" 
         variant="elevated"
       >
         <v-card-title 
-          class="text-h5 font-weight-regular bg-teal-lighten-1"
+          class="d-flex align-center pe-2 bg-teal-lighten-1" color="cyan-lighten-2"
         >
-        <v-icon>mdi-chart-gantt</v-icon>
-          Input Transaction
+        <v-icon color="black">mdi-chart-gantt</v-icon> &nbsp; Input Transaction
         </v-card-title>
           <v-card-item>
             <v-alert 
                 class="text-teal"
                 v-model="alert"
-                border="start"
                 variant="tonal"
                 closable
                 v-if="error"
@@ -102,7 +96,7 @@
                 <v-row>
                   <v-col>
                     <v-checkbox
-                      label="Delivery?"
+                      label="Delivery"
                       v-model="isSend"
                       color="blue-grey"
                       @click="checkIsSend"
@@ -126,47 +120,47 @@
                     </v-btn>
                   </v-col>
                 </v-row>
-            </v-card-item>
+                <v-card-title class="d-flex align-center pe-2 bg-teal-lighten-1" color="cyan-lighten-2">
+                  <v-icon color="black">mdi-chart-timeline</v-icon> &nbsp; Pick The Item
+                </v-card-title>
+                <v-divider></v-divider>
+                  <v-autocomplete
+                    v-model="selectedItem"
+                    :items="mItems"
+                    item-title="item_name"
+                    item-value="id"
+                    :label="`Item — ${isEditing ? 'Editable' : 'Saved'}`"
+                    :readonly="!isEditing"
+                    :hint="!isEditing ? 'Click the icon to edit' : 'Click the icon to save'"
+                    :disabled="!fieldDisabled"
+                    prepend-icon="mdi-tooltip-edit-outline"
+                    persistent-hint
+                    color="blue-grey"
+                  >
+                    <template v-slot:append>
+                      <v-slide-x-reverse-transition mode="out-in">
+                        <v-icon
+                          :key="`icon-${isEditing}`"
+                          :color="isEditing ? 'success' : 'info'"
+                          :icon="isEditing ? 'mdi-check-outline' : 'mdi-circle-edit-outline'"
+                          @click="isEditing = !isEditing"
+                        ></v-icon>
+                      </v-slide-x-reverse-transition>
+                    </template>
+                  </v-autocomplete>
+              </v-card-item>
           </v-card>
-          <v-divider></v-divider>
-          <v-card width="280" >
-            <v-card-title class="text-h5 font-weight-regular bg-teal-lighten-1">
-            <v-icon>mdi-chart-timeline</v-icon>
-              Pick The Item
-            </v-card-title>
-            <v-card-text>
-              <div class="text-caption pa-3"></div>
-              <v-autocomplete
-                v-model="selectedItem"
-                :items="mItems"
-                item-title="item_name"
-                item-value="id"
-                :label="`Item — ${isEditing ? 'Editable' : 'Saved'}`"
-                :readonly="!isEditing"
-                :hint="!isEditing ? 'Click the icon to edit' : 'Click the icon to save'"
-                :disabled="!fieldDisabled"
-                prepend-icon="mdi-tooltip-edit-outline"
-                persistent-hint
-                color="blue-grey"
-              >
-                <template v-slot:append>
-                  <v-slide-x-reverse-transition mode="out-in">
-                    <v-icon
-                      :key="`icon-${isEditing}`"
-                      :color="isEditing ? 'success' : 'info'"
-                      :icon="isEditing ? 'mdi-check-outline' : 'mdi-circle-edit-outline'"
-                      @click="isEditing = !isEditing"
-                    ></v-icon>
-                  </v-slide-x-reverse-transition>
-                </template>
-              </v-autocomplete>
-            </v-card-text>
-          </v-card>
-        </v-col>
+      </v-div>
         <v-col>
-          <v-card class="elevation-12 font-weight-regular" width="850" color="white" variant="elevated">
+          <v-card 
+            class="elevation-12 font-weight-regular pa-1 ma-1" 
+            max-height="auto"
+            max-width="auto" 
+            color="white" 
+            variant="elevated"
+          >
             <v-card-title class="d-flex align-center pe-2 bg-teal-lighten-1" color="cyan-lighten-2">
-              <v-icon icon="mdi-book-open" color="black"></v-icon> &nbsp; Data Transaksi
+              <v-icon icon="mdi-book-open" color="black"></v-icon> &nbsp; Data Transaction
             <v-spacer></v-spacer>
             <v-text-field 
                 v-model="search" 
@@ -178,8 +172,10 @@
                 >
             </v-text-field>
           </v-card-title>
-          <!-- <v-divider class="mt-1"></v-divider> -->
-          <v-dialog v-model="dialog" max-width="400px">
+          <v-dialog 
+            v-model="dialog" 
+            max-width="400px"
+          >
             <template v-slot:activator="{ props }">
                 <v-btn class="text-white mb-2" color="blue-grey" variant="text" icon v-bind="props">
                   <v-icon size="30">mdi-calendar</v-icon>
@@ -197,6 +193,119 @@
               </v-row>
             </v-container>
           </v-dialog>
+          <v-dialog
+            v-model="dialogUpdate"
+            transition="dialog-top-transition"
+            width="400"
+          >
+          <v-card  
+            class="elevation-12 font-weight-regular"
+          >
+          <v-card-title class="d-flex align-center pe-2 bg-teal-lighten-1" color="cyan-lighten-2">
+              <v-icon icon="mdi-mushroom" color="black"></v-icon> &nbsp; Update Transaction
+          </v-card-title>
+              <v-card-item>
+                <v-alert 
+                    class="text-teal"
+                    v-model="alert"
+                    variant="tonal"
+                    closable
+                    v-if="error"
+                    > 
+                    {{ error }} 
+                </v-alert>
+                  <v-divider class="mt-1"></v-divider>
+                      <v-autocomplete
+                        label="Customer"
+                        v-model="updateTrx.customer_id"
+                        variant="outlined"       
+                        :items="customers"
+                        :disabled="!fieldDisabled"
+                        item-title="customer_name"
+                        item-value="id"
+                        color="blue-grey"
+                        @keyup.enter="save"
+                      >
+                      <template v-slot:item="{ props, item }">
+                        <v-list-item
+                          v-bind="props"
+                          :subtitle="item.raw.nik"
+                          :title="item.raw.customer_name"
+                        ></v-list-item>
+                      </template>
+                    </v-autocomplete>
+                      <v-number-input
+                        label="Qty"
+                        type="number"
+                        v-model="updateTrx.quantity"
+                        :disabled="!fieldDisabled"
+                        variant="outlined"
+                        color="blue-grey"
+                        :reverse="false"
+                        controlVariant="split"
+                        @keyup.enter="save"
+                      ></v-number-input>
+                      <v-textarea
+                        label="Description"
+                        v-model="this.updateTrx.description"
+                        variant="outlined"       
+                        :disabled="!fieldDisabled"
+                        color="blue-grey"
+                      >
+                    </v-textarea>
+                      <v-autocomplete
+                        v-model="updateTrx.amount"
+                        variant="outlined"
+                        :items="harga"
+                        item-title="name"
+                        item-value="value"
+                        :label="`Price — ${isEditAmt ? 'Editable' : 'Saved'}`"
+                        :hint="!isEditAmt ? 'Click the icon to edit' : 'Click the icon to save'"
+                        :readonly="!isEditAmt"
+                        :disabled="!fieldDisabled"
+                        persistent-hint
+                        color="blue-grey"
+                      >
+                      <template v-slot:append>
+                      <v-slide-x-reverse-transition mode="out-in">
+                        <v-icon
+                          :key="`icon-${isEditAmt}`"
+                          :color="isEditAmt ? 'success' : 'info'"
+                          :icon="isEditAmt ? 'mdi-check-outline' : 'mdi-circle-edit-outline'"
+                          @click="isEditAmt = !isEditAmt"
+                        ></v-icon>
+                      </v-slide-x-reverse-transition>
+                    </template>
+                      </v-autocomplete>
+                    <v-row>
+                      <v-col>
+                        <v-checkbox
+                          label="Delivery"
+                          v-model="isSend"
+                          color="blue-grey"
+                          @click="checkIsSend"
+                          :disabled="!fieldDisabled"
+                        >
+                        </v-checkbox>
+                      </v-col>
+                      <v-col class="text-right">
+                        <v-btn
+                          class="text-white"
+                          variant="elevated"
+                          size="large"
+                          rounded="lg"
+                          color="blue-grey"
+                          :disabled="isUpdateDisabled"
+                          :loading="loadingButton"
+                          @click="save"
+                        >
+                            Update
+                        </v-btn>
+                      </v-col>
+                    </v-row>
+                </v-card-item>
+              </v-card>
+        </v-dialog>
                 <v-data-table-virtual
                   class="text-black"
                   v-model:search="search" 
@@ -221,128 +330,9 @@
                      </v-icon>
                   </template>
                 </v-data-table-virtual>
-                <v-dialog
-                  v-model="dialogUpdate"
-                  transition="dialog-top-transition"
-                >
-                <v-card  
-                  width="280" 
-                  color="white" 
-                  variant="elevated"
-                >
-                  <v-card-title 
-                    class="text-h5 font-weight-regular bg-teal-lighten-1"
-                  >
-                  <v-icon>mdi-chart-gantt</v-icon>
-                    Update Transaction
-                  </v-card-title>
-                    <v-card-item>
-                      <v-alert 
-                          class="text-teal"
-                          v-model="alert"
-                          variant="tonal"
-                          closable
-                          v-if="error"
-                          > 
-                          {{ error }} 
-                      </v-alert>
-                        <v-divider class="mt-1"></v-divider>
-                            <v-autocomplete
-                              label="Customer"
-                              v-model="updateTrx.customer_id"
-                              variant="outlined"       
-                              :items="customers"
-                              :disabled="!fieldDisabled"
-                              item-title="customer_name"
-                              item-value="id"
-                              color="blue-grey"
-                              @keyup.enter="save"
-                            >
-                            <template v-slot:item="{ props, item }">
-                              <v-list-item
-                                v-bind="props"
-                                :subtitle="item.raw.nik"
-                                :title="item.raw.customer_name"
-                              ></v-list-item>
-                            </template>
-                          </v-autocomplete>
-                            <v-number-input
-                              label="Qty"
-                              type="number"
-                              v-model="updateTrx.quantity"
-                              :disabled="!fieldDisabled"
-                              variant="outlined"
-                              color="blue-grey"
-                              :reverse="false"
-                              controlVariant="split"
-                              @keyup.enter="save"
-                            ></v-number-input>
-                            <v-textarea
-                              label="Description"
-                              v-model="this.updateTrx.description"
-                              variant="outlined"       
-                              :disabled="!fieldDisabled"
-                              color="blue-grey"
-                            >
-                          </v-textarea>
-                            <v-autocomplete
-                              v-model="updateTrx.amount"
-                              variant="outlined"
-                              :items="harga"
-                              item-title="name"
-                              item-value="value"
-                              :label="`Price — ${isEditAmt ? 'Editable' : 'Saved'}`"
-                              :hint="!isEditAmt ? 'Click the icon to edit' : 'Click the icon to save'"
-                              :readonly="!isEditAmt"
-                              :disabled="!fieldDisabled"
-                              persistent-hint
-                              color="blue-grey"
-                            >
-                            <template v-slot:append>
-                            <v-slide-x-reverse-transition mode="out-in">
-                              <v-icon
-                                :key="`icon-${isEditAmt}`"
-                                :color="isEditAmt ? 'success' : 'info'"
-                                :icon="isEditAmt ? 'mdi-check-outline' : 'mdi-circle-edit-outline'"
-                                @click="isEditAmt = !isEditAmt"
-                              ></v-icon>
-                            </v-slide-x-reverse-transition>
-                          </template>
-                            </v-autocomplete>
-                          <v-row>
-                            <v-col>
-                              <v-checkbox
-                                label="Delivery?"
-                                v-model="isSend"
-                                color="blue-grey"
-                                @click="checkIsSend"
-                                :disabled="!fieldDisabled"
-                              >
-                              </v-checkbox>
-                            </v-col>
-                            <v-col class="text-right">
-                              <v-btn
-                                class="text-white"
-                                variant="elevated"
-                                size="large"
-                                rounded="lg"
-                                color="blue-grey"
-                                :disabled="isUpdateDisabled"
-                                :loading="loadingButton"
-                                @click="save"
-                              >
-                                  Update
-                              </v-btn>
-                            </v-col>
-                          </v-row>
-                      </v-card-item>
-                    </v-card>
-              </v-dialog>
               </v-card>
           </v-col>
-          <v-spacer></v-spacer>
   </v-row>
-</v-container>
 </template>
 <script>
 import AxiosInstance from '@/services/AxiosInstance';
@@ -485,8 +475,10 @@ export default {
         checkIsSend() {
             if (!this.isSend){
             this.editedItem.amount = 20000;
+            this.updateTrx.amount = 20000;
           } else if(this.isSend) {
               this.editedItem.amount = 19000;
+              this.updateTrx.amount = 19000;
           }
         },
 
@@ -589,6 +581,7 @@ export default {
                 this.hasSaved = true;
                 this.editedIndex = -1;
                 this.dialogUpdate =false;
+                this.isSend = false;
               }
 
               } catch (error) {
@@ -602,9 +595,11 @@ export default {
               this.editedItem.quantity = 1;
             }
 
-            if (this.editedItem.description == null) {
-              this.editedItem.description = 'Umum';
+            if (this.selectedCustomer == '' || this.selectedCustomer == null) {
+              this.selectedCustomer = 6825;
             }
+
+            console.log('select customer :' + this.selectedCustomer);
 
             let postData = {
               quantity: this.editedItem.quantity,

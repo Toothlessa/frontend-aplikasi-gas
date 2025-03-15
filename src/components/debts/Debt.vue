@@ -1,12 +1,12 @@
 <template>
-   <v-container class="bg-">
+   <!-- <v-container class="bg-"> -->
        <v-row no-gutters>
-           <v-col>
+           <v-div>
                <v-card
-                   align="center"
-                   class="elevation-12"
+                   class="elevation-12 pa-1 ma-1"
                    color="blue-grey-lighten-5"
-                   width="280"
+                   max-height="auto"
+                   max-width="auto"
                >
                <v-card-title class="text-h6 font-weight-regular bg-teal">
                    <v-icon size="30">mdi-cash</v-icon>&nbsp;Input Debt
@@ -75,11 +75,12 @@
                    </v-col>
                </v-col>
                </v-card>
-           </v-col>
+           </v-div>
            <v-col>
                <v-card 
-                   class="elevation-12 font-weight-regular" 
-                   width="810" 
+                   class="elevation-12 font-weight-regular pa-1 ma-1" 
+                   max-height="auto"
+                   max-width="auto" 
                    variant="elevated"
                    color="#f0f5ff"
                >
@@ -137,9 +138,8 @@
                             </v-table>
                             </v-card>
                         </v-dialog>
-                            <v-dialog v-model="dialogUpdate" max-width="340">
+                            <v-dialog v-model="dialogUpdate" max-width="auto">
                                 <v-card
-                                    align="center"
                                     class="elevation-12"
                                     color="blue-grey-lighten-5"
                                     width="300"
@@ -205,7 +205,7 @@
                     </v-card>
             </v-col>
        </v-row>
-   </v-container>
+   <!-- </v-container> -->
 </template>
 <script>
 import AxiosInstance from '@/services/AxiosInstance';
