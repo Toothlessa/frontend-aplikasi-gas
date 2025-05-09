@@ -5,31 +5,63 @@
       </v-toolbar>
       <v-divider></v-divider>
       <v-card height="" flat color="transparent" class="mt-n5">
-        <v-table class="transparent text-black mt-n2 bg-cyan" color="transparent">
-          <template v-slot:default>
-            <thead>
-              <tr>
-                <th class="text-left">No</th>
-                <th class="text-left">Nama</th>
-                <th class="text-left">Quantity</th>
-                <th class="text-left">Deskripsi</th>
-                <th class="text-left">Total</th>
-                <th class="text-left">Tanggal</th>
-              </tr>
-            </thead>
-            <tbody class="bg-cyan-lighten-5 text-black">
-              <tr v-for="(item, index) in outsTransaction" :key="item.id">
-                <td>{{ index + 1 }}</td>
-                <td>{{ item.customer_name }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>{{ item.description }}</td>
-                <td>{{ item.total }}</td>
-                <td>{{ item.created_at }}</td>
-              </tr>
-            </tbody>
+        <v-data-table-virtual
+          :headers="outsTrxTable"
+          :items="outsTransaction"
+           class="transparent text-black mt-n2 bg-cyan-lighten-3"
+        >
+          <template v-slot:[`item.actions`]="{ item }">
+            <v-icon class="me-2" size="small" @click="editOutsTrx(item)"> 
+              mdi-pencil-outline
+            </v-icon>
           </template>
-        </v-table>
+        </v-data-table-virtual>
       </v-card>
+      <v-dialog
+        v-model="dialogDesc"
+        max-width="400"
+      >
+      <v-card
+        class="elevation-12"
+        variant="outlined"
+      >
+        <v-card-title class="text-h5 font-weight-regular bg-cyan-darken-2">
+          <v-icon size="30"> mdi-unity </v-icon>&nbsp; Change Status
+        </v-card-title>
+        <v-textarea
+          label="Description"
+          v-model="updateOutsTrx.description"
+          class="pa-2 ma-2"
+          row-height="25"
+          rows="3"
+          variant="outlined"
+          auto-grow
+          @keyup.enter="updateDescription()"
+        ></v-textarea>
+        <div class="pa-4 text-end">
+          <v-btn
+            class="text-none pa-2 ma-2"
+            color="medium-emphasis"
+            min-width="92"
+            variant="outlined"
+            rounded
+            @click="updateDescription()"
+          >
+            Change
+          </v-btn>
+          <v-btn
+            class="text-none"
+            color="medium-emphasis"
+            min-width="92"
+            variant="outlined"
+            rounded
+            @click="dialogDesc = false"
+          >
+            Close
+          </v-btn>
+        </div>
+      </v-card>
+      </v-dialog>
     </div>
   </template>
   
@@ -41,18 +73,58 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
 
   export default {
   data : () => ({
+    outsTrxTable: [
+      { title: 'Name', align: 'center', key: 'customer_name' },
+      { title: 'Qty', align: 'center', key: 'quantity'},
+      { title: 'Description', align: 'center', key: 'description' },
+      { title: 'Total', align: 'start', key: 'total'},
+      { title: 'Date', align: 'start', key: 'created_at'},
+      { title: 'Action', align: 'start', key: 'actions'},
+    ],
       outsTransaction: [],
+      updateOutsTrx: [],
       alert: false,
+      dialogDesc: false,
   }),
 
   created() {
 
-    this.getOutstandingDebt();
+    this.getOutstandingTrx();
   },
 
   methods: {
 
-    async getOutstandingDebt() {
+    editOutsTrx(item) {
+      this.updateOutsTrx = Object.assign({}, item);
+      console.log(this.updateOutsTrx);
+      this.dialogDesc = true;
+    },
+
+    async updateDescription() {
+
+      let postData = this.updateOutsTrx;
+
+      try {
+        let response = ''
+          response = await AxiosInstance.patch('http://127.0.0.1:8000/api/transactions/'+this.updateOutsTrx.id, postData,
+            {
+              headers: {
+              'Content-Type': 'application/json', 
+              'Accept': 'application/json',
+              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+              },
+            })
+            if (response.status == 200) {
+              this.getOutstandingTrx();
+              this.dialogDesc = false;
+            }
+      } catch (error) {2
+        this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0], );
+        this.alert = true;
+      }
+    },
+
+    async getOutstandingTrx() {
 
       try {
         await AxiosInstance
@@ -65,7 +137,6 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
             },
           }).then((response) => {
               this.outsTransaction = response.data.data;
-              console.log(this.outsTransaction);
           })
       } catch(error) {
         this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0], );

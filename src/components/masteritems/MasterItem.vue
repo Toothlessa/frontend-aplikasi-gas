@@ -353,8 +353,8 @@ data() {
           { title: 'Item Code', align: 'start', key: 'item_code' },
           { title: 'Item Type', align: 'start', key: 'item_type' },
           { title: 'Category', align: 'start', key: 'category' },
-          { title: 'Cost of Goods', align: 'center', key: 'cost_of_goods_sold' },
-          { title: 'Selling Price', align: 'center', key: 'selling_price'},
+          { title: 'Cost of Goods', align: 'start', key: 'cost_of_goods_sold', value: item => this.formatPrice(item.cost_of_goods_sold) },
+          { title: 'Selling Price', align: 'center', key: 'selling_price', value: item => this.formatPrice(item.selling_price) },
           { title: 'Stock', align: 'center', key: 'in_stock'},
           { title: 'Status', align: 'center', key: 'active_flag'},
           { title: 'Actions', key: 'actions', sortable: false },
@@ -462,6 +462,10 @@ data() {
       updateStatusCategory(item) {
         this.editCategory = item;
         this.dialogInactive = true;
+      },
+
+      formatPrice (value) {
+          return `Rp${parseFloat(value).toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&.')}`
       },
 
       async getAllData() {

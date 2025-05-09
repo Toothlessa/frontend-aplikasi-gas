@@ -5,28 +5,12 @@
       </v-toolbar>
       <v-divider></v-divider>
       <v-card height="" flat color="transparent" class="mt-n5">
-        <v-table class="bg-teal mt-n2">
-          <template v-slot:default>
-            <thead>
-              <tr>
-                <th class="text-left">#</th>
-                <th class="text-left">Nama</th>
-                <th class="text-left">Total Bayar</th>
-                <th class="text-left">Total Hutang</th>
-                <th class="text-left">Sisa Hutang</th>
-              </tr>
-            </thead>
-            <tbody class="bg-teal-lighten-4">
-              <tr v-for="(item, index) in outsDebts" :key="item.customer_id">
-                <td>{{ index + 1 }}</td>
-                <td>{{ item.customer_name }}</td>
-                <td>{{ item.total_pay }}</td>
-                <td>{{ item.total_debt }}</td>
-                <td>{{ item.debt_left }}</td>
-              </tr>
-            </tbody>
-          </template>
-        </v-table>
+        <v-data-table-virtual
+          :headers="debtsTable"
+          :items="outsDebts"
+          class="transparent text-black mt-n2 bg-cyan-lighten-5"
+        > 
+        </v-data-table-virtual>
       </v-card>
     </div>
   </template>
@@ -39,6 +23,12 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
 
   export default {
   data : () => ({
+    debtsTable: [
+      { title: 'Name', align: 'center', key: 'customer_name' },
+      { title: 'Total Pay', align: 'center', key: 'total_pay'},
+      { title: 'Total', align: 'center', key: 'total_debt' },
+      { title: 'Debt Left', align: 'start', key: 'debt_left'},
+    ],
     outsDebts: [],
     alert: false,
   }),

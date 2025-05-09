@@ -350,8 +350,9 @@ export default {
                 { title: 'NIK', align: 'center', key: 'nik' },
                 { title: 'Description', align: 'center', key: 'description'},
                 { title: 'Qty', align: 'center', key: 'quantity' },
-                { title: 'Price', align: 'start', key: 'amount' },
-                { title: 'Total', align: 'start', key: 'total' },
+                // { title: 'Price', align: 'start', key: 'amount' },
+                { title: 'Price', align: 'start', key: 'amount', value: item => this.formatPrice(item.amount) },
+                { title: 'Total', align: 'start', key: 'total', value: item => this.formatPrice(item.total) },
                 { title: 'Created', aligh: 'start', key: 'created_at'},
                 { title: 'Actions', align: 'center', key: 'actions', sortable: false },
             ],
@@ -450,8 +451,6 @@ export default {
       this.getTransactionByDate();
       this.getMasterItem();
 
-      // this.editedIndex = -1;
-      console.log("created: " + this.editedIndex);
       this.selectedItem = 1;
       this.editedItem.amount = 19000;
     },
@@ -512,6 +511,10 @@ export default {
             else if (description.toLowerCase().substring(0, 4) == "uang")
                return 'orange'
             else return 'green'
+        },
+
+        formatPrice (value) {
+          return `Rp${value.toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&.')}`
         },
 
         async getMasterItem() {
@@ -596,7 +599,7 @@ export default {
             }
 
             if (this.selectedCustomer == '' || this.selectedCustomer == null) {
-              this.selectedCustomer = 6825;
+              this.selectedCustomer = 2070;
             }
 
             console.log('select customer :' + this.selectedCustomer);
