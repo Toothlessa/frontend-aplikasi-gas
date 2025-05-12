@@ -350,9 +350,10 @@ export default {
                 { title: 'NIK', align: 'center', key: 'nik' },
                 { title: 'Description', align: 'center', key: 'description'},
                 { title: 'Qty', align: 'center', key: 'quantity' },
-                { title: 'Price', align: 'start', key: 'amount' },
-                { title: 'Total', align: 'start', key: 'total' },
+                { title: 'Price', align: 'start', key: 'amount', value: item => this.formatPrice(item.amount) },
+                { title: 'Total', align: 'start', key: 'total', value: item => this.formatPrice(item.total) },
                 { title: 'Created', aligh: 'start', key: 'created_at'},
+                { align: ' d-none', key: 'stock_id'},
                 { title: 'Actions', align: 'center', key: 'actions', sortable: false },
             ],
             // load data
@@ -424,7 +425,6 @@ export default {
     computed: {
 
       isSaveDisabled(){
-        // return !(this.selectedCustomer && this.editedItem.quantity && this.editedItem.description)
         return !(this.selectedCustomer && this.editedItem.quantity)
       },
 
@@ -450,8 +450,6 @@ export default {
       this.getTransactionByDate();
       this.getMasterItem();
 
-      // this.editedIndex = -1;
-      console.log("created: " + this.editedIndex);
       this.selectedItem = 1;
       this.editedItem.amount = 19000;
     },
@@ -463,7 +461,6 @@ export default {
           this.editedIndex = this.transactions.indexOf(item);
           this.updateTrx = Object.assign({}, item);
           this.dialogUpdate = true;
-          console.log("edit Item: " + this.editedIndex);
         },
 
         close() {
@@ -514,6 +511,10 @@ export default {
             else return 'green'
         },
 
+        formatPrice (value) {
+          return `Rp${value.toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&.')}`
+        },
+
         async getMasterItem() {
 
           try {
@@ -557,6 +558,10 @@ export default {
         async save() {
           if (this.editedIndex > -1) {
             let postData = {
+              //stock
+              stock_id: this.updateTrx.stock_id,
+              stock: this.updateTrx.quantity,
+              //transaction
               customer_id: this.updateTrx.customer_id,
               quantity: this.updateTrx.quantity,
               description: this.updateTrx.description,
@@ -596,12 +601,15 @@ export default {
             }
 
             if (this.selectedCustomer == '' || this.selectedCustomer == null) {
-              this.selectedCustomer = 6825;
+              this.selectedCustomer = 2070;
             }
 
             console.log('select customer :' + this.selectedCustomer);
 
             let postData = {
+              stock: this.editedItem.quantity,
+              customer_id: this.selectedCustomer,
+              item_id: this.selectedItem,
               quantity: this.editedItem.quantity,
               description: this.editedItem.description,
               amount: this.editedItem.amount,
@@ -612,7 +620,7 @@ export default {
 
             let response =''
             response = await AxiosInstance
-              .post('http://127.0.0.1:8000/api/transactions/'+this.selectedItem+'/customer/'+this.selectedCustomer, postData,
+              .post('http://127.0.0.1:8000/api/transactions', postData,
                   {
                   headers: {
                   'Content-Type': 'application/json', 
@@ -627,8 +635,6 @@ export default {
                 this.selectedCustomer= null
                 this.editedItem = [];
                 this.isSend = false;
-                // this.editedItem.quantity = null
-                // this.editedItem.description = null
               }
               } catch (error) {
               this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
@@ -654,6 +660,7 @@ export default {
               })
               .then((response) => {
                     this.transactions = response.data.data;
+                    console.log(this.transactions);
                 
                 if(response.status == 200){
                     this.loadingData = false

@@ -485,6 +485,10 @@ export default {
 
   methods: {
 
+    formatPrice (value) {
+      return `Rp${parseFloat(value).toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&.')}`
+    },
+
     editOwner(item) {
         this.updateOwners = item;
         this.dialogUpdateOwner = true

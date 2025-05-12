@@ -39,9 +39,12 @@
                        >
                        </v-text-field>
                         <v-textarea
-                           v-model="editedDebt.description"
-                           label="Description"
-                           variant="outlined"
+                            v-model="editedDebt.description"
+                            label="Description"
+                            variant="outlined"
+                            row-height="25"
+                            rows="3"
+                            auto-grow
                        >
                         </v-textarea>
                         <v-checkbox
@@ -138,11 +141,14 @@
                             </v-table>
                             </v-card>
                         </v-dialog>
-                            <v-dialog v-model="dialogUpdate" max-width="auto">
+                            <v-dialog 
+                                v-model="dialogUpdate" 
+                                transition="dialog-top-transition"
+                                width="300"
+                            >
                                 <v-card
                                     class="elevation-12"
                                     color="blue-grey-lighten-5"
-                                    width="300"
                                 >
                                 <v-card-title class="text-h6 font-weight-regular bg-teal">
                                     <v-icon size="30">mdi-cash</v-icon>&nbsp;Edit Debt
@@ -183,13 +189,16 @@
                                             @keyup.enter="updateDebt"
                                         >
                                         </v-text-field>
-                                        <v-text-field
+                                        <v-textarea
                                             v-model="updatedDebt.description"
                                             label="Description"
                                             variant="outlined"
+                                            row-height="25"
+                                            rows="3"
+                                            auto-grow
                                             @keyup.enter="updateDebt"
                                         >
-                                        </v-text-field>
+                                        </v-textarea>
                                     </v-col>
                                     <v-card-actions>
                                         <v-btn class="text-white mb-2" color="teal" variant="elevated"  @click="dialogUpdate = false">
@@ -221,7 +230,7 @@ export default{
             key: 'customer_name',
             title: 'Customer Name',
             },
-            { key: 'total_debt', title: 'Total Debt', align: 'center'},
+            { key: 'total_debt', title: 'Total Debt', align: 'center',  },
             { key: 'total_pay', title: 'Total Pay', align: 'center' },
             { key: 'debt_left', title: 'Debt Left', align: 'center'},       
             { key: 'actions', title: 'Details', align:'center', sortable: false },
@@ -268,6 +277,10 @@ export default{
    },
 
    methods : {
+
+        async formatPrice (value) {
+          return await `Rp${parseFloat(value).toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&.')}`
+        },
 
         async customerLoad() {
 
