@@ -347,7 +347,7 @@ export default {
             search: '',
             headers: [
                 { title: 'Customer', align: 'start', key: 'customer_name'},
-                { title: 'NIK', align: 'center', key: 'nik' },
+                { align: ' d-none', key: 'nik'},
                 { title: 'Description', align: 'center', key: 'description'},
                 { title: 'Qty', align: 'center', key: 'quantity' },
                 { title: 'Price', align: 'start', key: 'amount', value: item => this.formatPrice(item.amount) },
@@ -429,7 +429,7 @@ export default {
       },
 
       isUpdateDisabled(){
-        return !(this.updateTrx.customer_id && this.updateTrx.quantity && this.updateTrx.description)
+        return !(this.updateTrx.customer_id && this.updateTrx.quantity)
       },
 
     },
@@ -560,7 +560,7 @@ export default {
             let postData = {
               //stock
               stock_id: this.updateTrx.stock_id,
-              stock: this.updateTrx.quantity,
+              stock: -this.updateTrx.quantity,
               //transaction
               customer_id: this.updateTrx.customer_id,
               quantity: this.updateTrx.quantity,
@@ -601,13 +601,11 @@ export default {
             }
 
             if (this.selectedCustomer == '' || this.selectedCustomer == null) {
-              this.selectedCustomer = 2070;
+              this.selectedCustomer = 1;
             }
 
-            console.log('select customer :' + this.selectedCustomer);
-
             let postData = {
-              stock: this.editedItem.quantity,
+              stock: -this.editedItem.quantity,
               customer_id: this.selectedCustomer,
               item_id: this.selectedItem,
               quantity: this.editedItem.quantity,
@@ -649,7 +647,6 @@ export default {
         getTransactionByDate() {
           
           try {
-            console.log("transacation by data : " + this.editedIndex);
             AxiosInstance.get(`http://127.0.0.1:8000/api/transactions/today/`+ this.getDateOptions(this.pickDate),
               {
                 headers: {
@@ -660,7 +657,6 @@ export default {
               })
               .then((response) => {
                     this.transactions = response.data.data;
-                    console.log(this.transactions);
                 
                 if(response.status == 200){
                     this.loadingData = false
