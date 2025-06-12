@@ -80,6 +80,7 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
       { title: 'Total', align: 'start', key: 'total'},
       { title: 'Date', align: 'start', key: 'created_at'},
       { title: 'Action', align: 'start', key: 'actions'},
+      { align: ' d-none', key: 'stock_id'},
     ],
       outsTransaction: [],
       updateOutsTrx: [],
@@ -96,13 +97,23 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
 
     editOutsTrx(item) {
       this.updateOutsTrx = Object.assign({}, item);
-      console.log(this.updateOutsTrx);
       this.dialogDesc = true;
     },
 
     async updateDescription() {
 
-      let postData = this.updateOutsTrx;
+      // let postData = this.updateOutsTrx;
+      let postData = {
+              //stock
+              stock_id: this.updateOutsTrx.stock_id,
+              stock: -this.updateOutsTrx.quantity,
+              //transaction
+              customer_id: this.updateOutsTrx.customer_id,
+              quantity: this.updateOutsTrx.quantity,
+              description: this.updateOutsTrx.description,
+              amount: this.updateOutsTrx.amount,
+              total: this.updateOutsTrx.total,
+          };
 
       try {
         let response = ''

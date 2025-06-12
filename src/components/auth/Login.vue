@@ -221,11 +221,12 @@ export default{
     methods: {
       ...mapActions('auth', {
       login: LOGIN_ACTION,
-    }),
-
-    ...mapActions('auth', {
       signup : SIGNUP_ACTION,
     }),
+
+    // ...mapActions('auth', {
+    //   signup : SIGNUP_ACTION,
+    // }),
 
     async onLogin() {
       try{
@@ -237,7 +238,6 @@ export default{
         this.error = error;
         this.alert= true;
       }
-      console.log("renanss");
       this.$router.push('/');
     },
 

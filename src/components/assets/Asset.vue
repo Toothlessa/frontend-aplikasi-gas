@@ -452,6 +452,7 @@ export default {
       { title: 'Owner', align: 'start', key: 'owner_name'},
       { title: 'Asset Name', align: 'start', key: 'asset_name' },
       { title: 'Quantity', align: 'center', key: 'quantity' },
+      // { title: 'Buying Price', align: 'center', key: 'cogs', value: item => this.formatPrice(item.cogs) },
       { title: 'Buying Price', align: 'center', key: 'cogs' },
       { title: 'Selling Price', align: 'center', key: 'selling_price' },
       { title: 'Action', align: 'end', key: 'actions' },

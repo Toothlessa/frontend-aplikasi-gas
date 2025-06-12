@@ -278,7 +278,7 @@
       :headers="headers"
       :items="customers"
       loading-text="Loading... Please wait"
-      :loading="loading"
+      :loading="loadingData"
     >
     <template v-slot:[`item.active_flag`]="{ item }">
         <div class="text-center">
@@ -300,11 +300,10 @@
 </template>
 
 <script>
-import { LOAD_CUSTOMER_DATA } from '@/store/storeconstant';
-import { 
-  mapActions,
-  mapState,
-} from 'vuex';
+import AxiosInstance from '@/services/AxiosInstance';
+import Validations from '@/services/Validations';
+import store from '@/store/store';
+import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
 
     export default {
     data() {
@@ -330,11 +329,13 @@ import {
         },
         editedIndex: -1,
         search: '',
+        customers: [],
         dialog: false,
         dialogDelete: false,
         dialogUploadCustomer: false,
         alert: true,
         hasSaved: false,
+        loadingData: true,
         error:'',
         //csv
         csvFile: null,
@@ -344,23 +345,207 @@ import {
         }
       },
 
-
     created() {
-      this.loadCustomer();
-      console.log("created");
+      this.getCustomerAll();
     },
 
     computed: {
-      ...mapState('customer', ['customers', 'loading', 'error', 'successMessage']),
+      formTitle() {
+        return this.editedIndex === -1 ? 'mdi-new-box' : 'mdi-update'
+        },
+    },
 
-      formTitle() {return this.editedIndex === -1 ? 'mdi-new-box' : 'mdi-update'},
+    watch: {
+      dialog(val) {
+        val || this.close()
+      },
+      dialogDelete(val) {
+        val || this.closeDelete()
+      },
     },
 
     methods: 
     {
-        ...mapActions('customer', {
-      loadCustomer : LOAD_CUSTOMER_DATA
-    }),
-  },
+
+      editItem(item) {
+        this.editedIndex = this.customers.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialog = true
+      },
+
+      updateStatusCustomer(item) {
+        this.editedIndex = this.customers.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialogDelete = true
+      },
+
+      close() {
+        this.dialog = false
+        this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+        })
+      },
+
+      closeDelete() {
+        this.dialogDelete = false
+        this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+        })
+      },
+
+      async getCustomerAll() {
+
+        try {
+          AxiosInstance.get(`http://127.0.0.1:8000/api/customers/all`,
+          {
+              headers: {
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json',
+                'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+              }
+            })
+              .then((response) => {
+
+                if(response.status == 200){
+                  for(let i=0; i<response.data.data.length; i++) {
+                    if(response.data.data[i].active_flag =='N') {
+                      response.data.data[i].active_flag = null;
+                    }
+                    this.customers = response.data.data[i];
+                }
+                this.customers = response.data.data;
+                this.loadingData = false
+              }
+          });
+        }catch(error) {
+          this.error = Validations.getErrorMessageFromCodeCustomer(error.response.data.errors[0],);
+          this.alert = true
+        }
+      },
+
+      async updateStatusCustomerConfirm() {
+        try{ 
+          await AxiosInstance
+          .patch('http://127.0.0.1:8000/api/customers/inactive/'+this.editedItem.id, [],
+            {
+              headers: {
+              'Content-Type': 'application/json', 
+              'Accept': 'application/json',
+              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+              },
+          })
+          .then((response) => {
+
+            if(response.status == 200){
+              this.getCustomerAll();
+            }
+          })
+
+          this.customers.splice(this.editedIndex, 1)
+        } catch (error) {
+        this.error = Validations.getErrorMessageFromCodeCustomer(error.response.data.errors[0],);
+        this.alert = true
+        }
+        
+        this.closeDelete()
+      },
+
+      async save() {
+        if (this.editedIndex > -1) {
+          let postData = {
+            customer_name: this.editedItem.customer_name,
+            type: this.editedItem.type,
+            nik: this.editedItem.nik,
+            email: this.editedItem.email,
+            address: this.editedItem.address,
+            phone: this.editedItem.phone,
+          }
+          try{ 
+          let response = '';
+          response = await AxiosInstance.put('http://127.0.0.1:8000/api/customers/'+this.editedItem.id, postData,
+            {
+            headers: {
+            'Content-Type': 'application/json', 
+            'Accept': 'application/json',
+            'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+            },
+          });
+          
+          if(response.status == 200){
+            Object.assign(this.customers[this.editedIndex], this.editedItem);
+            this.close();
+            this.hasSaved = true;
+            this.getCustomerAll();
+            }
+            
+          } catch (error) {
+            this.error = Validations.getErrorMessageFromCodeCustomer(error.response.data.errors[0],);
+            this.alert = true
+            }
+          } else {
+            let postData = {
+              customer_name: this.editedItem.customer_name,
+              type: this.editedItem.type,
+              nik: this.editedItem.nik,
+              email: this.editedItem.email,
+              address: this.editedItem.address,
+              phone: this.editedItem.phone,
+            }
+            try{ 
+              let response = '';
+              response = await AxiosInstance.post('http://127.0.0.1:8000/api/customers', postData,
+                {
+                headers: {
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json',
+                'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+                },
+            })
+
+              if (response.status == 201) {
+                this.getCustomerAll();
+                this.hasSaved = true
+                this.close()
+              }
+              } catch (error) {
+              this.error = Validations.getErrorMessageFromCodeCustomer(error.response.data.errors);
+              this.alert = true
+              }
+        }
+      },
+
+      async uploadFile() {
+        if (!this.csvFile) return;
+
+          this.uploading = true;
+          this.uploadError = null;
+          this.uploadSuccess = null;
+
+          const formData = new FormData();
+          formData.append('csvFile', this.csvFile);
+
+        try {
+
+          const response = await AxiosInstance.post('http://127.0.0.1:8000/api/customers/import-csv', formData, {
+                headers: {
+                'Content-Type': 'multipart/form-data',
+                'Accept': 'application/json',
+                'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+                },
+            })
+            if (response.status == 200) {
+                this.getCustomerAll();
+              }
+
+            this.uploadSuccess = response.data.message;
+        } catch (error) {
+          this.uploadError = error.response?.data?.message || 'An error occurred.';
+        } finally {
+          this.uploading = false;
+        }
+      },
+    },
 }
 </script>
