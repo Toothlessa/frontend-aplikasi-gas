@@ -10,25 +10,16 @@
         style="color: white;"
         rounded="xl" 
         icon
-        @click="openCreateDialog = true, editedItem = {}, error = '', editedIndex = -1;"
+        @click="openCreateDialog = true, resetEditedItem(), error = '', editedIndex = -1;"
       >
           <v-icon>mdi-new-box</v-icon>
-      </v-btn>
-
-      <v-btn
-        style="color: white;" 
-        rounded="xl" 
-        icon
-        @click="dialogUploadCustomer = true, this.error = ''"
-      >
-        <v-icon>mdi-cloud-upload</v-icon>
       </v-btn>
 
       <v-spacer />
 
       <v-text-field
         v-model="search"
-        label="Search by customer name"
+        label="Search by item name"
         variant="solo-filled"
         class="mr-4"
         style="max-width: 500px;"
@@ -69,7 +60,7 @@
       Data saved successfully!
     </v-snackbar>
 
-    <!-- Customers Data Table -->
+    <!-- Master Item Table -->
     <v-data-table-virtual
       :headers="localHeaders"
       :items="mItems"
@@ -90,42 +81,54 @@
 
       <template v-slot:[`item.actions`]="{ item }">
         <v-icon size="small" class="mr-2" @click="editItem(item)">mdi-pencil-outline</v-icon>
-        <v-icon size="small" @click="updateStatusCustomer(item)">mdi-radioactive</v-icon>
+        <v-icon size="small" @click="updateStatusItem(item)">mdi-radioactive</v-icon>
       </template>
     </v-data-table-virtual>
 
-    <!-- Create/Edit Customer Dialog -->
+    <!-- Create/Edit Master Item Dialog -->
     <v-dialog v-model="openCreateDialog" max-width="600px">
       <v-card>
-        <v-card-title class="text-h5 font-weight-regular bg-cyan">
+        <v-card-title class="text-white text-h5 font-weight-regular bg-cyan">
           <v-icon size="40">{{ formIcon }}</v-icon> {{ formTitle }}
         </v-card-title>
 
         <v-card-text>
-          <v-row>
-            <v-col v-for="field in fields" :key="field.model" cols="12" sm="6">
-              <v-text-field
-                v-model="editedItem[field.model]"
-                :label="field.label"
-                variant="outlined"
-              />
-            </v-col>
-          </v-row>
+                <v-text-field v-model="editedItem.item_name" label="Item Name" variant="outlined" />
+                <v-row>
+                  <v-col v-for="field in allFields" :key="field.model" cols="12" sm="6">
+                    <v-autocomplete
+                      v-if="field.items"
+                      v-model="editedItem[field.model]"
+                      :label="field.label"
+                      :items="field.items"
+                      :item-title="field.itemTitle"
+                      :item-value="field.itemValue"
+                      variant="outlined"
+                    />
+                    <v-text-field
+                      v-else
+                      v-model="editedItem[field.model]"
+                      :label="field.label"
+                      variant="outlined"
+                      v-on:keyup.enter="field.onEnterSubmit && onCreateItem()"
+                    />
+                  </v-col>
+                </v-row>
         </v-card-text>
 
         <v-card-actions>
           <v-spacer />
-          <v-btn color="cyan" variant="elevated" @click="openCreateDialog = false">Cancel</v-btn>
-          <v-btn color="cyan" variant="elevated" @click="onCreateCustomer">Save</v-btn>
+          <v-btn class="text-white" color="cyan" variant="elevated" @click="close">Cancel</v-btn>
+          <v-btn class="text-white" color="cyan" variant="elevated" @click="onCreateItem">Save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <!-- Delete/Deactivate Customer Dialog -->
+    <!-- Delete/Deactivate Master Item Dialog -->
     <v-dialog v-model="dialogDeactivate" max-width="500px">
       <v-card class="elevation-12" variant="elevated">
-        <v-card-title class="bg-cyan text-h5 text-center">
-          Change Customer Status?
+        <v-card-title class="bg-cyan text-white text-h5 text-center">
+          Change Item Status?
         </v-card-title>
 
         <v-card-actions class="justify-center">
@@ -133,7 +136,7 @@
             <v-icon size="30">mdi-cancel</v-icon>
           </v-btn>
 
-          <v-btn icon color="cyan" variant="text" @click="onDeactivateCustomer">
+          <v-btn icon color="cyan" variant="text" @click="onDeactivated">
             <v-icon size="30">mdi-pokeball</v-icon>
           </v-btn>
         </v-card-actions>
@@ -145,9 +148,9 @@
 
 <script setup lang="ts">
 
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, onDeactivated } from 'vue';
 import { useStore } from 'vuex';
-import { LOAD_MASTER_ITEM } from '@/store/storeconstant';
+import { LOAD_CATEGORY_DATA, LOAD_MASTER_ITEM, CREATE_ITEM, } from '@/store/storeconstant';
 
 import type { MasterItem } from '@/types/masteritem'; // ✅ type-only
 import { headers } from '@/types/masteritem';         // ✅ runtime value
@@ -155,40 +158,105 @@ import { headers } from '@/types/masteritem';         // ✅ runtime value
 const store = useStore();
 
 const search = ref<string>('');
+const openCreateDialog = ref<boolean>(false);
+const dialogDeactivate = ref<boolean>(false);
+
 const error = ref<string | string[]>('');
 const showError = ref<boolean>(false);
-const openCreateDialog = ref<boolean>(false);
-const dialogUploadCustomer = ref<boolean>(false);
-const dialogDeactivate = ref<boolean>(false);
 
 const localHeaders = headers; // Use the imported headers directly
 const editedIndex = ref(-1);
 
-const editedItem = reactive<Partial<MasterItem>>({
+const mItems = computed<MasterItem[]>(() => store.state.masteritem.mItems);
+const categories = computed<MasterItem[]>(() => store.state.masteritem.categories);
+const itemType = [ { name: "Asset" }, { name: "Item" },];
+const hasSaved = computed<boolean>(() => store.state.masteritem.hasSaved);
+const loading = computed<boolean>(() => store.state.masteritem.loading);
+
+const formIcon = computed<string>(() => editedIndex.value === -1 ? 'mdi-new-box' : 'mdi-update');
+const formTitle = computed<string>(() => editedIndex.value === -1 ? 'Create Customer' : 'Edit Customer');
+
+const editedItem = reactive<Partial<MasterItem>>({});
+const defaultItem: Partial<MasterItem> = {
+  id: '',
   item_name: '',
+  item_code: '',
   item_type: '',
+  category_id: '',
   category: '',
   cost_of_goods_sold: '',
   selling_price: '',
-});
+  in_stock: false,
+  active_flag: false,
+};
 
-const fields = reactive([
-  { model: 'item_name', label: 'Customer Name' },
-  { model: 'item_type', label: 'Type' },
-  { model: 'category', label: 'NIK' },
-  { model: 'cost_of_goods', label: 'E-mail' },
-  { model: 'selling_price', label: 'Address' },
+type MasterItemKey = keyof MasterItem;
+
+interface Field {
+  model: MasterItemKey;
+  label: string;
+  items?: any[];          // Optional
+  itemTitle?: string;     // Optional
+  itemValue?: string;     // Optional
+  onEnterSubmit?: boolean;
+}
+
+const allFields = computed<Field[]>(() => [
+  { model: 'item_type', label: 'Item Type', items: itemType, itemTitle: 'name' },
+  { model: 'category_id', label: 'Category', items: categories.value, itemTitle: 'name', itemValue: 'id' },
+  { model: 'cost_of_goods_sold', label: 'Cost of Goods' },
+  { model: 'selling_price', label: 'Selling Price',  onEnterSubmit: true },
 ]);
-
-const hasSaved = computed<boolean>(() => store.state.masteritem.hasSaved);
-const mItems = computed<MasterItem[]>(() => store.state.masteritem.mItems);
-const loading = computed<boolean>(() => store.state.masteritem.loading);
 
 onMounted(() => {
   loadMasterItem();
+  loadCategories();
 });
 
-const loadMasterItem = () =>
-  store.dispatch(`masteritem/${LOAD_MASTER_ITEM}`);
+const loadMasterItem = () => store.dispatch(`masteritem/${LOAD_MASTER_ITEM}`);
+const loadCategories = () => store.dispatch(`masteritem/${LOAD_CATEGORY_DATA}`);
+
+function editItem(item:any) {
+  editedIndex.value = mItems.value.indexOf(item);
+  Object.assign(editedItem, item);
+  openCreateDialog.value = true;
+}
+
+function updateStatusItem(item:any) {
+  editedIndex.value = mItems.value.indexOf(item);
+  Object.assign(editedItem, item);
+  dialogDeactivate.value = true;
+}
+
+function close() {
+  openCreateDialog.value = false;
+  dialogDeactivate.value = false;
+  Object.assign(editedItem, {});
+  editedIndex.value = -1;
+}
+
+function resetEditedItem() {
+// Reset like this
+Object.assign(editedItem, defaultItem);
+}
+
+async function onCreateItem() {
+  try {
+    error.value = '';
+    await store.dispatch(`masteritem/${CREATE_ITEM}`, editedItem);
+    openCreateDialog.value = false;
+  } catch (e) {
+    showError.value = true;
+    
+    if (Array.isArray(e)) {
+      error.value = e; // e is string[]
+    } else if (e instanceof Error) {
+      error.value = e.message; // e is an Error
+    } else {
+      error.value = String(e); // fallback
+    }
+  }
+}
+
 
 </script>

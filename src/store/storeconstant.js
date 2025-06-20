@@ -21,14 +21,16 @@ export const SET_HASSAVED = '[mutations] set has saved data'
 
 /* MASTER ITEM */
 /* actions */
-export const CREATE_MASTER_ITEM = '[actions] create master item'
+export const CREATE_ITEM = '[actions] create master item'
 export const LOAD_MASTER_ITEM = '[actions] load master item data'
-export const DEACTIVATE_MASTER_ITEM = '[actions] deactivate customer'
+export const LOAD_CATEGORY_DATA = '[actions] load category item data'
+export const DEACTIVATE_ITEM = '[actions] deactivate customer'
 
 /* getters */
 
 /* mutations */
 export const SET_DATA_MITEM = '[mutations] set master item data'
+export const SET_DATA_CATEGORY = '[mutations] set category item data'
 
 /* CUSTOMER */
 /* actions */

@@ -1,19 +1,28 @@
 export interface MasterItemState {
   mItems: MasterItem[];
+  categories : CategoryItem[];
   loading: boolean;
-   headers: Header[];
+  headers: Header[];
 }
 
 export interface MasterItem {
-
+  id: number | string;
   item_name: string;
   item_code: string;
   item_type: string;
+  category_id: string;
   category: string;
   cost_of_goods_sold: number | string;
   selling_price: number | string;
   in_stock: boolean;
   active_flag: boolean;
+}
+
+export interface CategoryItem {
+  id: number | string;
+  name: string;
+  active_flag: string;
+  inactive_date: string;
 }
 
 export interface Header {
