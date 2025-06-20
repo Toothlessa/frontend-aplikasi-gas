@@ -5,7 +5,10 @@ import mutations from "./mutations";
 export default {
     namespaced: true,
     state() {
-        return {};
+        return {
+            mItems: [],
+            loading: false,
+        };
     },
     mutations,
     getters,

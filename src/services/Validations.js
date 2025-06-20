@@ -30,6 +30,14 @@ export default class Validations {
                 return 'Customer name already used';
             case "EMAIL_EXISTS":
                 return 'Email already exists';
+            case "The customer name field is required.":
+              return "Please fill in the customer name";
+            case "The type field is required.":
+                return 'Please select a customer type';
+            case "The csv file failed to upload.":
+                return 'Failed to upload CSV file, please try again.';
+            case "The csv file field must be a file of type: csv, txt.":
+                return 'Csv file error, please check the file format and try again.';
             default:
                 return 'Unexpected error occured. Please try again.';
         }

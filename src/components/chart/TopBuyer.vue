@@ -50,11 +50,11 @@ export default {
       },
       styles: {
         type: Object,
-        default: () => {},
+        // default: () => {},
       },
       plugins: {
         type: Array,
-        default: () => {},
+        // default: () => {},
       },
     },
   data() {

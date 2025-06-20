@@ -13,28 +13,35 @@ export const IS_USER_AUTHENTICATE_GETTER = '[getters] check user have token'
 export const SET_USER_TOKEN_DATA_MUTATION = '[mutations] set user data token'
 export const SET_AUTO_LOGOUT_MUTATION = '[mutations] set autlogout true'
 
-
-/* MASTER ITEM */
-/* actions */
-export const CREATE_MASTERITEM_ACTION = '[actions] create master item action'
-export const GET_MASTERITEM_ACTION = '[actions] create master item action'
-
-/* getters */
-
-/* mutations */
-
-/* CUSTOMER */
-/* actions */
-export const LOAD_CUSTOMER_DATA = '[actions] load data customers'
-
-/* getters */
-export const GET_DATA_CUSTOMER = '[actions] get all data customers'
-export const GET_LOADING = '[actions] get all data customers'
-export const GET_ERROR = '[actions] get all data customers'
-export const GET_SUCCESS_MESSAGE = '[actions] get all data customers'
-
-/* mutations */
-export const SET_DATA_CUSTOMER = '[mutations] set all data customers'
+/* GLOBAL VARIABEL */
 export const SET_LOADING = '[mutations] set data succesfully load'
 export const SET_ERROR = '[mutations] set error'
 export const SET_SUCCESS_MESSAGE = '[mutations] set success message'
+export const SET_HASSAVED = '[mutations] set has saved data'
+
+/* MASTER ITEM */
+/* actions */
+export const CREATE_MASTER_ITEM = '[actions] create master item'
+export const LOAD_MASTER_ITEM = '[actions] load master item data'
+export const DEACTIVATE_MASTER_ITEM = '[actions] deactivate customer'
+
+/* getters */
+
+/* mutations */
+export const SET_DATA_MITEM = '[mutations] set master item data'
+
+/* CUSTOMER */
+/* actions */
+export const CREATE_CUSTOMER = '[actions] create customer'
+export const LOAD_CUSTOMER_DATA = '[actions] load data customers'
+export const DEACTIVATE_CUSTOMER = '[actions] deactivate customer'
+export const UPLOAD_CUSTOMER = '[actions] upload customer data'
+
+/* getters */
+// export const GET_DATA_CUSTOMER = '[actions] get all data customers'
+// export const GET_LOADING = '[actions] get all data customers'
+// export const GET_ERROR = '[actions] get all data customers'
+// export const GET_SUCCESS_MESSAGE = '[actions] get all data customers'
+
+/* mutations */
+export const SET_DATA_CUSTOMER = '[mutations] set all data customers'

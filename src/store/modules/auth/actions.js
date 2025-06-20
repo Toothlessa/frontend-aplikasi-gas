@@ -7,8 +7,8 @@ import {
     AUTH_ACTION,
     SET_USER_TOKEN_DATA_MUTATION,
     LOGOUT_ACTION,
-    // AUTO_LOGOUT_ACTION,
-    // SET_AUTO_LOGOUT_MUTATION,
+    AUTO_LOGOUT_ACTION,
+    SET_AUTO_LOGOUT_MUTATION,
     GET_USER_TOKEN_GETTER,
 } from "@/store/storeconstant";
 import store from "@/store/store";
@@ -83,10 +83,10 @@ export default {
         }
     },
 
-    // [AUTO_LOGOUT_ACTION](context) {
-    //     context.dispatch(LOGOUT_ACTION);
-    //     context.commit(SET_AUTO_LOGOUT_MUTATION);
-    // },
+    [AUTO_LOGOUT_ACTION](context) {
+        context.dispatch(LOGOUT_ACTION);
+        context.commit(SET_AUTO_LOGOUT_MUTATION);
+    },
 
     async [AUTH_ACTION](context, payload) {
         let postData = {
