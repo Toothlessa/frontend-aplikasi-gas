@@ -133,7 +133,7 @@
         </v-card-title>
 
         <v-card-text>
-                <v-text-field v-model="categoryField" label="Category Name" variant="outlined" />
+                <v-text-field v-model="newCategory.name" label="Category Name" variant="outlined" />
         </v-card-text>
 
         <v-card-actions>
@@ -199,7 +199,6 @@ const formIcon = computed<string>(() => editedIndex.value === -1 ? 'mdi-new-box'
 const formTitle = computed<string>(() => editedIndex.value === -1 ? 'Create Customer' : 'Edit Customer');
 
 // Fields
-const categoryField = { name : ''};
 const editedItem = reactive<Partial<MasterItem>>({});
 const defaultItem: Partial<MasterItem> = {
   id: '',
@@ -213,6 +212,12 @@ const defaultItem: Partial<MasterItem> = {
   in_stock: false,
   active_flag: false,
 };
+
+const newCategory = reactive<Partial<CategoryItem>>({
+  name: '',
+  active_flag: 'Y',
+  inactive_date: '',
+});
 
 type MasterItemKey = keyof MasterItem;
 
@@ -300,11 +305,12 @@ async function onDeactivated() {
 }
 
 async function onCreateCategory() {
-
+  console.log("catogory: ", newCategory.name);
   try {
     error.value = '';
-    await store.dispatch(`masteritem/${CREATE_CATEGORY_ITEM}`, categoryField);
+    await store.dispatch(`masteritem/${CREATE_CATEGORY_ITEM}`, newCategory);
     openCategoryDialog.value = false;
+    newCategory.name = '';
   } catch (e) {
     showError.value = true;
 
