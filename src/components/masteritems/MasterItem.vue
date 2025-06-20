@@ -81,7 +81,7 @@
 
       <template v-slot:[`item.actions`]="{ item }">
         <v-icon size="small" class="mr-2" @click="editItem(item)">mdi-pencil-outline</v-icon>
-        <v-icon size="small" @click="updateStatusItem(item)">mdi-radioactive</v-icon>
+        <v-icon size="small" @click="deactivateItem(item)">mdi-radioactive</v-icon>
       </template>
     </v-data-table-virtual>
 
@@ -118,8 +118,28 @@
 
         <v-card-actions>
           <v-spacer />
+          <v-btn class="text-white" prepend-icon="mdi-shape-plus" color="cyan" variant="elevated" @click="openCategoryDialog = true">Add Category</v-btn>
           <v-btn class="text-white" color="cyan" variant="elevated" @click="close">Cancel</v-btn>
           <v-btn class="text-white" color="cyan" variant="elevated" @click="onCreateItem">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Add new category -->
+    <v-dialog v-model="openCategoryDialog" max-width="400px">
+      <v-card>
+        <v-card-title class="text-white text-h5 font-weight-regular bg-cyan">
+          <v-icon size="40"> mdi-new-box </v-icon> Add Category
+        </v-card-title>
+
+        <v-card-text>
+                <v-text-field v-model="categoryField" label="Category Name" variant="outlined" />
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn class="text-white" color="cyan" variant="elevated" @click="openCategoryDialog = false">Close</v-btn>
+          <v-btn class="text-white" color="cyan" variant="elevated" @click="onCreateCategory">Save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -148,18 +168,20 @@
 
 <script setup lang="ts">
 
-import { ref, reactive, computed, onMounted, onDeactivated } from 'vue';
+import { ref, reactive, computed, onMounted, } from 'vue';
 import { useStore } from 'vuex';
-import { LOAD_CATEGORY_DATA, LOAD_MASTER_ITEM, CREATE_ITEM, } from '@/store/storeconstant';
+import { LOAD_CATEGORY_DATA, LOAD_MASTER_ITEM, CREATE_ITEM, DEACTIVATE_ITEM, CREATE_CATEGORY_ITEM, } from '@/store/storeconstant';
 
-import type { MasterItem } from '@/types/masteritem'; // ✅ type-only
+import type { CategoryItem, MasterItem } from '@/types/masteritem'; // ✅ type-only
 import { headers } from '@/types/masteritem';         // ✅ runtime value
 
 const store = useStore();
 
 const search = ref<string>('');
 const openCreateDialog = ref<boolean>(false);
+const openCategoryDialog = ref<boolean>(false);
 const dialogDeactivate = ref<boolean>(false);
+
 
 const error = ref<string | string[]>('');
 const showError = ref<boolean>(false);
@@ -176,6 +198,8 @@ const loading = computed<boolean>(() => store.state.masteritem.loading);
 const formIcon = computed<string>(() => editedIndex.value === -1 ? 'mdi-new-box' : 'mdi-update');
 const formTitle = computed<string>(() => editedIndex.value === -1 ? 'Create Customer' : 'Edit Customer');
 
+// Fields
+const categoryField = { name : ''};
 const editedItem = reactive<Partial<MasterItem>>({});
 const defaultItem: Partial<MasterItem> = {
   id: '',
@@ -222,16 +246,9 @@ function editItem(item:any) {
   openCreateDialog.value = true;
 }
 
-function updateStatusItem(item:any) {
-  editedIndex.value = mItems.value.indexOf(item);
-  Object.assign(editedItem, item);
-  dialogDeactivate.value = true;
-}
-
 function close() {
   openCreateDialog.value = false;
   dialogDeactivate.value = false;
-  Object.assign(editedItem, {});
   editedIndex.value = -1;
 }
 
@@ -248,6 +265,49 @@ async function onCreateItem() {
   } catch (e) {
     showError.value = true;
     
+    if (Array.isArray(e)) {
+      error.value = e; // e is string[]
+    } else if (e instanceof Error) {
+      error.value = e.message; // e is an Error
+    } else {
+      error.value = String(e); // fallback
+    }
+  }
+}
+
+function deactivateItem(item:any) {
+  editedIndex.value = mItems.value.indexOf(item);
+  Object.assign(editedItem, item);
+  dialogDeactivate.value = true;
+}
+
+async function onDeactivated() {
+  try {
+    error.value = '';
+    await store.dispatch(`masteritem/${DEACTIVATE_ITEM}`, editedItem.id);
+    dialogDeactivate.value = false;
+  } catch (e) {
+    showError.value = true;
+
+    if (Array.isArray(e)) {
+      error.value = e; // e is string[]
+    } else if (e instanceof Error) {
+      error.value = e.message; // e is an Error
+    } else {
+      error.value = String(e); // fallback
+    }
+  }
+}
+
+async function onCreateCategory() {
+
+  try {
+    error.value = '';
+    await store.dispatch(`masteritem/${CREATE_CATEGORY_ITEM}`, categoryField);
+    openCategoryDialog.value = false;
+  } catch (e) {
+    showError.value = true;
+
     if (Array.isArray(e)) {
       error.value = e; // e is string[]
     } else if (e instanceof Error) {

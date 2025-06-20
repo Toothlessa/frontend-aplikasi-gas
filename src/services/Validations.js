@@ -16,8 +16,14 @@ export default class Validations {
     /* master items get error message from backend */
     static getErrorMessageFromCodeMasterItem(errorCode) {
         switch (errorCode) {
-            case "EMAIL_EXISTS":
-                return 'Email already exists';
+            case "The item name field is required.":
+                return 'Please fill in the ite name';
+            case "The category id field is required.":
+                return 'Please fill in the category';
+            case "The cost of goods sold field is required.":
+                return 'Please fill in the cost of goods';
+            case "The selling price field is required.":
+                return 'Please fill in the selling price';
             default:
                 return 'Unexpected error occured. Please try again.';
         }
