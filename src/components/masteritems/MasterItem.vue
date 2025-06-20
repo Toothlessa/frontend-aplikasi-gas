@@ -170,7 +170,7 @@
 
 import { ref, reactive, computed, onMounted, } from 'vue';
 import { useStore } from 'vuex';
-import { LOAD_CATEGORY_DATA, LOAD_MASTER_ITEM, CREATE_ITEM, DEACTIVATE_ITEM, CREATE_CATEGORY_ITEM, } from '@/store/storeconstant';
+import { LOAD_CATEGORY_ITEM, LOAD_MASTER_ITEM, CREATE_ITEM, DEACTIVATE_ITEM, CREATE_CATEGORY_ITEM, } from '@/store/storeconstant';
 
 import type { CategoryItem, MasterItem } from '@/types/masteritem'; // ✅ type-only
 import { headers } from '@/types/masteritem';         // ✅ runtime value
@@ -243,7 +243,7 @@ onMounted(() => {
 });
 
 const loadMasterItem = () => store.dispatch(`masteritem/${LOAD_MASTER_ITEM}`);
-const loadCategories = () => store.dispatch(`masteritem/${LOAD_CATEGORY_DATA}`);
+const loadCategories = () => store.dispatch(`masteritem/${LOAD_CATEGORY_ITEM}`);
 
 function editItem(item:any) {
   editedIndex.value = mItems.value.indexOf(item);

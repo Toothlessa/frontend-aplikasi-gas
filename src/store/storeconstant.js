@@ -24,7 +24,7 @@ export const SET_HASSAVED = '[mutations] set has saved data'
 export const CREATE_ITEM = '[actions] create master item'
 export const CREATE_CATEGORY_ITEM = '[actions] create category item'
 export const LOAD_MASTER_ITEM = '[actions] load master item data'
-export const LOAD_CATEGORY_DATA = '[actions] load category item data'
+export const LOAD_CATEGORY_ITEM = '[actions] load category item data'
 export const DEACTIVATE_ITEM = '[actions] deactivate customer'
 
 /* getters */
@@ -41,10 +41,6 @@ export const DEACTIVATE_CUSTOMER = '[actions] deactivate customer'
 export const UPLOAD_CUSTOMER = '[actions] upload customer data'
 
 /* getters */
-// export const GET_DATA_CUSTOMER = '[actions] get all data customers'
-// export const GET_LOADING = '[actions] get all data customers'
-// export const GET_ERROR = '[actions] get all data customers'
-// export const GET_SUCCESS_MESSAGE = '[actions] get all data customers'
 
 /* mutations */
 export const SET_DATA_CUSTOMER = '[mutations] set all data customers'

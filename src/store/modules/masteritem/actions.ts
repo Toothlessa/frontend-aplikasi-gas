@@ -2,7 +2,7 @@ import axios from 'axios';
 import {
   GET_USER_TOKEN_GETTER,
   LOAD_MASTER_ITEM,
-  LOAD_CATEGORY_DATA,
+  LOAD_CATEGORY_ITEM,
   CREATE_ITEM,
   CREATE_CATEGORY_ITEM,
   SET_DATA_MITEM,
@@ -45,7 +45,7 @@ const actions: ActionTree<MasterItemState, RootState> = {
     }
   },
 
-  async [LOAD_CATEGORY_DATA]({ commit }: Context): Promise<void> {
+  async [LOAD_CATEGORY_ITEM]({ commit }: Context): Promise<void> {
     commit(SET_LOADING, true);
     try {
 
@@ -164,7 +164,7 @@ const actions: ActionTree<MasterItemState, RootState> = {
       });
 
       if ([201].includes(response.status)) {
-        dispatch(LOAD_CATEGORY_DATA);
+        dispatch(LOAD_CATEGORY_ITEM);
         commit(SET_HASSAVED, true);
         setTimeout(() => {
           commit(SET_HASSAVED, false);
