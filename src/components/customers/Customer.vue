@@ -145,12 +145,14 @@
         </v-card-title>
         <v-card-text>
           <v-file-upload 
+            v-model="csvFile"
             title="Drag and Drop Here"
             browse-text="Local Filesystem"
             divider-text="Csv File Only"
             color="pink-lighten-5"
             icon="mdi-upload"
             accept=".csv"
+            scrim="primary"
           >
           </v-file-upload>
           <v-progress-linear

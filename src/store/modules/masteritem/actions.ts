@@ -20,6 +20,7 @@ import { RootState } from '@/store/types'; // ← create this file too
 type Context = ActionContext<MasterItemState,  RootState>;
 
 const actions: ActionTree<MasterItemState, RootState> = {
+  
   async [LOAD_MASTER_ITEM]({ commit }: Context): Promise<void> {
     commit(SET_LOADING, true);
     try {
