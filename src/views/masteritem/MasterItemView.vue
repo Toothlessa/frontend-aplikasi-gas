@@ -6,7 +6,7 @@
   import { defineComponent } from 'vue';
   
   // Components
-  import MasterItem from '@/components/masteritems/MasterItem.vue';
+  import MasterItem from '@/components/masteritem/MasterItem.vue';
   
   export default defineComponent({
     name: 'MasterItemView',

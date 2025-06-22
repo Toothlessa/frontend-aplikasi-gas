@@ -17,7 +17,7 @@ export default class Validations {
     static getErrorMessageFromCodeMasterItem(errorCode) {
         switch (errorCode) {
             case "The item name field is required.":
-                return 'Please fill in the ite name';
+                return 'Please fill in the item name';
             case "The category id field is required.":
                 return 'Please fill in the category';
             case "The cost of goods sold field is required.":

@@ -5,7 +5,7 @@ import {
 const Login = () => import( /* webpackChunkName: "Login" */ '@/views/auth/LoginView.vue');
 const Dashboard = () => import('@/views/dashboard');
 const User = () => import('@/views/users/UserView.vue');
-const MasterItem = () => import('@/views/masteritems/MasterItemView.vue')
+const MasterItem = () => import('@/views/masteritem/MasterItemView.vue')
 const Customer = () => import('@/views/customers/CustomerView.vue')
 const Transaction = () => import('@/views/transaction/TransactionView.vue')
 const Stock = () => import('@/views/stocks/StockView.vue')

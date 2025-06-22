@@ -2,6 +2,7 @@ export interface MasterItemState {
   mItems: MasterItem[];
   categories : CategoryItem[];
   loading: boolean;
+  hasSaved: boolean;
   headers: Header[];
   headerscategory: HeaderCategory[];
 }
