@@ -25,7 +25,8 @@ export const CREATE_ITEM = '[actions] create master item'
 export const CREATE_CATEGORY_ITEM = '[actions] create category item'
 export const LOAD_MASTER_ITEM = '[actions] load master item data'
 export const LOAD_CATEGORY_ITEM = '[actions] load category item data'
-export const DEACTIVATE_ITEM = '[actions] deactivate customer'
+export const DEACTIVATE_ITEM = '[actions] deactivate item data'
+export const DEACTIVATE_ITEM_CATEGORY = '[actions] deactivate item category data'
 
 /* getters */
 

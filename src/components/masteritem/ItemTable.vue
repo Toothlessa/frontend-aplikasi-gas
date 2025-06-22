@@ -1,16 +1,15 @@
 <template>
   <v-data-table-virtual
     :headers="headers"
-    :items="items"
+    :items="filteredItems"
     :loading="loading"
-    :v-model:search="search"
-    :filter-keys="['item_name']"
     loading-text="Loading... Please wait"
     class="elevation-10 bg-cyan-lighten-5 text-black rounded-xl"
     density="comfortable"
     hover
     item-value="id"
   >
+
     <!-- In Stock -->
     <template v-slot:[`item.in_stock`]="{ item }">
       <v-chip
@@ -61,10 +60,10 @@
 </template>
 
 <script setup lang="ts">
-import type { MasterItem } from '@/types/masteritem';
-import type { Header } from '@/types/masteritem';
+import { computed } from 'vue';
+import type { MasterItem, Header } from '@/types/masteritem';
 
-defineProps<{
+const props = defineProps<{
   headers: Header[];
   items: MasterItem[];
   search: string;
@@ -72,4 +71,15 @@ defineProps<{
 }>();
 
 defineEmits(['edit', 'deactivate']);
+
+// Manual filtering logic
+const filteredItems = computed(() => {
+  if (!props.search) return props.items;
+
+  const keyword = props.search.toLowerCase();
+  return props.items.filter(item =>
+    item.item_name?.toLowerCase().includes(keyword)
+  );
+});
 </script>
+

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog :v-model="dialog" max-width="700px" persistent>
+  <v-dialog v-model="localDialog" max-width="700px" persistent>
     <v-card class="rounded-xl elevation-12">
       <v-card-title class="bg-cyan-darken-2 text-white d-flex align-center">
         <v-icon size="28" class="mr-2">{{ isEdit ? 'mdi-update' : 'mdi-new-box' }}</v-icon>
@@ -10,7 +10,7 @@
 
       <v-card-text class="py-6 px-4">
         <v-text-field
-          :v-model="editedItem.item_name"
+          v-model="localItem.item_name"
           label="Item Name"
           variant="outlined"
           density="comfortable"
@@ -29,7 +29,7 @@
           >
             <v-autocomplete
               v-if="field.items"
-              :v-model="editedItem[field.model]"
+              v-model="localItem[field.model]"
               :label="field.label"
               :items="field.items"
               :item-title="field.itemTitle"
@@ -41,12 +41,11 @@
             />
             <v-text-field
               v-else
-              :v-model="editedItem[field.model]"
+              v-model="localItem[field.model]"
               :label="field.label"
               variant="outlined"
               density="comfortable"
               clearable
-              @keyup.enter="field.onEnterSubmit && $emit('submit')"
             />
           </v-col>
         </v-row>
@@ -75,7 +74,7 @@
           color="cyan-darken-2"
           variant="elevated"
           class="text-white"
-          @click="$emit('submit')"
+          @click="$emit('submit', localItem)"
         >
           Save
         </v-btn>
@@ -85,8 +84,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch, reactive } from 'vue';
 import type { MasterItem, Field } from '@/types/masteritem';
 
+// 1. Define props and emits
 const props = defineProps<{
   dialog: boolean;
   isEdit: boolean;
@@ -94,5 +95,34 @@ const props = defineProps<{
   allFields: Field[];
 }>();
 
-const emit = defineEmits(['close', 'submit', 'add-category']);
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'submit', item: Partial<MasterItem>): void;
+  (e: 'add-category'): void;
+  (e: 'update:dialog', val: boolean): void;
+}>();
+
+// 2. Create a local ref for dialog
+const localDialog = ref(props.dialog);
+const localItem = reactive<Partial<MasterItem>>({});
+
+watch(
+  () => [props.dialog, props.editedItem],
+  ([dialog, newVal]) => {
+    if (dialog && newVal) {
+      Object.assign(localItem, newVal);
+    }
+  },
+  { immediate: true }
+);
+
+// 3. Sync parent prop → local state
+watch(() => props.dialog, (val) => {
+  localDialog.value = val;
+});
+
+// 4. Sync local state → emit to parent
+watch(localDialog, (val) => {
+  emit('update:dialog', val);
+});
 </script>
