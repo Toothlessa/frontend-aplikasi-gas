@@ -44,7 +44,7 @@
       <!-- Search Bar -->
       <v-toolbar flat class="bg-cyan-lighten-5 px-4 pt-2" density="comfortable">
         <v-text-field
-          v-model="searchModel"
+          :model-value="search"
           @update:model-value="$emit('update:search', $event)"
           label="Search Categories"
           variant="solo-filled"
@@ -82,6 +82,17 @@
           <v-btn
             icon
             size="small"
+            color="primary"
+            variant="text"
+            class="mr-1"
+            @click="$emit('updateCategory', item)"
+          >
+            <v-icon size="18">mdi-pencil-outline</v-icon>
+          </v-btn>
+          
+          <v-btn
+            icon
+            size="small"
             variant="text"
             color="red-darken-2"
             @click="$emit('deactivate', item)"
@@ -110,6 +121,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'submit', item: Partial<CategoryItem>): void;
+  (e: 'updateCategory', item: CategoryItem): void;
   (e: 'deactivate', item: CategoryItem): void;
   (e: 'update:dialog', val: boolean): void;
   (e: 'update:search', search: string): void;
@@ -117,33 +129,20 @@ const emit = defineEmits<{
 
 const localDialog = ref(props.dialog);
 const localCategory = reactive<Partial<CategoryItem>>({});
-const searchModel = ref(props.search);
 
-// Watch for newCategory when dialog is opened
-watch(
-  () => [props.dialog, props.newCategory],
-  ([dialog, newVal]) => {
-    if (dialog && newVal) {
-      Object.assign(localCategory, newVal);
-    }
-  },
-  { immediate: true }
-);
-
-// Sync dialog prop ↔ localDialog
 watch(() => props.dialog, (val) => {
   localDialog.value = val;
-});
-watch(localDialog, (val) => {
   emit('update:dialog', val);
-});
-
-// Sync search prop ↔ local search
-watch(() => props.search, (val) => {
-  searchModel.value = val;
-});
-watch(searchModel, (val) => {
-  emit('update:search', val);
+  console.log('Dialog state changed:', val);
+  
+  if (val && props.newCategory) {
+    // Dialog opened — fill localCategory
+    Object.assign(localCategory, props.newCategory);
+  } else if (!val) {
+    // Dialog closed — clear localCategory
+    Object.assign(localCategory, {});
+    console.log('Dialog closed, clearing localCategory', localCategory);
+  }
 });
 
 // Filtered category list

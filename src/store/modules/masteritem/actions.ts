@@ -153,19 +153,23 @@ const actions: ActionTree<MasterItemState, RootState> = {
     }
   },
 
-   async [CREATE_CATEGORY_ITEM](
+  async [CREATE_CATEGORY_ITEM](
     { dispatch, commit }: Context, categoryitem: CategoryItem
   ): Promise<void> {
     try {
-      const url = `http://127.0.0.1:8000/api/categoryitems`;
+      const url = categoryitem.id
+        ? `http://127.0.0.1:8000/api/categoryitems/${categoryitem.id}`
+        : 'http://127.0.0.1:8000/api/categoryitems';
 
-      const response = await axios.post(url, categoryitem, {
+      const method: 'patch' | 'post' = categoryitem.id ? 'patch' : 'post';
+
+      const response = await axios[method](url, categoryitem, {
         headers: {
           Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
         },
       });
 
-      if ([201].includes(response.status)) {
+      if ([200, 201].includes(response.status)) {
         dispatch(LOAD_CATEGORY_ITEM);
         commit(SET_HASSAVED, true);
         setTimeout(() => {
@@ -190,6 +194,44 @@ const actions: ActionTree<MasterItemState, RootState> = {
       }
     }
   },
+
+  //  async [CREATE_CATEGORY_ITEM](
+  //   { dispatch, commit }: Context, categoryitem: CategoryItem
+  // ): Promise<void> {
+  //   try {
+  //     const url = `http://127.0.0.1:8000/api/categoryitems`;
+
+  //     const response = await axios.post(url, categoryitem, {
+  //       headers: {
+  //         Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+  //       },
+  //     });
+
+  //     if ([201].includes(response.status)) {
+  //       dispatch(LOAD_CATEGORY_ITEM);
+  //       commit(SET_HASSAVED, true);
+  //       setTimeout(() => {
+  //         commit(SET_HASSAVED, false);
+  //       }, 2000);
+  //     }
+  //   } catch (error: any) {
+  //     const errors = error.response?.data?.errors;
+  //     if (errors) {
+  //       const messages: string[] = [];
+
+  //       for (const field in errors) {
+  //         if (Array.isArray(errors[field])) {
+  //           const message = errors[field][0];
+  //           messages.push(
+  //             Validations.getErrorMessageFromCodeMasterItem(message)
+  //           );
+  //         }
+  //       }
+
+  //       throw messages;
+  //     }
+  //   }
+  // },
 
    async [DEACTIVATE_ITEM_CATEGORY](
     { dispatch, commit }: Context, id

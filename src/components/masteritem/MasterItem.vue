@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="pa-0">
 
-    <ItemToolbar
+    <ToolbarSimple
       title="Manage Items"
       icon="mdi-new-box"
       :search="search"
@@ -15,13 +15,13 @@
     />
 
     <!-- Error Snackbar -->
-     <ErrorSnackbar :messages="Array.isArray(error) ? error : [error]" v-model="showError" :timeout="4000" />
+     <SnackbarError :messages="Array.isArray(error) ? error : [error]" v-model="showError" :timeout="4000" />
      
     <!-- Success Snackbar -->
-     <SuccessSnackbar v-model="hasSaved" message="Item has been saved successfully!" />
+     <SnackbarSuccess v-model="hasSaved" message="Item has been saved successfully!" />
 
     <!-- Master Item Table -->
-     <ItemTable
+     <TableItem
       :headers="localHeaders"
       :items="mItems"
       :search="search"
@@ -32,32 +32,33 @@
     />
 
     <!-- Create/Edit Master Item Dialog -->
-    <ItemFormDialog
+    <DialogItemForm
       :dialog="openCreateDialog"
       :isEdit="editedIndex !== -1"
       :editedItem="editedItem"
       :allFields="allFields"
       @close="close"
       @submit="onSubmit"
-      @add-category="openCategoryDialog = true"
+      @add-category="openCategoryDialog = true, selectedCategory = {}"
     />
 
     <!-- Add New Category Dialog -->
-    <CategoryDialog
+    <DialogCategory
       :dialog="openCategoryDialog"
-      :new-category="newCategory"
+      :newCategory="selectedCategory"
       :search="searchCategory"
        @update:search="searchCategory = $event"
       :categories="categories"
       :headers="localHCategory"
       :loading="loading"
-      @close="openCategoryDialog = false"
+      @close="onClose"
       @submit="onCreateCategory"
       @deactivate="deactivateCategory"
+      @updateCategory="onEditCategory"
     />
 
   <!-- Deactivate Dialog -->
-   <DeactivateDialog
+   <DialogDeactivate
       :dialog="dialogDeactivate"
       title="Change Item Status?"
       message="Are you sure you want to deactivate this item?"
@@ -66,10 +67,10 @@
     />
 
     <!-- Deactivate Category Dialog -->
-    <DeactivateDialog
+    <DialogDeactivate
       :dialog="dialogDeactivateCategory"
-      title="Change Category Status?"
-      message="Are you sure you want to deactivate this category?"
+      title="Change Category Item Status?"
+      message="Are you sure you want to deactivate this category item?"
       @confirm="onDeactivatedCategory"
       @cancel="close"
     />
@@ -79,11 +80,11 @@
 
 <script setup lang="ts">
 // components
-import { ErrorSnackbar, SuccessSnackbar, ItemToolbar } from '@/components/globalcomponent';
-import ItemTable from './ItemTable.vue';
-import ItemFormDialog from './ItemFormDialog.vue';
-import CategoryDialog from './CategoryDialog.vue';
-import DeactivateDialog from './DeactivateDialog.vue'; 
+import { SnackbarError, SnackbarSuccess, ToolbarSimple } from '@/components/globalcomponent';
+import TableItem from './TableItem.vue';
+import DialogItemForm from './DialogItemForm.vue';
+import DialogCategory from './DialogCategory.vue';
+import DialogDeactivate from './DialogDeactivate.vue'; 
 
 // import SuccessSnackbar from '@/components/globalcomponent/SuccessSnackbar.vue';
 import { ref, reactive, computed, onMounted, } from 'vue';
@@ -209,12 +210,15 @@ async function onCreateItem() {
 }
 
 function deactivateItem(item:any) {
-  editedIndex.value = mItems.value.indexOf(item);
+  // editedIndex.value = mItems.value.indexOf(item);
   Object.assign(editedItem, item);
   dialogDeactivate.value = true;
 }
 
 function deactivateCategory(item:any) {
+  Object.assign(newCategory, item);
+  console.log("deactivate category: ", item);
+  console.log("editedItem: ", newCategory);
   dialogDeactivateCategory.value = true;
 }
 
@@ -236,6 +240,18 @@ async function onDeactivated() {
     }
   }
 }
+
+const selectedCategory = ref<Partial<CategoryItem>>({});
+const onEditCategory = (item: CategoryItem) => {
+  selectedCategory.value = { ...item }; // Set item to pass to the dialog
+  console.log("selected category: ", selectedCategory.value);
+};
+const onClose = () => {
+  openCategoryDialog.value = false;                // Close the dialog
+  selectedCategory.value = {};         // Clear the selected data
+  console.log('selectcetCategory: ' ,selectedCategory.value);
+};
+
 
 async function onCreateCategory(item: Partial<CategoryItem>) {
   console.log("catogory: ", item);
@@ -262,7 +278,7 @@ async function onDeactivatedCategory() {
   try {
     error.value = '';
 
-    await store.dispatch(`masteritem/${DEACTIVATE_ITEM_CATEGORY}`, editedItem.id);
+    await store.dispatch(`masteritem/${DEACTIVATE_ITEM_CATEGORY}`, newCategory.id);
     dialogDeactivateCategory.value = false;
   } catch (e) {
     showError.value = true;

@@ -1,3 +1,3 @@
-export { default as ErrorSnackbar } from './ErrorSnackbar.vue';
-export { default as SuccessSnackbar } from './SuccessSnackbar.vue';
-export { default as ItemToolbar } from './ItemToolbar.vue';
+export { default as SnackbarError } from './SnackbarError.vue';
+export { default as SnackbarSuccess } from './SnackbarSuccess.vue';
+export { default as ToolbarSimple } from './ToolbarSimple.vue';
