@@ -23,22 +23,25 @@
       <!-- Buttons -->
       <v-card-actions class="px-4 pb-4">
         <v-spacer />
-        <v-btn
-          variant="text"
-          color="grey-darken-2"
-          class="text-white"
-          @click="$emit('close')"
-        >
-          Close
-        </v-btn>
-        <v-btn
-          color="cyan-darken-1"
-          variant="elevated"
-          class="text-white"
-          @click="$emit('submit', localCategory)"
-        >
-          Save
-        </v-btn>
+        <!-- Close Button -->
+          <v-btn
+            variant="text"
+            color="grey-darken-2"
+            class="text-white"
+            @click="handleClose"
+          >
+            Close
+          </v-btn>
+
+          <!-- Save Button -->
+          <v-btn
+            color="cyan-darken-1"
+            variant="elevated"
+            class="text-white"
+            @click="handleSave"
+          >
+            Save
+          </v-btn>
       </v-card-actions>
 
       <!-- Search Bar -->
@@ -107,7 +110,7 @@
 
 <script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue';
-import type { CategoryItem, HeaderCategory } from '@/types/masteritem';
+import type { CategoryItem, HeaderCategory } from '@/types/MasterItem';
 
 const props = defineProps<{
   dialog: boolean;
@@ -129,21 +132,29 @@ const emit = defineEmits<{
 
 const localDialog = ref(props.dialog);
 const localCategory = reactive<Partial<CategoryItem>>({});
+const defaultCategory: Partial<CategoryItem> = {
+  id: '',
+  name: '',
+  active_flag: 'Y',
+  inactive_date: '',
+};
 
+// Sync localDialog with parent
 watch(() => props.dialog, (val) => {
   localDialog.value = val;
   emit('update:dialog', val);
-  console.log('Dialog state changed:', val);
-  
-  if (val && props.newCategory) {
-    // Dialog opened — fill localCategory
-    Object.assign(localCategory, props.newCategory);
-  } else if (!val) {
-    // Dialog closed — clear localCategory
-    Object.assign(localCategory, {});
-    console.log('Dialog closed, clearing localCategory', localCategory);
-  }
 });
+
+// When newCategory changes and dialog is open, fill localCategory
+watch(
+  () => props.newCategory,
+  (newVal) => {
+    if (localDialog.value && newVal) {
+      Object.assign(localCategory, newVal);
+    }
+  },
+  { immediate: true }
+);
 
 // Filtered category list
 const filteredItems = computed(() => {
@@ -154,4 +165,15 @@ const filteredItems = computed(() => {
     item.name?.toLowerCase().includes(keyword)
   );
 });
+
+const handleClose = () => {
+  emit('close');               // Let parent clear state
+  Object.assign(localCategory, defaultCategory);      
+};
+
+const handleSave = () => {
+  emit('submit', localCategory); // Submit to parent
+  Object.assign(localCategory, defaultCategory); 
+};
+
 </script>

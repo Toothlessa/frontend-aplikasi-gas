@@ -318,7 +318,7 @@
 
 <script setup lang="ts">
 // components
-import { ErrorSnackbar, SuccessSnackbar, ItemToolbar } from '@/components/globalcomponent';
+import { ErrorSnackbar, SuccessSnackbar, ItemToolbar } from '@/components/globalComponent';
 // import ItemTable from '@/components/item/ItemTable.vue';
 
 // import SuccessSnackbar from '@/components/globalcomponent/SuccessSnackbar.vue';
@@ -333,8 +333,8 @@ import {
   SET_HASSAVED,
 } from '@/store/storeconstant';
 
-import type { CategoryItem, MasterItem, Field } from '@/types/masteritem'; // ✅ type-only
-import { headers, headerscategory } from '@/types/masteritem';         // ✅ runtime value
+import type { CategoryItem, MasterItem, Field } from '@/types/MasterItem'; // ✅ type-only
+import { headers, headerscategory } from '@/types/MasterItem';         // ✅ runtime value
 
 const store = useStore();
 

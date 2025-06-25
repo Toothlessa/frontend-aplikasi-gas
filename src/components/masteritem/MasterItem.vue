@@ -4,7 +4,9 @@
     <ToolbarSimple
       title="Manage Items"
       icon="mdi-new-box"
+      :color="'bg-cyan-darken-2'"
       :search="search"
+      :showUploadButton="false"
       @update:search="search = $event"
       @create="
         openCreateDialog = true;
@@ -54,7 +56,7 @@
       @close="onClose"
       @submit="onCreateCategory"
       @deactivate="deactivateCategory"
-      @updateCategory="onEditCategory"
+      @updateCategory="onUpdateCategory"
     />
 
   <!-- Deactivate Dialog -->
@@ -80,7 +82,7 @@
 
 <script setup lang="ts">
 // components
-import { SnackbarError, SnackbarSuccess, ToolbarSimple } from '@/components/globalcomponent';
+import { SnackbarError, SnackbarSuccess, ToolbarSimple } from '@/components/globalComponent';
 import TableItem from './TableItem.vue';
 import DialogItemForm from './DialogItemForm.vue';
 import DialogCategory from './DialogCategory.vue';
@@ -99,8 +101,8 @@ import {
   DEACTIVATE_ITEM_CATEGORY,
 } from '@/store/storeconstant';
 
-import type { CategoryItem, MasterItem, Field } from '@/types/masteritem'; // ✅ type-only
-import { headers, headerscategory } from '@/types/masteritem';         // ✅ runtime value
+import type { CategoryItem, MasterItem, Field } from '@/types/MasterItem'; // ✅ type-only
+import { headers, headerscategory } from '@/types/MasterItem';         // ✅ runtime value
 
 const store = useStore();
 
@@ -130,6 +132,7 @@ const editedIndex = ref(-1);
 const itemType = [ { name: "Asset" }, { name: "Item" },];
 const localHeaders = headers; // Use the imported headers directly
 const localHCategory = headerscategory;
+
 const editedItem = reactive<Partial<MasterItem>>({});
 const defaultItem: Partial<MasterItem> = {
   id: '',
@@ -149,6 +152,13 @@ const newCategory = reactive<Partial<CategoryItem>>({
   active_flag: 'Y',
   inactive_date: '',
 });
+
+const defaultCategory: Partial<CategoryItem> = {
+  id: '',
+  name: '',
+  active_flag: 'Y',
+  inactive_date: '',
+};
 
 const allFields = computed<Field[]>(() => [
   { model: 'item_type', label: 'Item Type', items: itemType, itemTitle: 'name' },
@@ -215,13 +225,6 @@ function deactivateItem(item:any) {
   dialogDeactivate.value = true;
 }
 
-function deactivateCategory(item:any) {
-  Object.assign(newCategory, item);
-  console.log("deactivate category: ", item);
-  console.log("editedItem: ", newCategory);
-  dialogDeactivateCategory.value = true;
-}
-
 async function onDeactivated() {
   try {
     error.value = '';
@@ -241,17 +244,15 @@ async function onDeactivated() {
   }
 }
 
+// Category
 const selectedCategory = ref<Partial<CategoryItem>>({});
-const onEditCategory = (item: CategoryItem) => {
+const onUpdateCategory = (item: CategoryItem) => {
   selectedCategory.value = { ...item }; // Set item to pass to the dialog
-  console.log("selected category: ", selectedCategory.value);
 };
 const onClose = () => {
-  openCategoryDialog.value = false;                // Close the dialog
-  selectedCategory.value = {};         // Clear the selected data
-  console.log('selectcetCategory: ' ,selectedCategory.value);
+  openCategoryDialog.value = false;                         // Close the dialog
+  Object.assign(selectedCategory, defaultCategory );        // Clear the selected data
 };
-
 
 async function onCreateCategory(item: Partial<CategoryItem>) {
   console.log("catogory: ", item);
@@ -272,6 +273,11 @@ async function onCreateCategory(item: Partial<CategoryItem>) {
       error.value = String(e); // fallback
     }
   }
+}
+
+function deactivateCategory(item:any) {
+  Object.assign(newCategory, item);
+  dialogDeactivateCategory.value = true;
 }
 
 async function onDeactivatedCategory() {

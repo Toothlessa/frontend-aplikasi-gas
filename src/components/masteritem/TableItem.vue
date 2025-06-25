@@ -4,7 +4,7 @@
     :items="filteredItems"
     :loading="loading"
     loading-text="Loading... Please wait"
-    class="elevation-10 bg-cyan-lighten-5 text-black rounded-xl"
+    :class="[bgcolor || 'bg-cyan-lighten-5', 'elevation-10', 'text-black', 'rounded-xl']"
     density="comfortable"
     hover
     item-value="id"
@@ -61,13 +61,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { MasterItem, Header } from '@/types/masteritem';
+import type { MasterItem, Header } from '@/types/MasterItem';
+import { Customer } from '@/types';
 
 const props = defineProps<{
   headers: Header[];
   items: MasterItem[];
   search: string;
   loading: boolean;
+  bgcolor?: string; //
 }>();
 
 defineEmits(['edit', 'deactivate']);

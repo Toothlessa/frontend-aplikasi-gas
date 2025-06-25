@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 import { ref, watch, reactive } from 'vue';
-import type { MasterItem, Field } from '@/types/masteritem';
+import type { MasterItem, Field } from '@/types/MasterItem';
 
 // 1. Define props and emits
 const props = defineProps<{

@@ -15,7 +15,7 @@ import {
 import Validations from '@/services/Validations';
 import store from '@/store/store';
 import { ActionContext, ActionTree } from 'vuex';
-import { MasterItemState, MasterItem, CategoryItem } from '@/types/masteritem';
+import { MasterItemState, MasterItem, CategoryItem } from '@/types/MasterItem';
 import { RootState } from '@/store/types'; // ← create this file too
 
 type Context = ActionContext<MasterItemState,  RootState>;
@@ -194,44 +194,6 @@ const actions: ActionTree<MasterItemState, RootState> = {
       }
     }
   },
-
-  //  async [CREATE_CATEGORY_ITEM](
-  //   { dispatch, commit }: Context, categoryitem: CategoryItem
-  // ): Promise<void> {
-  //   try {
-  //     const url = `http://127.0.0.1:8000/api/categoryitems`;
-
-  //     const response = await axios.post(url, categoryitem, {
-  //       headers: {
-  //         Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-  //       },
-  //     });
-
-  //     if ([201].includes(response.status)) {
-  //       dispatch(LOAD_CATEGORY_ITEM);
-  //       commit(SET_HASSAVED, true);
-  //       setTimeout(() => {
-  //         commit(SET_HASSAVED, false);
-  //       }, 2000);
-  //     }
-  //   } catch (error: any) {
-  //     const errors = error.response?.data?.errors;
-  //     if (errors) {
-  //       const messages: string[] = [];
-
-  //       for (const field in errors) {
-  //         if (Array.isArray(errors[field])) {
-  //           const message = errors[field][0];
-  //           messages.push(
-  //             Validations.getErrorMessageFromCodeMasterItem(message)
-  //           );
-  //         }
-  //       }
-
-  //       throw messages;
-  //     }
-  //   }
-  // },
 
    async [DEACTIVATE_ITEM_CATEGORY](
     { dispatch, commit }: Context, id

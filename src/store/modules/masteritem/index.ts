@@ -1,6 +1,6 @@
 // store/modules/masteritem/index.ts
 import type { Module } from 'vuex';
-import type { MasterItemState } from '@/types/masteritem';
+import type { MasterItemState } from '@/types/MasterItem';
 import type { RootState } from '@/store/types'; // define this if you haven't
 
 import actions from './actions';

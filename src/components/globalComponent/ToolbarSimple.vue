@@ -1,5 +1,8 @@
 <template>
-  <v-toolbar flat class="bg-cyan-darken-2 text-white rounded-xl px-4 py-2">
+  <v-toolbar 
+    flat 
+    :class="[color || 'bg-cyan-darken-2', 'text-white', 'rounded-xl', 'px-4', 'py-2']"
+  >
     <v-btn
       icon
       variant="flat"
@@ -9,6 +12,18 @@
       @click="$emit('create')"
     >
       <v-icon size="28"> {{ icon }}</v-icon>
+    </v-btn>
+
+    <v-btn
+       v-if="showUploadButton"
+      icon
+      variant="flat"
+      color="white"
+      size="large"
+      class="mr-2"
+      @click="$emit('uppload_customer')"
+    >
+      <v-icon size="28"> mdi-cloud-upload </v-icon>
     </v-btn>
 
     <v-toolbar-title class="text-h6 font-weight-regular">
@@ -36,6 +51,8 @@ defineProps<{
   search: string;
   title: string;
   icon: string;
+  color?: string; //
+  showUploadButton?: boolean 
 }>();
 
 defineEmits(['update:search', 'create']);

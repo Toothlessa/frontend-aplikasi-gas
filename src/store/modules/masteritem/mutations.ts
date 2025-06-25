@@ -6,7 +6,7 @@ import {
 } from '@/store/storeconstant';
 
 import type { MutationTree } from 'vuex';
-import type { MasterItemState, MasterItem, CategoryItem } from '@/types/masteritem';
+import type { MasterItemState, MasterItem, CategoryItem } from '@/types/MasterItem';
 
 const mutations: MutationTree<MasterItemState> = {
   [SET_DATA_MITEM](state, payload: MasterItem[]) {
