@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+    <v-container fluid class="pa-0">
 
     <!-- Toolbar Actions -->
      <ToolbarSimple
@@ -23,8 +23,8 @@
     <!-- Success Snackbar -->
      <SnackbarSuccess v-model="hasSaved" message="Item has been saved successfully!" />
 
-      <!-- Master Item Table -->
-     <TableSimple
+      <!-- Master Customer Table -->
+     <TableCustomer
       :headers="headersLocal"
       :items="customers"
       :search="search"
@@ -34,23 +34,46 @@
       @submit="onCreateItem"
       @deactivate="deactivateItem"
     />
+
+     <!-- Create/Edit Customer Dialog -->
+    <DialogItemForm
+      :dialog="DialogOpenCreate"
+      :isEdit="editedIndex !== -1"
+      :editedItem="editedItem"
+      :allFields="allFields"
+      @close="close"
+      @submit="onSubmit"
+    />
 </v-container>
 </template>
 
 <script setup lang="ts">
-import { SnackbarError, SnackbarSuccess, ToolbarSimple, TableSimple } from '@/components/globalComponent';
+import { SnackbarError, SnackbarSuccess, ToolbarSimple } from '@/components/globalComponent';
+import TableCustomer from './TableCustomer.vue';
+
 import store from '@/store/store';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { 
   LOAD_CUSTOMER_DATA,
   SET_HASSAVED,
 } from '@/store/storeconstant';
-import { Customer, HeadersCustomer } from '@/types';
+import { Customer, headerCustomer } from '@/types/Customer';
 
 //Variable
-const headersLocal = HeadersCustomer; // Use the imported headers directly
+const headersLocal = headerCustomer; // Use the imported headers directly
 const search = ref<string>('');
 const editedIndex = ref(-1);
+const editedItem = reactive<Partial<Customer>>({});
+const defaultItem: Partial<Customer> = {
+  id: '',
+  customer_name: '',
+  type: '',
+  nik: '',
+  email: '',
+  address: '',
+  phone: '',
+  active_flag: false,
+};
 
 const hasSaved = computed({
   get: () => store.state.customer.hasSaved,
@@ -74,6 +97,13 @@ const loadCustomerData = () => store.dispatch(`customer/${LOAD_CUSTOMER_DATA}`);
 onMounted(() => {
   loadCustomerData();
 });
+
+function editItem(item:any) {
+  editedIndex.value = customers.value.indexOf(item);
+  Object.assign(editedItem, item);
+  DialogOpenCreate.value = true;
+}
+
 
 // import { 
 //   LOAD_CUSTOMER_DATA,

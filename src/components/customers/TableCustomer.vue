@@ -10,18 +10,6 @@
     item-value="id"
   >
 
-    <!-- In Stock -->
-    <template v-slot:[`item.in_stock`]="{ item }">
-      <v-chip
-        :color="item.in_stock ? 'green-darken-1' : 'red-darken-1'"
-        class="text-white text-uppercase"
-        size="small"
-        label
-      >
-        {{ item.in_stock ? 'In Stock' : 'Out of Stock' }}
-      </v-chip>
-    </template>
-
     <!-- Active Flag -->
     <template v-slot:[`item.active_flag`]="{ item }">
       <v-chip
@@ -61,11 +49,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { MasterItem, Header } from '@/types/MasterItem';
+import { Customer, HeaderCustomer } from '@/types/Customer';
 
 const props = defineProps<{
-  headers: Header[];
-  items: MasterItem[];
+  headers: HeaderCustomer[];
+  items: Customer[];
   search: string;
   loading: boolean;
   bgcolor?: string; //
@@ -79,7 +67,7 @@ const filteredItems = computed(() => {
 
   const keyword = props.search.toLowerCase();
   return props.items.filter(item =>
-    item.item_name?.toLowerCase().includes(keyword)
+    item.customer_name?.toLowerCase().includes(keyword)
   );
 });
 </script>

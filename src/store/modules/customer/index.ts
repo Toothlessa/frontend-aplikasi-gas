@@ -11,7 +11,7 @@ const state = (): CustomerState => ({
   customers: [],
   loading: false,
   hasSaved: false,
-  HeadersCustomer: [],
+  headerCustomer: [],
 });
 
 const customer: Module<CustomerState, RootState> = {

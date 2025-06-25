@@ -1,8 +1,19 @@
 export interface CustomerState {
   customers: Customer[];
-  HeadersCustomer: HeaderCustomer[];
+  headerCustomer: HeaderCustomer[];
   loading: boolean;
   hasSaved: boolean;
+}
+
+type CustomerKey = keyof Customer;
+
+export interface CustomerField {
+  model: CustomerKey;
+  label: string;
+  items?: any[];          // Optional
+  itemTitle?: string;     // Optional
+  itemValue?: string;     // Optional
+  onEnterSubmit?: boolean;
 }
 
 export interface Customer {
@@ -24,7 +35,7 @@ export interface HeaderCustomer {
   sortable?: boolean;
 }
 
-export const HeadersCustomer: HeaderCustomer[] = [
+export const headerCustomer: HeaderCustomer[] = [
     { title: 'Customer Name', align: 'start', key: 'customer_name' },
     { title: 'Type', align: 'start', key: 'type' },
     { title: 'NIK', align: 'start', key: 'nik' },

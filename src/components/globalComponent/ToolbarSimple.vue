@@ -21,7 +21,7 @@
       color="white"
       size="large"
       class="mr-2"
-      @click="$emit('uppload_customer')"
+      @click="$emit('upload_customer')"
     >
       <v-icon size="28"> mdi-cloud-upload </v-icon>
     </v-btn>
