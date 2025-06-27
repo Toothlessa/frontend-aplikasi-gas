@@ -98,7 +98,6 @@
       </template>
     </v-navigation-drawer>
 
-
   <v-app-bar
     app
     color="white"
@@ -148,41 +147,44 @@
   </v-app-bar>
 
   <v-dialog v-model="dialogLogout" max-width="400px" persistent transition="dialog-top-transition">
-    <v-card class="rounded-xl elevation-12 pa-4 bg-blue-lighten">
-      <!-- Icon + Title -->
-      <div class="d-flex align-center justify-center mb-3">
-        <v-icon size="28" color="blue-darken-2" class="mr-2">mdi-logout</v-icon>
-        <div class="text-h6 font-weight-bold">Logout</div>
-      </div>
-      <div class="text-body-2 text-medium-emphasis text-center">
-        Are you sure you want to logout?
-      </div>
+  <v-card class="rounded-xl elevation-12">
+    
+    <!-- Title with colored background like Upload Customers -->
+    <v-card-title class="bg-teal text-white text-h6 font-weight-bold justify-center">
+      <v-icon size="28" start class="mr-2">mdi-logout</v-icon>
+      Logout
+    </v-card-title>
 
+    <!-- Body Text -->
+    <v-card-text class="text-body-2 text-medium-emphasis text-center pt-4 px-4">
+      Are you sure you want to logout?
+    </v-card-text>
 
-      <!-- Actions -->
-      <v-card-actions class="mt-6 justify-end">
-        <v-btn
-          variant="outlined"
-          color="grey-darken-1"
-          @click="dialogLogout = false"
-          class="rounded-pill"
-        >
-          <v-icon start>mdi-close</v-icon>
-          Cancel
-        </v-btn>
+    <!-- Actions -->
+    <v-card-actions class="mt-6 justify-end px-4 pb-4">
+      <v-btn
+        variant="outlined"
+        color="grey-darken-1"
+        @click="dialogLogout = false"
+        class="rounded-pill"
+      >
+        <v-icon start>mdi-close</v-icon>
+        Cancel
+      </v-btn>
 
-        <v-btn
-          variant="elevated"
-          color="blue-darken-2"
-          class="text-white rounded-pill"
-          @click="onLogout"
-        >
-          <v-icon start>mdi-logout</v-icon>
-          Logout
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      <v-btn
+        variant="elevated"
+        color="teal"
+        class="text-white rounded-pill"
+        @click="onLogout"
+      >
+        <!-- <v-icon start>mdi-logout</v-icon> -->
+        Logout
+      </v-btn>
+    </v-card-actions>
+
+  </v-card>
+</v-dialog>
 
   </nav>
 </template>
@@ -259,13 +261,13 @@ async function onLogout() {
 
 <style scoped>
 .custom-drawer {
-  background-color: #ffffff;
-  color: #212121;
-  border-right: 1px solid #e0e0e0;
+  background-color: #009688; /* Teal base */
+  color: #ffffff; /* White text for contrast */
+  border-right: 1px solid #00796b; /* Darker teal border */
 }
 
 .user-info {
-  background-color: #f5f5f5;
+  background-color: #4db6ac; /* Medium teal for card */
   border-radius: 8px;
   margin: 8px;
   padding: 8px;
@@ -274,28 +276,30 @@ async function onLogout() {
 .nav-item {
   border-radius: 10px;
   margin: 4px 8px;
-  color: #212121;
+  color: #ffffff;
   transition: background-color 0.2s;
 }
 
 .nav-item:hover {
-  background-color: #e3f2fd;
+  background-color: #00796b; /* Darker teal on hover */
 }
 
 .nav-subitem {
   padding-left: 32px;
   font-size: 0.9rem;
-  color: #424242;
+  color: #c8fff4; /* Soft light teal for subitems */
 }
 
 .v-list-item--active {
-  background-color: #bbdefb !important;
+  background-color: #004d40 !important; /* Deep teal active */
   font-weight: 600;
-  color: #0d47a1 !important;
+  color: #ffffff !important;
 }
 
 .v-list-group__header .v-list-item-title {
   font-weight: 500;
-  color: #0d47a1;
+  color: #e0f2f1; /* Light teal text */
 }
 </style>
+
+
