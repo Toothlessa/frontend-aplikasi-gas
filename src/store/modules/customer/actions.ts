@@ -1,9 +1,13 @@
 import axios from 'axios';
 import {
-    GET_USER_TOKEN_GETTER,
+  CREATE_CUSTOMER,
+  DEACTIVATE_CUSTOMER,
+  GET_USER_TOKEN_GETTER,
   LOAD_CUSTOMER_DATA,
   SET_DATA_CUSTOMER,
-  SET_LOADING
+  SET_HASSAVED,
+  SET_LOADING,
+  UPLOAD_CUSTOMER
 } from '@/store/storeconstant';
 import Validations from '@/services/Validations';
 import store from '@/store/store';
@@ -33,11 +37,138 @@ const actions: ActionTree<CustomerState, RootState> = {
 
       commit(SET_DATA_CUSTOMER, data);
     } catch (error: any) {
-      throw Validations.getErrorMessageFromCodeMasterItem(error.response?.data?.errors?.[0]);
+      throw Validations.getErrorMessageFromCodeCustomer(error.response?.data?.errors?.[0]);
     } finally {
       commit(SET_LOADING, false);
     }
   },
+
+  async [CREATE_CUSTOMER](
+    { dispatch, commit }: Context, customer: Customer
+  ): Promise<void> {
+    try {
+      const url = customer.id
+        ? `http://127.0.0.1:8000/api/customers/${customer.id}`
+        : 'http://127.0.0.1:8000/api/customers';
+
+      const method: 'put' | 'post' = customer.id ? 'put' : 'post';
+
+      const response = await axios[method](url, customer, {
+        headers: {
+          Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+        },
+      });
+
+      if ([200, 201].includes(response.status)) {
+        dispatch(LOAD_CUSTOMER_DATA);
+        commit(SET_HASSAVED, true);
+        setTimeout(() => {
+          commit(SET_HASSAVED, false);
+        }, 2000);
+      }
+    } catch (error: any) {
+      const errors = error.response?.data?.errors;
+      if (errors) {
+        const messages: string[] = [];
+
+        for (const field in errors) {
+          if (Array.isArray(errors[field])) {
+            const message = errors[field][0];
+            messages.push(
+              Validations.getErrorMessageFromCodeCustomer(message)
+            );
+          }
+        }
+
+        throw messages;
+      }
+    }
+  },
+
+  async [DEACTIVATE_CUSTOMER](
+    { dispatch, commit }: Context, id
+  ): Promise<void> {
+    try {
+      const url = `http://127.0.0.1:8000/api/customers/inactive/${id}`;
+
+      const response = await axios.patch(url, [], {
+        headers: {
+          Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+        },
+      });
+
+      if ([200].includes(response.status)) {
+        dispatch(LOAD_CUSTOMER_DATA);
+        commit(SET_HASSAVED, true);
+        setTimeout(() => {
+          commit(SET_HASSAVED, false);
+        }, 2000);
+      }
+    } catch (error: any) {
+      const errors = error.response?.data?.errors;
+      if (errors) {
+        const messages: string[] = [];
+
+        for (const field in errors) {
+          if (Array.isArray(errors[field])) {
+            const message = errors[field][0];
+            messages.push(
+              Validations.getErrorMessageFromCodeMasterItem(message)
+            );
+          }
+        }
+
+        throw messages;
+      }
+    }
+  },
+
+  async [UPLOAD_CUSTOMER](
+    { dispatch, commit }: ActionContext<CustomerState, RootState>,
+    file: File
+  ): Promise<void> {
+    const formData = new FormData();
+    formData.append('csvFile', file);
+
+    try {
+      const response = await axios.post(
+        'http://127.0.0.1:8000/api/customers/import-csv',
+        formData,
+        {
+          headers: {
+            'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        dispatch(LOAD_CUSTOMER_DATA);
+
+        commit(SET_HASSAVED, true);
+        setTimeout(() => {
+          commit(SET_HASSAVED, false);
+        }, 2000);
+      }
+    } catch (error: any) {
+      const errorMessage: string = error.response?.data?.message ?? '';
+
+      if (errorMessage.includes("Duplicate entry")) {
+        const fieldMatch = errorMessage.match(/for key '(.+?)'/);
+        const fieldKey = fieldMatch ? fieldMatch[1] : null;
+
+        const fieldMap: Record<string, string> = {
+          'customer_nik_unique': 'NIK',
+          'customers_email_unique': 'Email',
+        };
+
+        const userFriendlyField = fieldKey ? fieldMap[fieldKey] || 'field' : 'field';
+        throw [`Data duplicate on ${userFriendlyField}.`];
+      } else {
+        throw Validations.getErrorMessageFromCodeCustomer(errorMessage);
+      }
+    }
+  }
 
 };
 

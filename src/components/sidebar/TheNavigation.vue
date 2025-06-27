@@ -1,194 +1,301 @@
 <template>
   <nav>
-    <v-navigation-drawer 
+    <v-navigation-drawer
       v-model="drawer"
       :rail="rail"
-      permanent
       @click="rail = false"
-      app 
-      dark
-      color="teal"
+      permanent
+      app
+      class="custom-drawer"
     >
-      <v-list-item
+
+      <!-- Profile Section -->
+       <v-list-item
+        nav
         lines="two"
+        class="user-info"
         prepend-icon="mdi-face-profile"
         :title="result.username"
         :subtitle="result.email"
-        nav
+        @click="rail = false"
       >
-        <template v-slot:append>
+
+
+        <template #append>
           <v-btn
-            icon="mdi-chevron-left"
+            icon
             variant="text"
+            color="white"
             @click.stop="rail = !rail"
-          ></v-btn>
+          >
+            <v-icon>{{ rail ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
+          </v-btn>
         </template>
       </v-list-item>
-      <!-- <v-divider class="mx-10 mt-1" ></v-divider> -->
-      <v-list dense class="mt-5" >
-        <v-list-item-group v-model="selectedItem" color="white" >
-          <v-list-item prepend-icon="mdi-view-dashboard" title="Dashboard" to="/"></v-list-item>
-          <v-list-item prepend-icon="mdi-file-document" title="Transaction" to="/transaction"></v-list-item>
-          <v-list-group value="Master">
-              <template v-slot:activator="{ props }">
-                <v-list-item
-                  v-bind="props"
-                  title="Master"
-                  prepend-icon="mdi-chart-pie"
-                  :rail="rail"
-                  @click="rail = false"
-                ></v-list-item>
-              </template>
 
-              <v-list-item
-                v-for="([icon, title, to], i) in masters"
-                :key="i"
-                :prepend-icon="icon"
-                :title="title"
-                :value="title"
-                :to="to"
-              ></v-list-item>
-          </v-list-group>
-          <v-list-item v-for="(item, i) in items" :key="i" :value="item" :to="item.to"  @click="actionClickNav(item.action)" >
-            <template v-slot:prepend>
-              <v-icon :icon="item.icon" ></v-icon>
-            </template>
-            <v-list-item-content>
-              <v-list-item-title v-text="item.text" ></v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list-item-group>
+      <v-divider class="my-2" />
+
+      <!-- Navigation List -->
+      <v-list dense nav class="mt-2">
+        <v-list-item
+          prepend-icon="mdi-view-dashboard"
+          title="Dashboard"
+          to="/"
+          class="nav-item"
+        />
+        <v-list-item
+          prepend-icon="mdi-file-document"
+          title="Transaction"
+          to="/transaction"
+          class="nav-item"
+        />
+
+        <!-- Master Group -->
+        <v-list-group value="Master" class="nav-group">
+          <template #activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              title="Master"
+              prepend-icon="mdi-folder-cog"
+              class="nav-item"
+            />
+          </template>
+
+          <v-list-item
+            v-for="([icon, title, to], i) in masters"
+            :key="i"
+            :prepend-icon="icon"
+            :title="title"
+            :to="to"
+            class="nav-subitem"
+          />
+        </v-list-group>
+
+        <!-- Other Items -->
+        <v-list-item
+          v-for="(item, i) in items"
+          :key="i"
+          :to="item.to"
+          class="nav-item"
+          @click="actionClickNav(item.action)"
+        >
+          <template #prepend>
+            <v-icon>{{ item.icon }}</v-icon>
+          </template>
+          <v-list-item-title>{{ item.text }}</v-list-item-title>
+        </v-list-item>
       </v-list>
-      <template v-slot:append>
-          <div class="pa-2">
-            <v-list-item prepend-icon="mdi-logout" title="Logout" @click.prevent="actionClickNav('logout')"></v-list-item>
-          </div>
+
+      <!-- Logout -->
+      <template #append>
+        <v-divider class="mx-4 my-2" />
+        <v-list-item
+          prepend-icon="mdi-logout"
+          title="Logout"
+          class="text-red-lighten-2 font-weight-bold"
+          @click.prevent="actionClickNav('logout')"
+        />
       </template>
     </v-navigation-drawer>
 
-    <v-app-bar app  color="teal-lighten-5" flat>
-      <v-text-field  dense label="Search..." color="black"></v-text-field>
-      <v-spacer></v-spacer>
-      <v-btn class="ml-2"  icon  small>
-        <v-icon color='grey'> mdi-bell </v-icon>
-      </v-btn>
-      <v-btn class="ml-2" icon  small>
-        <v-icon color='grey'> mdi-email </v-icon>
-      </v-btn>
-      <v-btn class="ml-2" icon  small color="#6B6C6E">
-        <v-icon dark large color='grey'> mdi-face-profile </v-icon>
-      </v-btn>
-    </v-app-bar>
 
-    <v-dialog v-model="dialogLogout" max-width="400px">
-          <v-card
-            class="elevation-12"
-            variant="elevated"
-          >
-            <v-card-title 
-              class="bg-teal text-white text-center"
-            >Apa anda yakin ingin Logout?</v-card-title
-            >
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn 
-                color="teal" 
-                variant="text" 
-                @click="closeLogout"
-              >
-              Tidak
-              </v-btn
-              >
-              <v-btn
-                color="teal"
-                variant="text"
-                @click="onLogout"
-              >
-              Ya
-              </v-btn>
-              <v-spacer></v-spacer>
-            </v-card-actions>
-          </v-card>
-      </v-dialog>
+  <v-app-bar
+    app
+    color="white"
+    class="shadow-sm"
+  >
+    <!-- Search Field -->
+    <v-text-field
+      v-model="search"
+      variant="solo-filled"
+      density="comfortable"
+      hide-details
+      flat
+      rounded
+      prepend-inner-icon="mdi-magnify"
+      placeholder="Search..."
+      class="bg-white rounded-lg"
+      style="max-width: 350px;"
+    />
+
+    <v-spacer />
+
+    <!-- Icon Buttons -->
+    <v-btn icon variant="text" class="mx-1">
+      <v-icon color="grey-darken-1">mdi-bell-outline</v-icon>
+    </v-btn>
+
+    <v-btn icon variant="text" class="mx-1">
+      <v-icon color="grey-darken-1">mdi-email-outline</v-icon>
+    </v-btn>
+
+    <v-menu location="bottom end">
+      <template #activator="{ props }">
+        <v-btn icon v-bind="props" variant="text" class="mx-1">
+          <v-avatar color="grey-lighten-3" size="32">
+            <v-icon size="24" color="grey-darken-2">mdi-face-profile</v-icon>
+          </v-avatar>
+        </v-btn>
+      </template>
+
+      <v-list elevation="3">
+        <v-list-item title="Profile" prepend-icon="mdi-account" />
+        <v-list-item title="Settings" prepend-icon="mdi-cog" />
+        <v-divider />
+        <v-list-item title="Logout" prepend-icon="mdi-logout" @click="dialogLogout = true" />
+      </v-list>
+    </v-menu>
+  </v-app-bar>
+
+  <v-dialog v-model="dialogLogout" max-width="400px" persistent transition="dialog-top-transition">
+    <v-card class="rounded-xl elevation-12 pa-4 bg-blue-lighten">
+      <!-- Icon + Title -->
+      <div class="d-flex align-center justify-center mb-3">
+        <v-icon size="28" color="blue-darken-2" class="mr-2">mdi-logout</v-icon>
+        <div class="text-h6 font-weight-bold">Logout</div>
+      </div>
+      <div class="text-body-2 text-medium-emphasis text-center">
+        Are you sure you want to logout?
+      </div>
+
+
+      <!-- Actions -->
+      <v-card-actions class="mt-6 justify-end">
+        <v-btn
+          variant="outlined"
+          color="grey-darken-1"
+          @click="dialogLogout = false"
+          class="rounded-pill"
+        >
+          <v-icon start>mdi-close</v-icon>
+          Cancel
+        </v-btn>
+
+        <v-btn
+          variant="elevated"
+          color="blue-darken-2"
+          class="text-white rounded-pill"
+          @click="onLogout"
+        >
+          <v-icon start>mdi-logout</v-icon>
+          Logout
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
   </nav>
 </template>
   
-<script>
-import { 
-  GET_USER_TOKEN_GETTER,
-  LOGOUT_ACTION 
-} from '@/store/storeconstant';
-import { mapActions, mapGetters } from 'vuex';
+<script setup lang="ts">
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { onMounted, reactive, ref } from 'vue';
 
-  export default {
-      data: () =>({
-          selectedItem: 0,
-          drawer: true,
-          rail: true,
-          dialogLogout: false,
-          result: {
-            username: '0',
-            email:'0',
-          },
-          items: [
-            {icon: 'mdi-basket-fill', text: 'Stocks', to:'/stock'}, 
-            {icon: 'mdi-cash', text: 'Debt', to:'/debt'},
-            {icon: 'mdi-odnoklassniki', text: 'Users', to: '/users'},
-        ],
-          masters: [
-              ['mdi-blur-linear', 'Master Item', '/masteritem'],
-              ['mdi-face-agent', 'Customers', '/customer'],
-              ['mdi-football-helmet', 'Asset', '/asset'],
-            ],
-        }),
+import { GET_USER_TOKEN_GETTER, LOGOUT_ACTION } from '@/store/storeconstant';
 
-  computed: {
-    ...mapGetters('auth', {
-      GET_USER_TOKEN_GETTER,
-    }),
-  },
+// Vuex store and router
+const store = useStore();
+const router = useRouter();
 
-  mounted() {
+// UI state
+const selectedItem = ref<number>(0);
+const drawer = ref<boolean>(true);
+const rail = ref<boolean>(true);
+const dialogLogout = ref<boolean>(false);
 
-      let userDataString = localStorage.getItem('userData');
-      let userData = JSON.parse(userDataString);
+// User info
+const result = reactive({
+  username: '0',
+  email: '0',
+});
 
-      if (userData) {
-        this.result = userData;
-      } 
-  },
-  
-  methods: {
-    ...mapActions('auth', {
-      logout: LOGOUT_ACTION,
-    }),
+// Sidebar items
+const items = [
+  { icon: 'mdi-basket-fill', text: 'Stocks', to: '/stock' },
+  { icon: 'mdi-cash', text: 'Debt', to: '/debt' },
+  { icon: 'mdi-odnoklassniki', text: 'Users', to: '/users' },
+];
 
-    actionClickNav(action) {
-      if(action == "logout"){
-        this.dialogLogout = true;
-      }
-    },
+const masters = [
+  ['mdi-blur-linear', 'Master Item', '/masteritem'],
+  ['mdi-face-agent', 'Customers', '/customer'],
+  ['mdi-football-helmet', 'Asset', '/asset'],
+];
 
-    closeLogout() {
-      this.dialogLogout = false;
-    },
+// Get token from store (optional use)
+const userToken = store.getters[`auth/${GET_USER_TOKEN_GETTER}`];
 
-    async onLogout() {
-      try{
-        await this.logout();
-      } catch (error) {
-        this.error = error;
-      }
-      
-      this.$router.push('/login');
-    },
+// Load user info from localStorage
+onMounted(() => {
+  const userDataString = localStorage.getItem('userData');
+  if (userDataString) {
+    try {
+      const userData = JSON.parse(userDataString);
+      result.username = userData.username;
+      result.email = userData.email;
+    } catch (error) {
+      console.warn('Failed to parse user data:', error);
+    }
+  }
+});
+
+// Actions
+function actionClickNav(action: string) {
+  if (action === 'logout') {
+    dialogLogout.value = true;
+  }
+}
+
+async function onLogout() {
+  try {
+    await store.dispatch(`auth/${LOGOUT_ACTION}`);
+    router.push('/login');
+  } catch (error) {
+    console.error('Logout failed:', error);
   }
 }
 </script>
-  
-  <style>
-  .image {
-      border: 2px solid #2EBFAF;
-  }
-  
-  </style>
+
+<style scoped>
+.custom-drawer {
+  background-color: #ffffff;
+  color: #212121;
+  border-right: 1px solid #e0e0e0;
+}
+
+.user-info {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin: 8px;
+  padding: 8px;
+}
+
+.nav-item {
+  border-radius: 10px;
+  margin: 4px 8px;
+  color: #212121;
+  transition: background-color 0.2s;
+}
+
+.nav-item:hover {
+  background-color: #e3f2fd;
+}
+
+.nav-subitem {
+  padding-left: 32px;
+  font-size: 0.9rem;
+  color: #424242;
+}
+
+.v-list-item--active {
+  background-color: #bbdefb !important;
+  font-weight: 600;
+  color: #0d47a1 !important;
+}
+
+.v-list-group__header .v-list-item-title {
+  font-weight: 500;
+  color: #0d47a1;
+}
+</style>

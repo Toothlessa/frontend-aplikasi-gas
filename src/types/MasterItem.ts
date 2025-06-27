@@ -77,15 +77,15 @@ export const headers: Header[] = [
     value: (_item: MasterItem) => formatPrice(_item.selling_price),
   },
   { title: 'Stock', align: 'center', key: 'in_stock' },
-  { title: 'Status', align: 'center', key: 'active_flag' },
-  { title: 'Actions', key: 'actions', sortable: false },
+  { title: 'Status', align: 'start', key: 'active_flag' },
+  { title: 'Actions', key: 'actions', align: 'center', sortable: false },
 ];
 
 export const headerscategory: HeaderCategory[] = [
   { title: 'Category Name', align: 'start', key: 'name' },
   { title: 'Status', align: 'start', key: 'active_flag' },
   { title: 'Last Active', align: 'start', key: 'inactive_date' },
-  { title: 'Actions', key: 'actions', sortable: false },
+  { title: 'Actions', key: 'actions', align: 'center', sortable: false },
 ];
 
 

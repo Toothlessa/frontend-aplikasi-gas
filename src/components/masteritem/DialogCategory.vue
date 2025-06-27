@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="localDialog" max-width="700px" persistent>
+  <v-dialog v-model="localDialog" max-width="600px" persistent>
     <v-card class="rounded-xl elevation-12">
       <!-- Header -->
       <v-card-title class="bg-cyan-darken-2 text-white d-flex align-center">

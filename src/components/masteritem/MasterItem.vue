@@ -81,12 +81,13 @@
 </template>
 
 <script setup lang="ts">
-// components
 import { SnackbarError, SnackbarSuccess, ToolbarSimple } from '@/components/globalComponent';
 import TableItem from './TableItem.vue';
 import DialogItemForm from './DialogItemForm.vue';
 import DialogCategory from './DialogCategory.vue';
-import DialogDeactivate from './DialogDeactivate.vue'; 
+import DialogDeactivate from './DialogDeactivate.vue';
+import type { CategoryItem, MasterItem, Field } from '@/types/MasterItem'; // ✅ type-only
+import { headers, headerscategory } from '@/types/MasterItem';         // ✅ runtime value 
 
 // import SuccessSnackbar from '@/components/globalcomponent/SuccessSnackbar.vue';
 import { ref, reactive, computed, onMounted, } from 'vue';
@@ -100,9 +101,6 @@ import {
   SET_HASSAVED,
   DEACTIVATE_ITEM_CATEGORY,
 } from '@/store/storeconstant';
-
-import type { CategoryItem, MasterItem, Field } from '@/types/MasterItem'; // ✅ type-only
-import { headers, headerscategory } from '@/types/MasterItem';         // ✅ runtime value
 
 const store = useStore();
 

@@ -5,13 +5,14 @@
      <ToolbarSimple
       title="Manage Customers"
       icon="mdi-new-box"
-      :color="'bg-pink-darken-2'"
+      :color="'bg-blue-accent-2'"
       :search="search"
       :showUploadButton="true"
       @update:search="search = $event"
+      @upload-customer="DialogOpenUploadCustomer = true"
       @create="
         DialogOpenCreate = true;
-        // resetEditedItem();
+        resetEditedItem();
         error = '';
         editedIndex = -1;
       "
@@ -29,14 +30,14 @@
       :items="customers"
       :search="search"
       :loading="loading"
-      :bgcolor="'bg-pink-lighten-5'"
+      :bgcolor="'bg-blue-lighten-4'"
       @edit="editItem"
       @submit="onCreateItem"
-      @deactivate="deactivateItem"
+      @deactivate="deactivateCustomer"
     />
 
      <!-- Create/Edit Customer Dialog -->
-    <DialogItemForm
+    <DialogCustomerForm
       :dialog="DialogOpenCreate"
       :isEdit="editedIndex !== -1"
       :editedItem="editedItem"
@@ -44,20 +45,45 @@
       @close="close"
       @submit="onSubmit"
     />
+
+    <!-- Deactivate Dialog -->
+   <DialogDeactivate
+      :dialog="DialogOpenDeactive"
+      title="Change Customer Status?"
+      message="Are you sure you want to deactivate this customer?"
+      @confirm="onDeactivated"
+      @cancel="close"
+    />
+
+    <!-- Dialog Upload Customer -->
+   <DialogUploadCustomer
+      v-model:csvFile="csvFile"
+      :dialog="DialogOpenUploadCustomer"
+      :loading="uploading"
+      @confirm="onUploadCustomer"
+      @close="close"
+    />
 </v-container>
 </template>
 
 <script setup lang="ts">
 import { SnackbarError, SnackbarSuccess, ToolbarSimple } from '@/components/globalComponent';
 import TableCustomer from './TableCustomer.vue';
+import DialogCustomerForm from './DialogCustomerForm.vue';
+import DialogDeactivate from './DialogDeactivate.vue';
+import DialogUploadCustomer from './DialogUploadCustomer.vue';
+
+import { Customer, CustomerField, headerCustomer } from '@/types/Customer';
 
 import store from '@/store/store';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { 
+  CREATE_CUSTOMER,
+  DEACTIVATE_CUSTOMER,
   LOAD_CUSTOMER_DATA,
   SET_HASSAVED,
+  UPLOAD_CUSTOMER,
 } from '@/store/storeconstant';
-import { Customer, headerCustomer } from '@/types/Customer';
 
 //Variable
 const headersLocal = headerCustomer; // Use the imported headers directly
@@ -81,16 +107,28 @@ const hasSaved = computed({
     store.commit(`Customer/${SET_HASSAVED}`, val);
   },
 });
-
+const csvFile = ref<File | null>(null);
+const uploading = ref(false);
 const error = ref<string | string[]>('');
 const showError = ref<boolean>(false);
 
 //DIalog
 const DialogOpenCreate = ref<boolean>(false);
+const DialogOpenDeactive = ref<boolean>(false);
+const DialogOpenUploadCustomer = ref<boolean>(false);
+
+const allFields = computed<CustomerField[]>(() => [
+  { model: 'customer_name', label: 'Customer Name' },
+  { model: 'type', label: 'Type'  },
+  { model: 'nik', label: 'NIK' },
+  { model: 'email', label: 'E-Mail',  onEnterSubmit: true },
+  { model: 'address', label: 'Address',  onEnterSubmit: true },
+  { model: 'phone', label: 'Phone',  onEnterSubmit: true },
+]);
 
 //computed
 const customers = computed<Customer[]>(() => store.state.customer.customers);
-const loading = computed<Customer[]>(() => store.state.customer.loading);
+const loading = computed<boolean>(() => store.state.customer.loading);
 
 const loadCustomerData = () => store.dispatch(`customer/${LOAD_CUSTOMER_DATA}`);
 
@@ -104,128 +142,96 @@ function editItem(item:any) {
   DialogOpenCreate.value = true;
 }
 
+function close() {
+  DialogOpenCreate.value = false;
+  DialogOpenDeactive.value = false;
+  DialogOpenUploadCustomer.value = false;
+  editedIndex.value = -1;
+}
 
-// import { 
-//   LOAD_CUSTOMER_DATA,
-//   CREATE_CUSTOMER,
-//   DEACTIVATE_CUSTOMER,
-//   UPLOAD_CUSTOMER,
-// } from '@/store/storeconstant';
-// import { 
-//   mapActions,
-//   mapState,
-// } from 'vuex';
+function resetEditedItem() {
+// Reset field edit and update item
+Object.assign(editedItem, defaultItem);
+}
 
-//     export default {
-//     data() {
-//       return {
-//         headers: [
-//           { title: 'Customer Name', align: 'start', key: 'customer_name' },
-//           { title: 'Type', align: 'start', key: 'type' },
-//           { title: 'NIK', align: 'start', key: 'nik' },
-//           { title: 'E-mail', align: 'start', key: 'email' },
-//           { title: 'Address', align: 'start', key: 'address' },
-//           { title: 'Handphone', align: 'center', key: 'phone'},
-//           { title: 'Status', align: 'center', key: 'active_flag'},
-//           { title: 'Actions', key: 'actions', sortable: false },
-//         ],
-//         fields: [
-//           { model: 'customer_name', label: 'Customer Name' },
-//           { model: 'type', label: 'Type' },
-//           { model: 'nik', label: 'NIK' },
-//           { model: 'email', label: 'E-mail' },
-//           { model: 'address', label: 'Address' },
-//           { model: 'phone', label: 'Phone Number' },
-//         ],
-//         editedItem: {},
-//         editedIndex: -1,
-//         search: '',
-//         openCreateDialog: false,
-//         dialogDeactivate: false,
-//         dialogUploadCustomer: false,
-//         error: '',
-//         showError: false,
-//         //csv
-//         csvFile: null,
-//         uploading: false,
-//         }
-//       },
+function onSubmit(item: Partial<Customer>) {
+  Object.assign(editedItem, item); 
+  console.log('Submitted item:', item);
+  onCreateItem(); 
+}
 
-//     created() {
-//       this.loadCustomer();
-//     },
+async function onCreateItem() {
+  try {
+    error.value = '';
+    console.log('Creating item:', editedItem);
 
-//     computed: {
-//       ...mapState('customer', ['customers', 'loading', 'error', 'hasSaved',]),
+    await store.dispatch(`customer/${CREATE_CUSTOMER}`, editedItem);
+    DialogOpenCreate.value = false;
+  } catch (e) {
+    showError.value = true;
+    
+    if (Array.isArray(e)) {
+      error.value = e; // e is string[]
+    } else if (e instanceof Error) {
+      error.value = e.message; // e is an Error
+    } else {
+      error.value = String(e); // fallback
+    }
+  }
+}
 
-//       formIcon() {return this.editedIndex === -1 ? 'mdi-new-box ' : 'mdi-update ';},
-//       formTitle() {return this.editedIndex === -1 ? 'Create Customer' : 'Edit Customer';},
-//     },   
+function deactivateCustomer(item:any) {
+  Object.assign(editedItem, item);
+  DialogOpenDeactive.value = true;
+}
 
-//     methods: 
-//     {
-//       ...mapActions('customer', {
-//           loadCustomer : LOAD_CUSTOMER_DATA,
-//           createCustomer: CREATE_CUSTOMER,
-//           deactivateCustomer: DEACTIVATE_CUSTOMER,
-//           uploadCustomer: UPLOAD_CUSTOMER,
-//      }),
+async function onDeactivated() {
+  try {
+    error.value = '';
 
-//     editItem(item) {
-//       this.editedIndex = this.customers.indexOf(item);
-//       this.editedItem = { ...item };
-//       this.openCreateDialog = true;
-//     },
+    await store.dispatch(`customer/${DEACTIVATE_CUSTOMER}`, editedItem.id);
+    DialogOpenDeactive.value = false;
+  } catch (e) {
+    showError.value = true;
 
-//     close() {
-//       this.openCreateDialog = false;
-//       this.dialogDeactivate = false;
-//       this.editedItem = {};
-//       this.editedIndex = -1;
-//     },
+    if (Array.isArray(e)) {
+      error.value = e; // e is string[]
+    } else if (e instanceof Error) {
+      error.value = e.message; // e is an Error
+    } else {
+      error.value = String(e); // fallback
+    }
+  }
+}
 
-//     updateStatusCustomer(item) {
-//       this.editedIndex = this.customers.indexOf(item)
-//       this.editedItem = Object.assign({}, item)
-//       this.dialogDeactivate = true
-//     },
+// Upload handler
+async function onUploadCustomer() {
+  if (!csvFile.value) {
+    showError.value = true;
+    error.value = ['Please select a CSV file to upload.'];
+    return;
+  }
+  console.log("csv file:", csvFile.value);
+  uploading.value = true;
 
-//     async onCreateCustomer() {
-//       this.error = "";
-//       try {
-//         await this.createCustomer(this.editedItem);
-//         this.openCreateDialog = false;
-//       } catch (error) {
-//         this.showError = true;
-//         this.error = error;
-//       }
-//     },
+  try {
+    await store.dispatch(`customer/${UPLOAD_CUSTOMER}`, csvFile.value);
+    DialogOpenUploadCustomer.value = false;
+    csvFile.value = null;
+  } catch (e: unknown) {
+    showError.value = true;
+    if (Array.isArray(e)) {
+      error.value = e;
+    } else if (typeof e === 'string') {
+      error.value = [e];
+    } else if (e instanceof Error) {
+      error.value = [e.message];
+    } else {
+      error.value = ['An unknown error occurred.'];
+    }
+  } finally {
+    uploading.value = false;
+  }
 
-//     async onDeactivateCustomer() {
-//       try {
-//         await this.deactivateCustomer(this.editedItem.id);
-//         this.dialogDeactivate = false;
-//       } catch (error) {
-//         this.showError = true;
-//         this.error = error;
-//       }
-//     },
-
-//      async onUploadCustomer() {
-//       if (!this.csvFile) return this.showError = true, this.error = ['Please select a CSV file to upload.'] ;
-//       this.uploading = true;
-//       try {
-//         await this.uploadCustomer(this.csvFile);
-//         this.dialogUploadCustomer = false;
-//         this.csvFile = null;
-//       } catch (e) {
-//         this.showError = true;
-//         this.error = Array.isArray(e) ? e : [e];
-//       } finally {
-//           this.uploading = false;
-//       }
-//     },
-
-//   },
-// }
+}
 </script>

@@ -1,10 +1,10 @@
 <template>
   <v-dialog v-model="localDialog" max-width="700px" persistent>
     <v-card class="rounded-xl elevation-12">
-      <v-card-title class="bg-cyan-darken-2 text-white d-flex align-center">
+      <v-card-title class="bg-blue-accent-2 text-white d-flex align-center">
         <v-icon size="28" class="mr-2">{{ isEdit ? 'mdi-update' : 'mdi-new-box' }}</v-icon>
         <span class="text-h6 font-weight-medium">
-          {{ isEdit ? 'Edit Item' : 'Create Item' }}
+          {{ isEdit ? 'Edit Customer' : 'Create Customer' }}
         </span>
       </v-card-title>
 
@@ -40,7 +40,7 @@
           Cancel
         </v-btn>
         <v-btn
-          color="cyan-darken-2"
+          color="blue-accent-4"
           variant="elevated"
           class="text-white"
           @click="$emit('submit', localItem)"
