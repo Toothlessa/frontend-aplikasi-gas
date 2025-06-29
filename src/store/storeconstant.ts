@@ -45,3 +45,19 @@ export const UPLOAD_CUSTOMER = '[actions] upload customer data'
 
 /* mutations */
 export const SET_DATA_CUSTOMER = '[mutations] set all data customers'
+
+/* Asset */
+/* actions */
+export const CREATE_ASSET = '[actions] create asset'
+export const LOAD_ASSET = '[actions] load data asset'
+export const DEACTIVE_ASSET = '[actions] deactivate asset'
+
+export const CREATE_OWNER = '[actions] create owner'
+export const LOAD_OWNER = '[actions] load owner'
+export const DEACTIVE_OWNER = '[actions] deactivate owner'
+
+/* getters */
+
+/* mutations */
+export const SET_DATA_ASSET = '[mutations] set all data asset'
+export const SET_DATA_OWNER = '[mutations] set data owner'

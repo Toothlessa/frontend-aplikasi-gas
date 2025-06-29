@@ -10,7 +10,7 @@
           <v-btn
             class="pa-2 ma-2 text-center bg-orange-lighten-4"
             prepend-icon="mdi-account-plus"
-            @click="dialogOwner=true"
+            @click="DialogOpenOwner=true"
           >
           Owner
           </v-btn>
@@ -41,9 +41,9 @@
             <v-autocomplete
               class="pa-2 ma-2"
               label="Asset Name"
-              v-model="assets.asset_name"
+              v-model="assets.item_name"
               variant="solo-inverted"
-              :items="masterItems"
+              :items="assets"
               item-title="item_name"
             >
             </v-autocomplete>
@@ -130,7 +130,7 @@
           </v-data-table>
       </v-card>
       <v-dialog
-        v-model="dialogOwner"
+        v-model="DialogOpenOwner"
         transition="dialog-bottom-transition"
         width="auto"
       >
@@ -140,23 +140,11 @@
         > 
           <v-card-title class="text-h6 font-weight-regular bg-blue-darken-1">
             <v-icon size="30" >mdi-account-circle</v-icon>&nbsp; Owners
-            <v-alert 
-            class="text-red"
-            v-model="alert"
-            border="start"
-            variant="tonal"
-            closable
-            v-if="error"
-            > 
-            {{ error }} 
-          </v-alert>
           </v-card-title>
             <v-text-field 
               class="pa-2 ma-2"
-              v-model="ownerName"
               label="Owner Name"
               variant="solo-inverted"
-              @keyup.enter="createOwner"
             >
             </v-text-field>
             <div class="text-center">
@@ -165,7 +153,6 @@
                 prepend-icon="mdi-copyright"
                 text="Create"
                 variant="outlined"
-                @click="createOwner"
               >
               </v-btn>
               <v-btn
@@ -173,38 +160,14 @@
                 prepend-icon="mdi-close-circle-outline"
                 text="Close"
                 variant="outlined"
-                @click="dialogOwner=false"
+                @click="DialogOpenOwner=false"
               >
               </v-btn>
             </div>
             <v-divider></v-divider>
               <v-col>
                 <v-data-table
-                  :headers="ownerHeaders"
-                  :items="assetOwners"
                 >
-                  <template v-slot:[`item.number`]="{ index}">
-                    <tr>
-                      <td>{{index + 1}}</td>
-                    </tr>
-                  </template>
-                  <template v-slot:[`item.actions`]="{ item }">
-                    <div class="text-end">
-                      <v-icon size="small" @click="editOwner(item)"> mdi-pencil-outline </v-icon>
-                      <v-icon size="small" @click="updateStatusOwner(item)"> mdi-radioactive </v-icon>
-                    </div>
-                  </template>
-                  <template v-slot:[`item.active_flag`]="{ item }">
-                  <div class="text-center">
-                    <v-chip
-                      :color="item.active_flag ? 'green' : 'black'"
-                      :text="item.active_flag ? 'Active' : 'Inactive'"
-                      class="text-uppercase"
-                      size="small"
-                      label
-                    ></v-chip>
-                  </div>
-                </template>
                 </v-data-table>
               </v-col>
         </v-card>
@@ -406,358 +369,30 @@
     </v-container>
   </template>
 
-<script>
-import AxiosInstance from '@/services/AxiosInstance';
-import Validations from '@/services/Validations';
+<script setup lang="ts">
+
+import { Asset, AssetField } from '@/types/asset';
+
 import store from '@/store/store';
-import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
+import { computed, onMounted, reactive, ref } from 'vue';
+import { 
+  LOAD_ASSET,
+  LOAD_OWNER
+} from '@/store/storeconstant';
 
-export default {
-  data: () => ({
-    loading: false,
-    assets: {
-      owner_id: '',
-      asset_name: '',
-      quantity: '',
-      cogs: '',
-      selling_price: '',
-      description: '',
-    },
-    masterItems: [],
-    assetOwners: [],
-    updateOwners: [],
-    updateOwnerAsset: '',
-    assetSummary: [],
-    detailAssets: [],
-    updateAssets: [],
-    getDetailAssets: [],
-    dialogOwner: false,
-    dialogUpdateOwner: false,
-    dialogInactive: false,
-    dialogDetailAsset: false,
-    dialogUpdateAsset: false,
-    ownerName: '',
-    search: '',
-    hasSaved: false,
-    alert: false,
-    error:'',
-    ownerHeaders: [
-      { title: 'No', align: 'start', key: 'number'},
-      { title: 'Owner', align: 'start', key: 'name'},
-      { title: 'Status', align: 'center', key: 'active_flag' },
-      { title: 'Action', align: 'end', key: 'actions' },
-    ],
-    headers: [
-      { title: 'No', align: 'start', key: 'number'},
-      { title: 'Owner', align: 'start', key: 'owner_name'},
-      { title: 'Asset Name', align: 'start', key: 'asset_name' },
-      { title: 'Quantity', align: 'center', key: 'quantity' },
-      // { title: 'Buying Price', align: 'center', key: 'cogs', value: item => this.formatPrice(item.cogs) },
-      { title: 'Buying Price', align: 'center', key: 'cogs' },
-      { title: 'Selling Price', align: 'center', key: 'selling_price' },
-      { title: 'Action', align: 'end', key: 'actions' },
-    ],
-    detailHeaders: [
-      { title: 'No', align: 'start', key: 'number'},
-      { title: 'Owner', align: 'start', key: 'owner_name'},
-      { title: 'Asset Name', align: 'start', key: 'asset_name' },
-      { title: 'Quantity', align: 'start', key: 'quantity' },
-      { title: 'Buying Price', align: 'start', key: 'cogs' },
-      { title: 'Selling Price', align: 'start', key: 'selling_price' },
-      { title: 'Descrtiption', align: 'start', key: 'description'},
-      { title: 'Created Date', align: 'start', key: 'created_at'},
-      { title: 'Action', align: 'end', key: 'actions' },
-    ],
-  }),
 
-  created() {
-    this.assetOwnerLoad();
-    this.assetSummaryLoad();
-    this.getItemAsset();
-  },
+const DialogOpenOwner = ref<boolean>(false);
 
-  watch: {
-      loading (val) {
-        if (!val) return
+const loadAssetData = () => store.dispatch(`asset/${LOAD_ASSET}`);
+const loadOwnerData = () => store.dispatch(`asset/${LOAD_OWNER}`);
 
-        setTimeout(() => (this.loading = false), 500)
-      },
-    },
+onMounted(() => {
+  loadAssetData();
+  loadOwnerData();
+});
 
-  methods: {
+//computed
+const assets = computed<Asset[]>(() => store.state.asset.assets);
+const owners = computed<Asset[]>(() => store.state.asset.owners);
 
-    formatPrice (value) {
-      return `Rp${parseFloat(value).toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&.')}`
-    },
-
-    editOwner(item) {
-        this.updateOwners = item;
-        this.dialogUpdateOwner = true
-    }, 
-
-    updateStatusOwner(item) {
-      this.updateOwners = item;
-      this.dialogInactive = true;
-    },
-
-    detailAsset(item) {
-      this.detailAssets = item;
-      console.log(this.detailAssets.owner_id);
-      this.getDetailAsset();
-      this.dialogDetailAsset = true;
-    },
-
-    updateAsset(item) {
-      this.updateAssets = item;
-      this.updateOwnerAsset = item.owner_id;
-      this.dialogUpdateAsset = true;
-    },
-
-    async getItemAsset() {
-
-        try {
-          await AxiosInstance.get(`http://127.0.0.1:8000/api/masteritems/itemtype/` + 'ASSET',
-        {
-          headers: {
-            'Content-Type': 'application/json', 
-            'Accept': 'application/json',
-            'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-          }
-        })
-          .then((response) => {
-            if(response.status == 200){
-              this.masterItems = response.data.data;
-          }
-        })
-        }catch (error) {
-          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],)
-          this.alert = true
-        } 
-      },
-
-    async assetOwnerLoad() {
-
-      try {
-          await AxiosInstance.get(`http://127.0.0.1:8000/api/assetowners/all`,
-          {
-              headers: {
-              'Content-Type': 'application/json', 
-              'Accept': 'application/json',
-              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-          }
-      })
-      .then((response) => { 
-
-        if(response.status == 200){
-          for(let i=0; i<response.data.data.length; i++) {
-            if(response.data.data[i].active_flag =='N') {
-              response.data.data[i].active_flag = null;
-            }
-            this.assetOwners = response.data.data[i];
-          }
-            this.assetOwners = response.data.data;
-      }
-      });
-
-      } catch(error) {
-          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
-          this.alert = true
-      }
-    },
-
-    async assetSummaryLoad() {
-
-      try {
-          await AxiosInstance.get(`http://127.0.0.1:8000/api/assets/summary`,
-          {
-              headers: {
-              'Content-Type': 'application/json', 
-              'Accept': 'application/json',
-              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-          }
-      })
-      .then((response) => { this.assetSummary = response.data.data; });
-
-      } catch(error) {
-          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
-          this.alert = true
-      }
-    },
-
-    async createOwner() {
-
-      let postData = {
-        name: this.ownerName,
-      }
-
-      try {
-          await AxiosInstance.post(`http://127.0.0.1:8000/api/assetowners`, postData,
-          {
-              headers: {
-              'Content-Type': 'application/json', 
-              'Accept': 'application/json',
-              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-          }
-      })
-      .then((response) => { 
-
-        if(response.status == 201) {
-          this.hasSaved = true;
-          this.dialogOwner = false;
-          this.ownerName = null;
-          this.assetOwnerLoad();
-        }
-      });
-
-      } catch(error) {
-          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
-          this.alert = true
-      }
-    },
-  
-    async updateOwner() {
-
-      let postData = {
-        name: this.updateOwners.name,
-      }
-
-      try {
-          await AxiosInstance.patch(`http://127.0.0.1:8000/api/assetowners/` +this.updateOwners.id, postData,
-          {
-              headers: {
-              'Content-Type': 'application/json', 
-              'Accept': 'application/json',
-              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-          }
-      })
-      .then((response) => { 
-
-        if(response.status == 200) {
-          this.hasSaved = true;
-          this.dialogUpdateOwner = false;
-          this.assetOwnerLoad();
-        }
-      });
-
-      } catch(error) {
-          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
-          this.alert = true
-      }
-    },
-
-    async inactiveOwner() {
-
-      try {
-          await AxiosInstance.patch(`http://127.0.0.1:8000/api/assetowners/inactive/` +this.updateOwners.id, [],
-          {
-              headers: {
-              'Content-Type': 'application/json', 
-              'Accept': 'application/json',
-              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-          }
-      })
-      .then((response) => { 
-
-        if(response.status == 200) {
-          this.hasSaved = true;
-          this.dialogInactive = false;
-          this.assetOwnerLoad();
-        }
-      });
-
-      } catch(error) {
-          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
-          this.alert = true
-      }
-    },
-
-    async createAsset() {
-
-      let postData = this.assets;
-
-      try {
-          await AxiosInstance.post(`http://127.0.0.1:8000/api/assets`, postData,
-          {
-              headers: {
-              'Content-Type': 'application/json', 
-              'Accept': 'application/json',
-              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-          }
-      })
-      .then((response) => {
-
-        if(response.status == 201) {
-          this.assets = {};
-          this.hasSaved = true;
-          this.assetSummaryLoad();
-        }
-      });
-
-      } catch(error) {
-          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
-          this.alert = true
-      }
-    },
-
-    async getDetailAsset() {
-
-      try {
-          await AxiosInstance.get(`http://127.0.0.1:8000/api/assets/details/` + this.detailAssets.owner_id + `/assets/` + this.detailAssets.asset_name,
-          {
-              headers: {
-              'Content-Type': 'application/json', 
-              'Accept': 'application/json',
-              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-          }
-      })
-      .then((response) => {
-
-        if(response.status == 200) {
-          this.getDetailAssets = response.data.data;
-        }
-      });
-
-      } catch(error) {
-          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
-          this.alert = true
-      }
-    },
-
-    async updateDetailAsset() {
-
-      let postData = {
-        owner_id : this.updateOwnerAsset,
-        asset_name: this.updateAssets.asset_name,
-        quantity: this.updateAssets.quantity,
-        cogs: this.updateAssets.cogs,
-        selling_price: this.updateAssets.selling_price,
-        description: this.updateAssets.description
-      }
-
-      try {
-          await AxiosInstance.patch(`http://127.0.0.1:8000/api/assets/` + this.updateAssets.id, postData,
-          {
-              headers: {
-              'Content-Type': 'application/json', 
-              'Accept': 'application/json',
-              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-          }
-      })
-      .then((response) => {
-
-        if(response.status == 200) {
-          this.hasSaved = true;
-          this.getDetailAsset();
-          this.assetSummaryLoad();
-          this.dialogUpdateAsset = false;
-        }
-      });
-
-      } catch(error) {
-          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
-          this.alert = true
-      }
-    },
-  }
-}
 </script>

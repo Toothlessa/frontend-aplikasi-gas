@@ -18,7 +18,7 @@ import { RootState } from '@/store/types'; // ← create this file too
 type Context = ActionContext<CustomerState,  RootState>;
 
 const actions: ActionTree<CustomerState, RootState> = {
-     async [LOAD_CUSTOMER_DATA]({ commit }: Context): Promise<void> {
+  async [LOAD_CUSTOMER_DATA]({ commit }: Context): Promise<void> {
     commit(SET_LOADING, true);
     try {
 
