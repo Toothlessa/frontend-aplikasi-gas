@@ -13,6 +13,8 @@ const state = (): AssetState => ({
   loading: false,
   hasSaved: false,
   headerAsset: [],
+  headerOwner: [],
+  selectedAsset: null,
 });
 
 const asset: Module<AssetState, RootState> = {

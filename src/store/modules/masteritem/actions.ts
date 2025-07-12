@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import {
   GET_USER_TOKEN_GETTER,
   LOAD_MASTER_ITEM,
@@ -15,7 +15,7 @@ import {
 import Validations from '@/services/Validations';
 import store from '@/store/store';
 import { ActionContext, ActionTree } from 'vuex';
-import { MasterItemState, MasterItem, CategoryItem } from '@/types/MasterItem';
+import { MasterItemState, MasterItem, CategoryItem, RawMasterItem, RawCategoryItem } from '@/types/MasterItem';
 import { RootState } from '@/store/types'; // ← create this file too
 
 type Context = ActionContext<MasterItemState,  RootState>;
@@ -27,21 +27,22 @@ const actions: ActionTree<MasterItemState, RootState> = {
     try {
 
       const token = store.getters[`auth/${GET_USER_TOKEN_GETTER}`];
-      const response = await axios.get('http://127.0.0.1:8000/api/masteritems/all', {
+      const response: AxiosResponse<{ data: RawMasterItem[] }> = await axios.get('http://127.0.0.1:8000/api/masteritems/all', {
         headers: {
           Authorization: token,
         },
       });
 
-      const data: MasterItem[] = response.data.data.map((item: any) => ({
+      const data: MasterItem[] = response.data.data.map((item) => ({
         ...item,
         active_flag: item.active_flag === 'Y',
         in_stock: item.in_stock === 'Y',
       }));
 
       commit(SET_DATA_MITEM, data);
-    } catch (error: any) {
-      throw Validations.getErrorMessageFromCodeMasterItem(error.response?.data?.errors?.[0]);
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { errors?: string[] } } };
+      throw Validations.getErrorMessageFromCodeMasterItem(axiosError.response?.data?.errors?.[0]);
     } finally {
       commit(SET_LOADING, false);
     }
@@ -54,20 +55,21 @@ const actions: ActionTree<MasterItemState, RootState> = {
       const url = `http://127.0.0.1:8000/api/categoryitems/all`;
       const token = store.getters[`auth/${GET_USER_TOKEN_GETTER}`];
       
-      const response = await axios.get(url, {
+      const response: AxiosResponse<{ data: RawCategoryItem[] }> = await axios.get(url, {
         headers: {
           Authorization: token,
         },
       });
 
-      const data: CategoryItem[] = response.data.data.map((item: any) => ({
+      const data: CategoryItem[] = response.data.data.map((item) => ({
         ...item,
         active_flag: item.active_flag === 'Y',
       }));
 
       commit(SET_DATA_CATEGORY, data);
-    } catch (error: any) {
-      throw Validations.getErrorMessageFromCodeMasterItem(error.response?.data?.errors?.[0]);
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { errors?: string[] } } };
+      throw Validations.getErrorMessageFromCodeMasterItem(axiosError.response?.data?.errors?.[0]);
     } finally {
       commit(SET_LOADING, false);
     }
@@ -96,8 +98,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
           commit(SET_HASSAVED, false);
         }, 2000);
       }
-    } catch (error: any) {
-      const errors = error.response?.data?.errors;
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { errors?: { [key: string]: string[] } } } };
+      const errors = axiosError.response?.data?.errors;
       if (errors) {
         const messages: string[] = [];
 
@@ -116,7 +119,7 @@ const actions: ActionTree<MasterItemState, RootState> = {
   },
 
   async [DEACTIVATE_ITEM](
-    { dispatch, commit }: Context, id
+    { dispatch, commit }: Context, id: number
   ): Promise<void> {
     try {
       const url = `http://127.0.0.1:8000/api/masteritems/inactive/${id}`;
@@ -134,8 +137,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
           commit(SET_HASSAVED, false);
         }, 2000);
       }
-    } catch (error: any) {
-      const errors = error.response?.data?.errors;
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { errors?: { [key: string]: string[] } } } };
+      const errors = axiosError.response?.data?.errors;
       if (errors) {
         const messages: string[] = [];
 
@@ -176,8 +180,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
           commit(SET_HASSAVED, false);
         }, 2000);
       }
-    } catch (error: any) {
-      const errors = error.response?.data?.errors;
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { errors?: { [key: string]: string[] } } } };
+      const errors = axiosError.response?.data?.errors;
       if (errors) {
         const messages: string[] = [];
 
@@ -196,7 +201,7 @@ const actions: ActionTree<MasterItemState, RootState> = {
   },
 
    async [DEACTIVATE_ITEM_CATEGORY](
-    { dispatch, commit }: Context, id
+    { dispatch, commit }: Context, id: number
   ): Promise<void> {
     try {
       const url = `http://127.0.0.1:8000/api/categoryitems/inactive/${id}`;
@@ -214,8 +219,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
           commit(SET_HASSAVED, false);
         }, 2000);
       }
-    } catch (error: any) {
-      const errors = error.response?.data?.errors;
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { errors?: { [key: string]: string[] } } } };
+      const errors = axiosError.response?.data?.errors;
       if (errors) {
         const messages: string[] = [];
 

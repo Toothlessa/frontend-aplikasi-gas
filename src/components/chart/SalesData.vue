@@ -1,8 +1,9 @@
 <template>
-  <v-toolbar flat color="rgba(0,0,0,0)" class="mt-n5">
+  <v-toolbar color="transparent" class="mt-n5" rounded-t-xl>
     <v-toolbar-title class="text-teal text-lg-h5 font-weight-bold">Gas Sales data</v-toolbar-title>
   </v-toolbar>
-  <v-card height="" flat color="transparent" class="mt-n5">
+  <v-divider></v-divider>
+  <v-card rounded="xl" elevation="4" class="mt-n5">
     <Line 
       :data="data" 
       width="100px"
@@ -27,7 +28,7 @@ import {
   Legend
 } from 'chart.js'
 import { Line } from 'vue-chartjs'
-import * as chartConfig from '../../chart/LineChart.js'
+import * as chartConfig from '../../chart/LineChart.ts'
 
 ChartJS.register(
   CategoryScale,

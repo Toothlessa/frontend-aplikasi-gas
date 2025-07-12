@@ -1,688 +1,754 @@
 <template>
-    <v-row no-gutters>
-      <v-div>
-      <v-card 
-        class="elevation-12 text-left pa-1 ma-1" 
-        width="350" 
-        color="white" 
-        variant="elevated"
+  <div :class="theme.global.current.value.dark ? 'modern-layout-dark' : 'modern-layout-light'">
+    <v-container fluid>
+      <!-- Header -->
+      <v-sheet
+        class="page-header"
+        elevation="4"
+        rounded="xl"
+        :class="theme.global.current.value.dark ? 'page-header-dark' : 'page-header-light'"
       >
-        <v-card-title 
-          class="d-flex align-center pe-2 bg-teal-lighten-1" color="cyan-lighten-2"
-        >
-        <v-icon color="black">mdi-chart-gantt</v-icon> &nbsp; Input Transaction
-        </v-card-title>
-          <v-card-item>
-            <v-alert 
-                class="text-teal"
+        <v-row align="center" class="pa-2">
+          <v-col cols="auto">
+            <v-avatar color="white" size="48">
+              <v-icon icon="mdi-swap-horizontal-bold" color="cyan-darken-2" size="40" />
+            </v-avatar>
+          </v-col>
+          <v-col>
+            <h1 :class="theme.global.current.value.dark ? 'text-h6 font-weight-bold text-white' : 'text-h6 font-weight-bold text-white'">
+              Transactions
+            </h1>
+            <p :class="theme.global.current.value.dark ? 'text-body-2 text-white mt-1' : 'text-body-2 text-white mt-1'" style="opacity: 0.9;">
+              Manage and track all your financial transactions
+            </p>
+          </v-col>
+        </v-row>
+      </v-sheet>
+
+      <v-row class="mt-8">
+        <!-- Left Column: Input Form -->
+        <v-col cols="12" md="3">
+          <v-card class="form-card rounded-xl elevation-2" :class="theme.global.current.value.dark ? 'form-card-dark' : 'form-card-light'">
+            <v-card-title :class="theme.global.current.value.dark ? 'card-header-dark' : 'card-header-light'">
+              <v-icon start>mdi-cash-register</v-icon>
+              New Transaction
+            </v-card-title>
+            <v-card-text class="pa-5">
+              <v-alert
+                v-if="error"
                 v-model="alert"
+                type="error"
                 variant="tonal"
                 closable
-                v-if="error"
-                > 
-                {{ error }} 
-            </v-alert>
-              <v-divider class="mt-1"></v-divider>
-                  <v-autocomplete
-                    label="Customer"
-                    v-model="selectedCustomer"
-                    variant="outlined"       
-                    :items="customers"
-                    :disabled="!fieldDisabled"
-                    item-title="customer_name"
-                    item-value="id"
-                    color="blue-grey"
-                  >
-                  <template v-slot:item="{ props, item }">
-                    <v-list-item
-                      v-bind="props"
-                      :subtitle="item.raw.nik"
-                      :title="item.raw.customer_name"
-                    ></v-list-item>
-                  </template>
-                </v-autocomplete>
-                  <v-number-input
-                    label="Qty"
-                    type="number"
-                    v-model="editedItem.quantity"
-                    :disabled="!fieldDisabled"
-                    variant="outlined"
-                    color="blue-grey"
-                    :reverse="false"
-                    controlVariant="split"
-                    @keyup.enter='save'
-                  ></v-number-input>
-                  <v-textarea
-                    label="Description"
-                    v-model="this.editedItem.description"
-                    variant="outlined"       
-                    :disabled="!fieldDisabled"
-                    color="blue-grey"
-                  >
-                </v-textarea>
-                  <v-autocomplete
-                    v-model="editedItem.amount"
-                    variant="outlined"
-                    :items="harga"
-                    item-title="name"
-                    item-value="value"
-                    :label="`Price — ${isEditAmt ? 'Editable' : 'Saved'}`"
-                    :hint="!isEditAmt ? 'Click the icon to edit' : 'Click the icon to save'"
-                    :readonly="!isEditAmt"
-                    :disabled="!fieldDisabled"
-                    persistent-hint
-                    color="blue-grey"
-                  >
-                  <template v-slot:append>
-                  <v-slide-x-reverse-transition mode="out-in">
-                    <v-icon
-                      :key="`icon-${isEditAmt}`"
-                      :color="isEditAmt ? 'success' : 'info'"
-                      :icon="isEditAmt ? 'mdi-check-outline' : 'mdi-circle-edit-outline'"
-                      @click="isEditAmt = !isEditAmt"
-                    ></v-icon>
-                  </v-slide-x-reverse-transition>
+                class="mb-4"
+              >
+                {{ error }}
+              </v-alert>
+
+              <v-autocomplete
+                label="Customer"
+                v-model="selectedCustomer"
+                variant="outlined"
+                rounded="lg"
+                :items="customers"
+                :disabled="!fieldDisabled"
+                item-title="customer_name"
+                item-value="id"
+                prepend-inner-icon="mdi-account-search-outline"
+                class="mb-4"
+              >
+                <template v-slot:item="{ props, item }">
+                  <v-list-item
+                    v-bind="props"
+                    :subtitle="item.raw.nik"
+                    :title="item.raw.customer_name"
+                  />
                 </template>
-                  </v-autocomplete>
-                  <v-snackbar
-                    class="text-center"
-                    color="orange"
-                    v-model="hasSaved"
-                    :timeout="2000"
-                    location="top center"
-                  >
-                  Data have been saved
-                  </v-snackbar>
-                <v-row>
-                  <v-col>
-                    <v-checkbox
-                      label="Delivery"
-                      v-model="isSend"
-                      color="blue-grey"
-                      @click="checkIsSend"
-                      :disabled="!fieldDisabled"
-                    >
-                    </v-checkbox>
-                  </v-col>
-                  <v-col class="text-right">
-                    <v-btn
-                      class="text-white"
-                      variant="elevated"
-                      size="large"
-                      rounded="lg"
-                      color="blue-grey"
-                      :disabled="isSaveDisabled"
-                      :loading="loadingButton"
-                      @click="save"
-                    >
-                        Save
-                      <!-- <v-icon size="30">mdi-content-save</v-icon> -->
-                    </v-btn>
-                  </v-col>
-                </v-row>
-                <v-card-title class="d-flex align-center pe-2 bg-teal-lighten-1" color="cyan-lighten-2">
-                  <v-icon color="black">mdi-chart-timeline</v-icon> &nbsp; Pick The Item
-                </v-card-title>
-                <v-divider></v-divider>
-                  <v-autocomplete
-                    v-model="selectedItem"
-                    :items="mItems"
-                    item-title="item_name"
-                    item-value="id"
-                    :label="`Item — ${isEditing ? 'Editable' : 'Saved'}`"
-                    :readonly="!isEditing"
-                    :hint="!isEditing ? 'Click the icon to edit' : 'Click the icon to save'"
-                    :disabled="!fieldDisabled"
-                    prepend-icon="mdi-tooltip-edit-outline"
-                    persistent-hint
-                    color="blue-grey"
-                  >
-                    <template v-slot:append>
-                      <v-slide-x-reverse-transition mode="out-in">
-                        <v-icon
-                          :key="`icon-${isEditing}`"
-                          :color="isEditing ? 'success' : 'info'"
-                          :icon="isEditing ? 'mdi-check-outline' : 'mdi-circle-edit-outline'"
-                          @click="isEditing = !isEditing"
-                        ></v-icon>
-                      </v-slide-x-reverse-transition>
-                    </template>
-                  </v-autocomplete>
-              </v-card-item>
+              </v-autocomplete>
+
+              <v-number-input
+                label="Quantity"
+                v-model="editedItem.quantity"
+                :disabled="!fieldDisabled"
+                variant="outlined"
+                rounded="lg"
+                controlVariant="split"
+                prepend-inner-icon="mdi-counter"
+                @keyup.enter="save"
+                class="mb-4"
+              />
+
+              <v-textarea
+                label="Description"
+                v-model="editedItem.description"
+                variant="outlined"
+                rounded="lg"
+                rows="2"
+                :disabled="!fieldDisabled"
+                prepend-inner-icon="mdi-note-text-outline"
+                class="mb-4"
+              />
+
+              <v-autocomplete
+                v-model="editedItem.amount"
+                variant="outlined"
+                rounded="lg"
+                :items="harga"
+                item-title="name"
+                item-value="value"
+                :label="`Price`"
+                :hint="!isEditAmt ? 'Click lock to edit' : 'Click lock to save'"
+                :readonly="!isEditAmt"
+                :disabled="!fieldDisabled"
+                persistent-hint
+                prepend-inner-icon="mdi-currency-usd"
+              >
+                <template v-slot:append>
+                  <v-icon
+                    :color="isEditAmt ? 'error' : 'success'"
+                    :icon="isEditAmt ? 'mdi-lock-open-variant-outline' : 'mdi-lock-outline'"
+                    @click="isEditAmt = !isEditAmt"
+                  />
+                </template>
+              </v-autocomplete>
+
+              <v-checkbox
+                label="Delivery Service"
+                v-model="isSend"
+                color="cyan-darken-2"
+                @click="checkIsSend"
+                :disabled="!fieldDisabled"
+                class="mt-2"
+              />
+
+              <v-btn
+                block
+                class="text-white mt-4"
+                variant="elevated"
+                size="large"
+                rounded="xl"
+                color="cyan-darken-1"
+                :disabled="isSaveDisabled"
+                :loading="loadingButton"
+                @click="save"
+              >
+                <v-icon left>mdi-content-save</v-icon>
+                Save Transaction
+              </v-btn>
+            </v-card-text>
           </v-card>
-      </v-div>
-        <v-col>
-          <v-card 
-            class="elevation-12 font-weight-regular pa-1 ma-1" 
-            max-height="auto"
-            max-width="auto" 
-            color="white" 
-            variant="elevated"
-          >
-            <v-card-title class="d-flex align-center pe-2 bg-teal-lighten-1" color="cyan-lighten-2">
-              <v-icon icon="mdi-book-open" color="black"></v-icon> &nbsp; Data Transaction
-            <v-spacer></v-spacer>
-            <v-text-field 
-                v-model="search" 
-                density="compact" 
-                label="search by description" 
-                prepend-inner-icon="mdi-magnify" 
-                variant="solo-filled" 
-                flat 
-                >
-            </v-text-field>
-          </v-card-title>
-          <v-dialog 
-            v-model="dialog" 
-            max-width="400px"
-          >
-            <template v-slot:activator="{ props }">
-                <v-btn class="text-white mb-2" color="blue-grey" variant="text" icon v-bind="props">
-                  <v-icon size="30">mdi-calendar</v-icon>
-                </v-btn>&nbsp;{{ dateTitle }} 
-             </template>
-            <v-container>
-              <v-row justify="space-around">
-                <v-date-picker
-                  v-model="pickDate"
-                  color="blue-grey"
-                  min="2025-01-01"
-                  @keyup.enter="getTransactionByDate(); close()"
-                >
-                </v-date-picker>
-              </v-row>
-            </v-container>
-          </v-dialog>
-          <v-dialog
-            v-model="dialogUpdate"
-            transition="dialog-top-transition"
-            width="400"
-          >
-          <v-card  
-            class="elevation-12 font-weight-regular"
-          >
-          <v-card-title class="d-flex align-center pe-2 bg-teal-lighten-1" color="cyan-lighten-2">
-              <v-icon icon="mdi-mushroom" color="black"></v-icon> &nbsp; Update Transaction
-          </v-card-title>
-              <v-card-item>
-                <v-alert 
-                    class="text-teal"
-                    v-model="alert"
-                    variant="tonal"
-                    closable
-                    v-if="error"
-                    > 
-                    {{ error }} 
-                </v-alert>
-                  <v-divider class="mt-1"></v-divider>
-                      <v-autocomplete
-                        label="Customer"
-                        v-model="updateTrx.customer_id"
-                        variant="outlined"       
-                        :items="customers"
-                        :disabled="!fieldDisabled"
-                        item-title="customer_name"
-                        item-value="id"
-                        color="blue-grey"
-                        @keyup.enter="save"
-                      >
-                      <template v-slot:item="{ props, item }">
-                        <v-list-item
-                          v-bind="props"
-                          :subtitle="item.raw.nik"
-                          :title="item.raw.customer_name"
-                        ></v-list-item>
-                      </template>
-                    </v-autocomplete>
-                      <v-number-input
-                        label="Qty"
-                        type="number"
-                        v-model="updateTrx.quantity"
-                        :disabled="!fieldDisabled"
-                        variant="outlined"
-                        color="blue-grey"
-                        :reverse="false"
-                        controlVariant="split"
-                        @keyup.enter="save"
-                      ></v-number-input>
-                      <v-textarea
-                        label="Description"
-                        v-model="this.updateTrx.description"
-                        variant="outlined"       
-                        :disabled="!fieldDisabled"
-                        color="blue-grey"
-                      >
-                    </v-textarea>
-                      <v-autocomplete
-                        v-model="updateTrx.amount"
-                        variant="outlined"
-                        :items="harga"
-                        item-title="name"
-                        item-value="value"
-                        :label="`Price — ${isEditAmt ? 'Editable' : 'Saved'}`"
-                        :hint="!isEditAmt ? 'Click the icon to edit' : 'Click the icon to save'"
-                        :readonly="!isEditAmt"
-                        :disabled="!fieldDisabled"
-                        persistent-hint
-                        color="blue-grey"
-                      >
-                      <template v-slot:append>
-                      <v-slide-x-reverse-transition mode="out-in">
-                        <v-icon
-                          :key="`icon-${isEditAmt}`"
-                          :color="isEditAmt ? 'success' : 'info'"
-                          :icon="isEditAmt ? 'mdi-check-outline' : 'mdi-circle-edit-outline'"
-                          @click="isEditAmt = !isEditAmt"
-                        ></v-icon>
-                      </v-slide-x-reverse-transition>
-                    </template>
-                      </v-autocomplete>
-                    <v-row>
-                      <v-col>
-                        <v-checkbox
-                          label="Delivery"
-                          v-model="isSend"
-                          color="blue-grey"
-                          @click="checkIsSend"
-                          :disabled="!fieldDisabled"
-                        >
-                        </v-checkbox>
-                      </v-col>
-                      <v-col class="text-right">
-                        <v-btn
-                          class="text-white"
-                          variant="elevated"
-                          size="large"
-                          rounded="lg"
-                          color="blue-grey"
-                          :disabled="isUpdateDisabled"
-                          :loading="loadingButton"
-                          @click="save"
-                        >
-                            Update
-                        </v-btn>
-                      </v-col>
-                    </v-row>
-                </v-card-item>
-              </v-card>
-        </v-dialog>
-                <v-data-table-virtual
-                  class="text-black"
-                  v-model:search="search" 
-                  :filter-keys="['description']" 
-                  :headers="headers"
-                  :items="transactions"
-                  loading-text="Loading... Please wait"
-                  :loading="loadingData"
-                  hide-default-footer
-                >
-                <template v-slot:[`item.description`]="{ value }">
-                  <v-chip 
-                  :color="getColorByDescription(value)"
-                  >
-                    {{ value }}
-                  </v-chip>
+
+          <v-card class="form-card mt-6" elevation="2" rounded="xl">
+            <v-card-title :class="theme.global.current.value.dark ? 'card-header-dark' : 'card-header-light'">
+              <v-icon start>mdi-package-variant-closed</v-icon>
+              Select Item
+            </v-card-title>
+            <v-card-text class="pa-5">
+              <v-autocomplete
+                v-model="selectedItem"
+                :items="mItems"
+                item-title="item_name"
+                item-value="id"
+                label="Item"
+                :readonly="!isEditing"
+                :hint="!isEditing ? 'Click lock to edit' : 'Click lock to save'"
+                :disabled="!fieldDisabled"
+                persistent-hint
+                variant="filled"
+                rounded="lg"
+                prepend-inner-icon="mdi-cube-outline"
+              >
+                <template v-slot:append>
+                   <v-icon
+                    :color="isEditing ? 'error' : 'success'"
+                    :icon="isEditing ? 'mdi-lock-open-variant-outline' : 'mdi-lock-outline'"
+                    @click="isEditing = !isEditing"
+                  />
                 </template>
-                <template v-slot:[`item.input`]></template>
-                  <template v-slot:[`item.actions`]="{ item }">
-                    <v-icon class="me-2" size="small" @click="editItem(item)"> 
-                      mdi-pencil-outline
-                     </v-icon>
-                  </template>
-                </v-data-table-virtual>
-              </v-card>
-          </v-col>
-  </v-row>
+              </v-autocomplete>
+            </v-card-text>
+          </v-card>
+        </v-col>
+
+        <!-- Right Column: Data Table -->
+        <v-col cols="12" md="8">
+          <v-card class="list-card" elevation="2" rounded="xl">
+            <v-card-title :class="theme.global.current.value.dark ? 'card-header-dark' : 'card-header-light'" class="d-flex align-center">
+              <v-icon start>mdi-format-list-bulleted</v-icon>
+              Transaction History
+              <v-spacer />
+              <div class="d-flex align-center">
+                <v-btn color="white" variant="tonal" @click="dialog = true" class="mr-3">
+                  <v-icon start>mdi-calendar</v-icon>
+                  {{ dateTitle }}
+                </v-btn>
+                <v-text-field
+                  v-model="search"
+                  density="compact"
+                  label="Search"
+                  prepend-inner-icon="mdi-magnify"
+                  variant="solo-filled"
+                  flat
+                  hide-details
+                  rounded="xl"
+                  class="search-field"
+                  width="300"
+                />
+              </div>
+            </v-card-title>
+            <v-divider />
+            <v-data-table-virtual
+              class="modern-table"
+              v-model:search="search"
+              :headers="headers"
+              :items="transactions"
+              :loading="loadingData"
+              loading-text="Loading data..."
+              hover
+            >
+              <template v-slot:[`item.description`]="{ value }">
+                <v-chip :color="getColorByDescription(value)" size="small" class="font-weight-bold">
+                  {{ value }}
+                </v-chip>
+              </template>
+              <template v-slot:[`item.actions`]="{ item }">
+                <v-btn icon="mdi-pencil-outline" variant="text" color="blue-grey" @click="editItem(item)" />
+              </template>
+            </v-data-table-virtual>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <!-- Dialogs -->
+      <v-dialog v-model="dialogUpdate" max-width="600px" persistent>
+        <v-card rounded="xl">
+          <v-card-title :class="theme.global.current.value.dark ? 'dialog-header-dark' : 'dialog-header-light'">
+            <v-icon start>mdi-update</v-icon>
+            Update Transaction
+          </v-card-title>
+          <v-card-text class="pa-5">
+             <v-autocomplete
+                label="Customer"
+                v-model="updateTrx.customer_id"
+                variant="filled"
+                rounded="lg"
+                :items="customers"
+                item-title="customer_name"
+                item-value="id"
+                prepend-inner-icon="mdi-account-search-outline"
+                class="mb-4"
+              >
+                <template v-slot:item="{ props, item }">
+                  <v-list-item
+                    v-bind="props"
+                    :subtitle="item.raw.nik"
+                    :title="item.raw.customer_name"
+                  />
+                </template>
+              </v-autocomplete>
+
+              <v-number-input
+                label="Quantity"
+                v-model="updateTrx.quantity"
+                variant="filled"
+                rounded="lg"
+                controlVariant="split"
+                prepend-inner-icon="mdi-counter"
+                class="mb-4"
+              />
+
+              <v-textarea
+                label="Description"
+                v-model="updateTrx.description"
+                variant="filled"
+                rounded="lg"
+                rows="2"
+                prepend-inner-icon="mdi-note-text-outline"
+                class="mb-4"
+              />
+
+              <v-autocomplete
+                v-model="updateTrx.amount"
+                variant="filled"
+                rounded="lg"
+                :items="harga"
+                item-title="name"
+                item-value="value"
+                label="Price"
+                hint="Click lock to edit"
+                :readonly="!isEditAmt"
+                persistent-hint
+                prepend-inner-icon="mdi-currency-usd"
+              >
+                <template v-slot:append>
+                  <v-icon
+                    :color="isEditAmt ? 'error' : 'success'"
+                    :icon="isEditAmt ? 'mdi-lock-open-variant-outline' : 'mdi-lock-outline'"
+                    @click="isEditAmt = !isEditAmt"
+                  />
+                </template>
+              </v-autocomplete>
+          </v-card-text>
+          <v-card-actions class="pa-4">
+            <v-spacer />
+            <v-btn text @click="close" rounded="lg">Cancel</v-btn>
+            <v-btn
+              color="cyan-darken-1"
+              class="text-white"
+              :disabled="isUpdateDisabled"
+              :loading="loadingButton"
+              @click="save"
+              rounded="lg"
+            >
+              <v-icon left>mdi-content-save-edit</v-icon>
+              Update
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="dialog" max-width="400px" persistent>
+        <v-card rounded="xl">
+          <v-card-title :class="theme.global.current.value.dark ? 'dialog-header-dark' : 'dialog-header-light'">
+            <v-icon start>mdi-calendar-search</v-icon>
+            Select Date
+          </v-card-title>
+          <v-card-text class="pa-0">
+            <v-date-picker
+              v-model="pickDate"
+              color="cyan-darken-2"
+              @update:model-value="getTransactionByDate(); dialog = false"
+              show-adjacent-months
+              width="400"
+            />
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
+      <v-snackbar
+        v-model="hasSaved"
+        :timeout="2500"
+        color="success"
+        location="top right"
+        rounded="xl"
+        elevation="12"
+      >
+        <v-icon start>mdi-check-circle-outline</v-icon>
+        Data has been saved successfully.
+      </v-snackbar>
+    </v-container>
+  </div>
 </template>
-<script>
+<script setup lang="ts">
+import { ref, computed, onMounted, reactive } from 'vue';
 import AxiosInstance from '@/services/AxiosInstance';
-import Validations from '@/services/Validations';
 import store from '@/store/store';
 import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
 import { VNumberInput } from 'vuetify/lib/labs/components.mjs';
-  
-export default {
-  data() {
-        return {
-            search: '',
-            headers: [
-                { title: 'Customer', align: 'start', key: 'customer_name'},
-                { align: ' d-none', key: 'nik'},
-                { title: 'Description', align: 'center', key: 'description'},
-                { title: 'Qty', align: 'center', key: 'quantity' },
-                { title: 'Price', align: 'start', key: 'amount', value: item => this.formatPrice(item.amount) },
-                { title: 'Total', align: 'start', key: 'total', value: item => this.formatPrice(item.total) },
-                { title: 'Created', aligh: 'start', key: 'created_at'},
-                { align: ' d-none', key: 'stock_id'},
-                { title: 'Actions', align: 'center', key: 'actions', sortable: false },
-            ],
-            // load data
-            transactions: [],
-            customers: [],
-            mItems: [],
-            //date
-            pickDate : new Date(),
-            dateTitle: '',
-            //disable
-            fieldDisabled: true,
-            //dialog
-            dialogUpdate: false,
-            dialog: false,
-            //field
-            selectedCustomer:[],
-            selectedItem:[],
-            isEditAmt: false,
-            isEditing: false,
-            isSend: false,     
-            //etc
-            hasSaved: false,
-            loadingButton: false,
-            loadingData: true,
-            alert: true,
-            error:'',
-            //
-            updateTrx: [],
-            editedIndex: -1,
-            editedItem: {
-                customer_id: null,
-                customer_name: null,
-                nik: null,
-                description: null,
-                quantity: null,
-                amount: 0,
-                total: 0,
-                created_at: '',
-            },
-            harga: [
-              {
-                name: "Rp.16.000",
-                value: 16000,
-              },
-              {
-                name: "Rp.17.000",
-                value: 17000,
-              },
-              {
-                name: "Rp.18.000",
-                value: 18000,
-              },
-              {
-                name: "Rp.19.000",
-                value: 19000,
-              },
-              {
-                name: "Rp.20.000",
-                value: 20000,
-              },
-            ],
-            }
-        },
-    
-    components: {
-      VNumberInput,
-    },
+import { useTheme } from 'vuetify';
 
-    computed: {
-
-      isSaveDisabled(){
-        return !(this.selectedCustomer && this.editedItem.quantity)
-      },
-
-      isUpdateDisabled(){
-        return !(this.updateTrx.customer_id && this.updateTrx.quantity)
-      },
-
-    },
-
-    watch: {
-      dialog(val) {
-        val || this.close()
-      },
-
-      dialogUpdate(val) {
-        val || this.close()
-      },
-    },
-
-    created() {
-      this.editedIndex = -1;
-      this.getCustomer();
-      this.getTransactionByDate();
-      this.getMasterItem();
-
-      this.selectedItem = 1;
-      this.editedItem.amount = 19000;
-    },
-    
-
-    methods: {
-
-        editItem(item) {
-          this.editedIndex = this.transactions.indexOf(item);
-          this.updateTrx = Object.assign({}, item);
-          this.dialogUpdate = true;
-        },
-
-        close() {
-            this.editedIndex = -1;
-            this.dialog = false;
-            this.dialogUpdate = false;
-        },
-
-        checkIsSend() {
-            if (!this.isSend){
-            this.editedItem.amount = 20000;
-            this.updateTrx.amount = 20000;
-          } else if(this.isSend) {
-              this.editedItem.amount = 19000;
-              this.updateTrx.amount = 19000;
-          }
-        },
-
-        getDateOptions(dateConv){
-          let date = dateConv;
-          let month = '' + (dateConv.getMonth()+1);
-          let day = '' + (dateConv.getDate());
-          let year = dateConv.getFullYear();
-
-          if (month.length < 2) 
-              month = '0' + month;
-          if (day.length < 2) 
-              day = '0' + day;
-
-            date =  [year, month, day].join('-');
-
-            return date;
-          },
-
-
-        getColorByDescription (description) {
-          if(description == null)
-            return 'white'
-              
-            if (description.toLowerCase().substring(0, 5) == "kirim") 
-                return 'cyan'
-            else if (description.toLowerCase().substring(0, 5) == "titip")
-               return 'orange'
-            else if (description.toLowerCase().substring(0, 5) == "pisah")
-               return 'deep-purple'
-            else if (description.toLowerCase().substring(0, 4) == "uang")
-               return 'orange'
-            else return 'green'
-        },
-
-        formatPrice (value) {
-          return `Rp${value.toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&.')}`
-        },
-
-        async getMasterItem() {
-
-          try {
-          await AxiosInstance.get(`http://127.0.0.1:8000/api/masteritems/itemtype/` + 'ITEM',
-            {
-                headers: {
-                  'Content-Type': 'application/json', 
-                  'Accept': 'application/json',
-                  'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-                }
-              })
-                .then((response) => {
-                  this.mItems = response.data.data;
-            });
-          } catch(error) {
-            this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
-              this.alert = true;
-          }
-        },
-
-        async getCustomer() {
-
-            try{
-            await AxiosInstance.get(`http://127.0.0.1:8000/api/customers/all`,
-            {
-                headers: {
-                  'Content-Type': 'application/json', 
-                  'Accept': 'application/json',
-                  'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-                }
-              })
-                .then((response) => {
-                    this.customers = response.data.data
-            });
-            } catch(error) {
-              this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
-              this.alert = true;
-            }
-        },
-
-        async save() {
-          if (this.editedIndex > -1) {
-            let postData = {
-              //stock
-              stock_id: this.updateTrx.stock_id,
-              stock: -this.updateTrx.quantity,
-              //transaction
-              customer_id: this.updateTrx.customer_id,
-              quantity: this.updateTrx.quantity,
-              description: this.updateTrx.description,
-              amount: this.updateTrx.amount,
-              total: this.updateTrx.amount * this.updateTrx.quantity,
-          };
-
-          try{ 
-
-            let response = ''
-            response = await AxiosInstance
-              .patch('http://127.0.0.1:8000/api/transactions/'+this.updateTrx.id, postData,
-                  {
-                  headers: {
-                  'Content-Type': 'application/json', 
-                  'Accept': 'application/json',
-                  'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-                  },
-              })
-              if (response.status == 200) {
-                this.getTransactionByDate();
-                this.hasSaved = true;
-                this.editedIndex = -1;
-                this.dialogUpdate =false;
-                this.isSend = false;
-              }
-
-              } catch (error) {
-              this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
-              this.alert = true;
-              this.editedIndex = -1;
-              }
-          } else {
-
-            if (this.editedItem.quantity == null) {
-              this.editedItem.quantity = 1;
-            }
-
-            if (this.selectedCustomer == '' || this.selectedCustomer == null) {
-              this.selectedCustomer = 1;
-            }
-
-            let postData = {
-              stock: -this.editedItem.quantity,
-              customer_id: this.selectedCustomer,
-              item_id: this.selectedItem,
-              quantity: this.editedItem.quantity,
-              description: this.editedItem.description,
-              amount: this.editedItem.amount,
-              total: this.editedItem.amount * this.editedItem.quantity,
-            };
-
-          try{ 
-
-            let response =''
-            response = await AxiosInstance
-              .post('http://127.0.0.1:8000/api/transactions', postData,
-                  {
-                  headers: {
-                  'Content-Type': 'application/json', 
-                  'Accept': 'application/json',
-                  'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-                  },
-              })
-
-              if (response.status == 201) {
-                this.getTransactionByDate();
-                this.hasSaved = true
-                this.selectedCustomer= null
-                this.editedItem = [];
-                this.isSend = false;
-              }
-              } catch (error) {
-              this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
-              this.alert = true
-              }
-            }
-            this.loadingButton = true;
-            setTimeout(() => (this.loadingButton = false), 500);
-            this.editedItem.amount = 19000;
-        },
-
-        getTransactionByDate() {
-          
-          try {
-            AxiosInstance.get(`http://127.0.0.1:8000/api/transactions/today/`+ this.getDateOptions(this.pickDate),
-              {
-                headers: {
-                  'Content-Type': 'application/json', 
-                  'Accept': 'application/json',
-                  'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-                }
-              })
-              .then((response) => {
-                    this.transactions = response.data.data;
-                
-                if(response.status == 200){
-                    this.loadingData = false
-                    
-                const options = { 
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                };
-                    
-                this.dateTitle = this.pickDate.toLocaleDateString('id-ID', options);
-                
-                if(this.getDateOptions(new Date()) != this.getDateOptions(this.pickDate))  {
-                    this.fieldDisabled = false;
-                  } else {
-                    this.fieldDisabled = true;
-                  }
-                }
-            });
-          } catch(error) {
-            this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0],);
-            this.alert = true
-          }
-      },
-
-    },
+interface Transaction {
+  customer_name: string;
+  description: string | null;
+  quantity: number | null;
+  amount: number;
+  total: number;
+  created_at: string;
+  id: number;
+  stock_id: number;
+  customer_id: number | null;
 }
-  </script>
+
+const theme = useTheme();
+
+const editedIndex = ref(-1);
+
+const search = ref('');
+const headers = [
+  { title: 'Customer', align: 'start', key: 'customer_name', class: 'text-subtitle-1' },
+  { title: 'Description', align: 'center', key: 'description', class: 'text-subtitle-1' },
+  { title: 'Qty', align: 'center', key: 'quantity', class: 'text-subtitle-1' },
+  { title: 'Price', align: 'start', key: 'amount', value: (item: Transaction) => formatPrice(item.amount), class: 'text-subtitle-1' },
+  { title: 'Total', align: 'start', key: 'total', value: (item: Transaction) => formatPrice(item.total), class: 'text-subtitle-1' },
+  { title: 'Created', align: 'start', key: 'created_at', class: 'text-subtitle-1' },
+  { title: 'Actions', align: 'center', key: 'actions', sortable: false, class: 'text-subtitle-1' },
+];
+
+const transactions = ref<Transaction[]>([]);
+const customers = ref<{id: number, customer_name: string, nik: string}[]>([]);
+const mItems = ref<{id: number, item_name: string}[]>([]);
+const pickDate = ref(new Date());
+const dateTitle = ref('');
+const fieldDisabled = ref(true);
+const dialogUpdate = ref(false);
+const dialog = ref(false);
+const selectedCustomer = ref<number | null>(1);
+const selectedItem = ref(1);
+const isEditAmt = ref(false);
+const isEditing = ref(false);
+const isSend = ref(false);
+const hasSaved = ref(false);
+const loadingButton = ref(false);
+const loadingData = ref(true);
+const alert = ref(false);
+const error = ref('');
+
+const updateTrx = reactive({
+  customer_id: null,
+  quantity: null,
+  description: null,
+  amount: 0,
+  total: 0,
+  stock_id: null,
+  id: null,
+});
+
+const editedItem = reactive({
+  customer_id: null,
+  customer_name: null,
+  nik: null,
+  description: null,
+  quantity: null,
+  amount: 19000,
+  total: 0,
+  created_at: '',
+});
+
+const harga = [
+  { name: "Rp 16.000", value: 16000 },
+  { name: "Rp 17.000", value: 17000 },
+  { name: "Rp 18.000", value: 18000 },
+  { name: "Rp 19.000", value: 19000 },
+  { name: "Rp 20.000", value: 20000 },
+];
+
+const isSaveDisabled = computed(() => !(selectedCustomer.value && editedItem.quantity));
+const isUpdateDisabled = computed(() => !(updateTrx.customer_id && updateTrx.quantity));
+
+const formatPrice = (value: number) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(value);
+};
+
+const getColorByDescription = (description: string | null) => {
+  if (description == null) return 'grey';
+  const lowerDesc = description.toLowerCase();
+  if (lowerDesc.startsWith("kirim")) return 'cyan';
+  else if (lowerDesc.startsWith("titip")) return 'orange';
+  else if (lowerDesc.startsWith("pisah")) return 'deep-purple';
+  else if (lowerDesc.startsWith("uang")) return 'amber';
+  else return 'green';
+};
+
+const getDateOptions = (dateConv: Date) => {
+  const date = new Date(dateConv);
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().split('T')[0];
+};
+
+const getCustomer = async () => {
+  try {
+    const response = await AxiosInstance.get<{data: {id: number, customer_name: string, nik: string}[]}>(`http://127.0.0.1:8000/api/customers/all`, {
+      headers: {
+        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+      },
+    });
+    customers.value = response.data.data;
+  } catch (err) {
+    error.value = "Failed to load customers.";
+    alert.value = true;
+  }
+};
+
+const getMasterItem = async () => {
+  try {
+    const response = await AxiosInstance.get<{data: {id: number, item_name: string}[]}>(`http://127.0.0.1:8000/api/masteritems/itemtype/ITEM`, {
+       headers: {
+        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+      },
+    });
+    mItems.value = response.data.data;
+  } catch (err) {
+    error.value = "Failed to load items.";
+    alert.value = true;
+  }
+};
+
+const getTransactionByDate = async () => {
+  loadingData.value = true;
+  try {
+    const formattedDate = getDateOptions(pickDate.value);
+    const response = await AxiosInstance.get<{data: Transaction[]}>(`http://127.0.0.1:8000/api/transactions/today/${formattedDate}`, {
+       headers: {
+        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+      },
+    });
+    transactions.value = response.data.data;
+    
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    dateTitle.value = pickDate.value.toLocaleDateString('id-ID', options);
+
+    fieldDisabled.value = getDateOptions(new Date()) === formattedDate;
+
+  } catch (err) {
+    error.value = "Failed to load transactions.";
+    alert.value = true;
+  } finally {
+    loadingData.value = false;
+  }
+};
+
+const save = async () => {
+  loadingButton.value = true;
+  try {
+    let response;
+    if (editedIndex.value > -1) {
+      // Update logic
+      const postData = {
+        stock_id: updateTrx.stock_id,
+        stock: -(updateTrx.quantity || 0),
+        customer_id: updateTrx.customer_id,
+        quantity: updateTrx.quantity,
+        description: updateTrx.description,
+        amount: updateTrx.amount,
+        total: (updateTrx.amount || 0) * (updateTrx.quantity || 0),
+      };
+      response = await AxiosInstance.patch(`http://127.0.0.1:8000/api/transactions/${updateTrx.id}`, postData, {
+         headers: {
+          'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+        },
+      });
+    } else {
+      // Create logic
+      const postData = {
+        stock: -(editedItem.quantity || 0),
+        customer_id: selectedCustomer.value,
+        item_id: selectedItem.value,
+        quantity: editedItem.quantity,
+        description: editedItem.description,
+        amount: editedItem.amount,
+        total: (editedItem.amount || 0) * (editedItem.quantity || 0),
+      };
+      response = await AxiosInstance.post('http://127.0.0.1:8000/api/transactions', postData, {
+         headers: {
+          'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+        },
+      });
+    }
+
+    if (response.status === 200 || response.status === 201) {
+      await getTransactionByDate();
+      hasSaved.value = true;
+      close();
+      resetForm();
+    }
+  } catch (err) {
+    error.value = "An error occurred while saving.";
+    alert.value = true;
+  } finally {
+    loadingButton.value = false;
+  }
+};
+
+const editItem = (item: Transaction) => {
+  editedIndex.value = transactions.value.findIndex(t => t.id === item.id);
+  Object.assign(updateTrx, item);
+  dialogUpdate.value = true;
+};
+
+const close = () => {
+  dialogUpdate.value = false;
+  setTimeout(() => {
+    editedIndex.value = -1;
+    Object.assign(updateTrx, { customer_id: null, quantity: null, description: null, amount: 0, total: 0, stock_id: null, id: null });
+  }, 300);
+};
+
+const resetForm = () => {
+    selectedCustomer.value = null;
+    editedItem.quantity = null;
+    editedItem.description = null;
+    editedItem.amount = 19000;
+    isSend.value = false;
+}
+
+const checkIsSend = () => {
+  if (isSend.value) {
+    editedItem.amount = 19000;
+  } else {
+    editedItem.amount = 20000;
+  }
+};
+
+onMounted(() => {
+  getCustomer();
+  getTransactionByDate();
+  getMasterItem();
+});
+</script>
+
+<style scoped>
+.modern-layout-light {
+  background-color: #f4f6f8;
+  min-height: 100vh;
+}
+
+.modern-layout-dark {
+  background-color: #282828;
+  min-height: 100vh;
+}
+
+.page-header-light {
+  background: linear-gradient(45deg, #00BCD4 0%, #4DD0E1 100%);
+  color: white;
+}
+
+.page-header-dark {
+  background: linear-gradient(45deg, #00838F 0%, #00ACC1 100%);
+  color: white;
+}
+
+.form-card-light, .list-card, .v-dialog .v-card {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.form-card-dark {
+  background-color: #333333;
+  border: 1px solid #444444;
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.form-card-light:hover, .list-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+}
+
+.form-card-dark:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+}
+
+.card-header-light {
+  background-color: #00BCD4 !important;
+  color: white !important;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.card-header-dark {
+  background-color: #00838F !important;
+  color: white !important;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.dialog-header-light {
+  background-color: #00BCD4 !important;
+  color: white !important;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 16px 24px;
+}
+
+.dialog-header-dark {
+  background-color: #00838F !important;
+  color: white !important;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 16px 24px;
+}
+
+.search-field {
+  /* max-width: 600px; */
+}
+
+.modern-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.modern-table .v-data-table-header {
+  background-color: #f9fafb;
+  color: #37474f;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modern-table .v-data-table__tr:hover {
+  background-color: #f0f7ff !important;
+}
+
+/* Text field adjustments for dark theme */
+.v-autocomplete.v-input--filled .v-field__input,
+.v-number-input.v-input--filled .v-field__input,
+.v-textarea.v-input--filled .v-field__input {
+  color: #333333; /* Default text color for light theme */
+}
+
+.modern-layout-dark .v-autocomplete.v-input--filled .v-field__input,
+.modern-layout-dark .v-number-input.v-input--filled .v-field__input,
+.modern-layout-dark .v-textarea.v-input--filled .v-field__input {
+  color: #ffffff; /* White text color for dark theme */
+}
+
+.v-autocomplete.v-input--filled .v-label,
+.v-number-input.v-input--filled .v-label,
+.v-textarea.v-input--filled .v-label {
+  color: #757575; /* Default label color for light theme */
+}
+
+.modern-layout-dark .v-autocomplete.v-input--filled .v-label,
+.modern-layout-dark .v-number-input.v-input--filled .v-label,
+.modern-layout-dark .v-textarea.v-input--filled .v-label {
+  color: #bbbbbb; /* Lighter label color for dark theme */
+}
+
+.modern-layout-dark .v-autocomplete.v-input--filled .v-field__overlay,
+.modern-layout-dark .v-number-input.v-input--filled .v-field__overlay,
+.modern-layout-dark .v-textarea.v-input--filled .v-field__overlay {
+  background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent white for dark theme input background */
+}
+
+.modern-layout-dark .v-data-table-virtual :deep(th),
+.modern-layout-dark .v-data-table-virtual :deep(td) {
+  color: #ffffff !important; /* White text for table headers and cells in dark mode */
+}
+
+.modern-layout-dark .modern-table .v-data-table-header {
+  background-color: #424242 !important;
+}
+
+.modern-layout-dark .modern-table .v-data-table__tr:hover {
+  background-color: #333333 !important;
+}
+
+.modern-layout-dark .search-field .v-field__input,
+.modern-layout-dark .search-field .v-label {
+  color: #ffffff !important;
+}
+
+.modern-layout-dark .search-field .v-icon {
+  color: #bbbbbb !important;
+}
+
+.modern-layout-dark .search-field {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.modern-layout-dark .search-field:focus-within {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.modern-layout-dark .v-btn.v-btn--variant-tonal {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.modern-layout-dark .v-btn.v-btn--variant-tonal:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+</style>

@@ -20,7 +20,27 @@ export interface MasterItem {
   active_flag: boolean;
 }
 
+export interface RawMasterItem {
+  id: number | string;
+  item_name: string;
+  item_code: string;
+  item_type: string | null | undefined;
+  category_id: string | null | undefined;
+  category: string;
+  cost_of_goods_sold: number | string;
+  selling_price: number | string;
+  in_stock: string;
+  active_flag: string;
+}
+
 export interface CategoryItem {
+  id: number | string;
+  name: string;
+  active_flag: boolean | string;
+  inactive_date: string;
+}
+
+export interface RawCategoryItem {
   id: number | string;
   name: string;
   active_flag: string;
@@ -68,13 +88,13 @@ export const headers: Header[] = [
     title: 'Cost of Goods',
     align: 'start',
     key: 'cost_of_goods_sold',
-    value: (_item: MasterItem) => formatPrice(_item.cost_of_goods_sold),
+    value: (item: MasterItem) => formatPrice(item.cost_of_goods_sold),
   },
   {
     title: 'Selling Price',
     align: 'center',
     key: 'selling_price',
-    value: (_item: MasterItem) => formatPrice(_item.selling_price),
+    value: (item: MasterItem) => formatPrice(item.selling_price),
   },
   { title: 'Stock', align: 'center', key: 'in_stock' },
   { title: 'Status', align: 'start', key: 'active_flag' },
@@ -87,5 +107,3 @@ export const headerscategory: HeaderCategory[] = [
   { title: 'Last Active', align: 'start', key: 'inactive_date' },
   { title: 'Actions', key: 'actions', align: 'center', sortable: false },
 ];
-
-

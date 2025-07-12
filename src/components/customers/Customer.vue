@@ -1,93 +1,80 @@
 <template>
-    <v-container fluid class="pa-0">
-
-    <!-- Toolbar Actions -->
-     <ToolbarSimple
-      title="Manage Customers"
-      icon="mdi-new-box"
-      :color="'bg-blue-accent-2'"
+  <v-container fluid class="pa-4 rounded-xl elevation-12">
+    <ToolbarSimple
+      title="Customer Management"
+      icon="mdi-account-group-outline"
+      color="blue"
       :search="search"
-      :showUploadButton="true"
+      :show-upload-button="true"
       @update:search="search = $event"
       @upload-customer="DialogOpenUploadCustomer = true"
-      @create="
-        DialogOpenCreate = true;
-        resetEditedItem();
-        error = '';
-        editedIndex = -1;
-      "
+      @create="openCreateDialog"
     />
 
-    <!-- Error Snackbar -->
-     <SnackbarError :messages="Array.isArray(error) ? error : [error]" v-model="showError" :timeout="4000" />
-     
-    <!-- Success Snackbar -->
-     <SnackbarSuccess v-model="hasSaved" message="Item has been saved successfully!" />
-
-      <!-- Master Customer Table -->
-     <TableCustomer
+    <!-- Master Customer Table -->
+    <TableCustomer
       :headers="headersLocal"
       :items="customers"
       :search="search"
       :loading="loading"
-      :bgcolor="'bg-blue-lighten-4'"
       @edit="editItem"
-      @submit="onCreateItem"
       @deactivate="deactivateCustomer"
     />
 
-     <!-- Create/Edit Customer Dialog -->
+    <!-- Error & Success Snackbars -->
+    <SnackbarError :messages="errorMessages" v-model="showError" :timeout="5000" />
+    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" />
+
+    <!-- Create/Edit Customer Dialog -->
     <DialogCustomerForm
       :dialog="DialogOpenCreate"
-      :isEdit="editedIndex !== -1"
-      :editedItem="editedItem"
-      :allFields="allFields"
-      @close="close"
+      :is-edit="isEditMode"
+      :edited-item="editedItem"
+      :all-fields="allFields"
+      @close="closeDialogs"
       @submit="onSubmit"
     />
 
-    <!-- Deactivate Dialog -->
-   <DialogDeactivate
+    <!-- Deactivate Confirmation Dialog -->
+    <DialogDeactivate
       :dialog="DialogOpenDeactive"
-      title="Change Customer Status?"
-      message="Are you sure you want to deactivate this customer?"
+      title="Confirm Status Change"
+      message="Are you sure you want to change this customer's status?"
       @confirm="onDeactivated"
-      @cancel="close"
+      @cancel="closeDialogs"
     />
 
-    <!-- Dialog Upload Customer -->
-   <DialogUploadCustomer
+    <!-- Upload Customer Dialog -->
+    <DialogUploadCustomer
       v-model:csvFile="csvFile"
       :dialog="DialogOpenUploadCustomer"
       :loading="uploading"
       @confirm="onUploadCustomer"
-      @close="close"
+      @close="closeDialogs"
     />
-</v-container>
+
+  </v-container>
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, computed, onMounted } from 'vue';
+import store from '@/store/store';
+import { 
+  CREATE_CUSTOMER, 
+  DEACTIVATE_CUSTOMER, 
+  LOAD_CUSTOMER_DATA, 
+  SET_HASSAVED, 
+  UPLOAD_CUSTOMER 
+} from '@/store/storeconstant';
+import { Customer, CustomerField, headerCustomer } from '@/types/Customer';
 import { SnackbarError, SnackbarSuccess, ToolbarSimple } from '@/components/globalComponent';
 import TableCustomer from './TableCustomer.vue';
 import DialogCustomerForm from './DialogCustomerForm.vue';
 import DialogDeactivate from './DialogDeactivate.vue';
 import DialogUploadCustomer from './DialogUploadCustomer.vue';
 
-import { Customer, CustomerField, headerCustomer } from '@/types/Customer';
-
-import store from '@/store/store';
-import { computed, onMounted, reactive, ref } from 'vue';
-import { 
-  CREATE_CUSTOMER,
-  DEACTIVATE_CUSTOMER,
-  LOAD_CUSTOMER_DATA,
-  SET_HASSAVED,
-  UPLOAD_CUSTOMER,
-} from '@/store/storeconstant';
-
-//Variable
-const headersLocal = headerCustomer; // Use the imported headers directly
-const search = ref<string>('');
+// State
+const search = ref('');
 const editedIndex = ref(-1);
 const editedItem = reactive<Partial<Customer>>({});
 const defaultItem: Partial<Customer> = {
@@ -100,138 +87,130 @@ const defaultItem: Partial<Customer> = {
   phone: '',
   active_flag: false,
 };
-
-const hasSaved = computed({
-  get: () => store.state.customer.hasSaved,
-  set: (val: boolean) => {
-    store.commit(`Customer/${SET_HASSAVED}`, val);
-  },
-});
 const csvFile = ref<File | null>(null);
 const uploading = ref(false);
 const error = ref<string | string[]>('');
-const showError = ref<boolean>(false);
+const showError = ref(false);
 
-//DIalog
-const DialogOpenCreate = ref<boolean>(false);
-const DialogOpenDeactive = ref<boolean>(false);
-const DialogOpenUploadCustomer = ref<boolean>(false);
+// Dialogs
+const DialogOpenCreate = ref(false);
+const DialogOpenDeactive = ref(false);
+const DialogOpenUploadCustomer = ref(false);
+
+// Computed Properties
+const customers = computed(() => store.state.customer.customers);
+const loading = computed(() => store.state.customer.loading);
+const hasSaved = computed({
+  get: () => store.state.customer.hasSaved,
+  set: (val: boolean) => store.commit(`customer/${SET_HASSAVED}`, val),
+});
+const isEditMode = computed(() => editedIndex.value !== -1);
+const errorMessages = computed(() => Array.isArray(error.value) ? error.value : [error.value]);
 
 const allFields = computed<CustomerField[]>(() => [
   { model: 'customer_name', label: 'Customer Name' },
-  { model: 'type', label: 'Type'  },
+  { model: 'type', label: 'Type' },
   { model: 'nik', label: 'NIK' },
-  { model: 'email', label: 'E-Mail',  onEnterSubmit: true },
-  { model: 'address', label: 'Address',  onEnterSubmit: true },
-  { model: 'phone', label: 'Phone',  onEnterSubmit: true },
+  { model: 'email', label: 'E-Mail', onEnterSubmit: true },
+  { model: 'address', label: 'Address', onEnterSubmit: true },
+  { model: 'phone', label: 'Phone', onEnterSubmit: true },
 ]);
 
-//computed
-const customers = computed<Customer[]>(() => store.state.customer.customers);
-const loading = computed<boolean>(() => store.state.customer.loading);
+const headersLocal = headerCustomer;
 
+// Methods
 const loadCustomerData = () => store.dispatch(`customer/${LOAD_CUSTOMER_DATA}`);
 
-onMounted(() => {
-  loadCustomerData();
-});
+onMounted(loadCustomerData);
 
-function editItem(item:any) {
+const resetEditedItem = () => {
+  Object.assign(editedItem, defaultItem);
+  editedIndex.value = -1;
+};
+
+const openCreateDialog = () => {
+  resetEditedItem();
+  error.value = '';
+  DialogOpenCreate.value = true;
+};
+
+const editItem = (item: Customer) => {
   editedIndex.value = customers.value.indexOf(item);
   Object.assign(editedItem, item);
+  error.value = '';
   DialogOpenCreate.value = true;
-}
+};
 
-function close() {
+const closeDialogs = () => {
   DialogOpenCreate.value = false;
   DialogOpenDeactive.value = false;
   DialogOpenUploadCustomer.value = false;
-  editedIndex.value = -1;
-}
+};
 
-function resetEditedItem() {
-// Reset field edit and update item
-Object.assign(editedItem, defaultItem);
-}
+const handleError = (e: unknown) => {
+  showError.value = true;
+  if (Array.isArray(e)) {
+    error.value = e;
+  } else if (e instanceof Error) {
+    error.value = e.message;
+  } else {
+    error.value = String(e);
+  }
+};
 
-function onSubmit(item: Partial<Customer>) {
-  Object.assign(editedItem, item); 
-  console.log('Submitted item:', item);
-  onCreateItem(); 
-}
+const onSubmit = (item: Partial<Customer>) => {
+  Object.assign(editedItem, item);
+  onCreateItem();
+};
 
 async function onCreateItem() {
   try {
     error.value = '';
-    console.log('Creating item:', editedItem);
-
     await store.dispatch(`customer/${CREATE_CUSTOMER}`, editedItem);
-    DialogOpenCreate.value = false;
+    closeDialogs();
   } catch (e) {
-    showError.value = true;
-    
-    if (Array.isArray(e)) {
-      error.value = e; // e is string[]
-    } else if (e instanceof Error) {
-      error.value = e.message; // e is an Error
-    } else {
-      error.value = String(e); // fallback
-    }
+    handleError(e);
   }
 }
 
-function deactivateCustomer(item:any) {
+const deactivateCustomer = (item: Customer) => {
   Object.assign(editedItem, item);
   DialogOpenDeactive.value = true;
-}
+};
 
 async function onDeactivated() {
   try {
     error.value = '';
-
     await store.dispatch(`customer/${DEACTIVATE_CUSTOMER}`, editedItem.id);
-    DialogOpenDeactive.value = false;
+    closeDialogs();
   } catch (e) {
-    showError.value = true;
-
-    if (Array.isArray(e)) {
-      error.value = e; // e is string[]
-    } else if (e instanceof Error) {
-      error.value = e.message; // e is an Error
-    } else {
-      error.value = String(e); // fallback
-    }
+    handleError(e);
   }
 }
 
-// Upload handler
 async function onUploadCustomer() {
   if (!csvFile.value) {
-    showError.value = true;
-    error.value = ['Please select a CSV file to upload.'];
+    handleError('Please select a CSV file to upload.');
     return;
   }
-  console.log("csv file:", csvFile.value);
   uploading.value = true;
-
   try {
     await store.dispatch(`customer/${UPLOAD_CUSTOMER}`, csvFile.value);
-    DialogOpenUploadCustomer.value = false;
+    closeDialogs();
     csvFile.value = null;
-  } catch (e: unknown) {
-    showError.value = true;
-    if (Array.isArray(e)) {
-      error.value = e;
-    } else if (typeof e === 'string') {
-      error.value = [e];
-    } else if (e instanceof Error) {
-      error.value = [e.message];
-    } else {
-      error.value = ['An unknown error occurred.'];
-    }
+  } catch (e) {
+    handleError(e);
   } finally {
     uploading.value = false;
   }
-
 }
 </script>
+
+<style scoped>
+.bg-gradient-to-r {
+  background: linear-gradient(to right, var(--v-theme-from), var(--v-theme-to));
+}
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+</style>

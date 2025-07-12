@@ -3,59 +3,78 @@
     :headers="headers"
     :items="filteredItems"
     :loading="loading"
-    loading-text="Loading... Please wait"
-    :class="[bgcolor || 'bg-cyan-lighten-5', 'elevation-10', 'text-black', 'rounded-xl']"
+    loading-text="Fetching item data..."
+    class="modern-table"
     density="comfortable"
     hover
     item-value="id"
   >
+    <!-- Custom Header -->
+    <template #header="{ props: headerProps }">
+      <thead class="table-header">
+        <tr>
+          <th 
+            v-for="header in headerProps.headers"
+            :key="header.key"
+            class="text-left px-4 py-3 font-weight-bold text-uppercase"
+          >
+            {{ header.title }}
+          </th>
+        </tr>
+      </thead>
+    </template>
 
     <!-- In Stock -->
-    <template v-slot:[`item.in_stock`]="{ item }">
+    <template #[`item.in_stock`]="{ item }">
       <v-chip
-        :color="item.in_stock ? 'green-darken-1' : 'red-darken-1'"
-        class="text-white text-uppercase"
-        size="small"
+        :color="item.in_stock ? '#4CAF50' : '#F44336'" 
+        class="status-chip"
         label
+        size="small"
       >
         {{ item.in_stock ? 'In Stock' : 'Out of Stock' }}
       </v-chip>
     </template>
 
     <!-- Active Flag -->
-    <template v-slot:[`item.active_flag`]="{ item }">
+    <template #[`item.active_flag`]="{ item }">
       <v-chip
-        :color="item.active_flag ? 'cyan-darken-2' : 'grey-darken-3'"
-        class="text-white"
-        size="small"
+        :color="item.active_flag ? '#00BCD4' : '#9E9E9E'" 
+        class="status-chip"
         label
+        size="small"
       >
         {{ item.active_flag ? 'Active' : 'Inactive' }}
       </v-chip>
     </template>
 
     <!-- Actions -->
-    <template v-slot:[`item.actions`]="{ item }">
-      <v-btn
-        icon
-        size="small"
-        color="primary"
-        variant="text"
-        class="mr-1"
-        @click="$emit('edit', item)"
-      >
-        <v-icon size="18">mdi-pencil-outline</v-icon>
-      </v-btn>
-      <v-btn
-        icon
-        size="small"
-        color="red-darken-1"
-        variant="text"
-        @click="$emit('deactivate', item)"
-      >
-        <v-icon size="18">mdi-radioactive</v-icon>
-      </v-btn>
+    <template #[`item.actions`]="{ item }">
+      <div class="action-buttons">
+        <v-tooltip text="Edit Item" location="top">
+          <template #activator="{ props }">
+            <v-btn v-bind="props" icon variant="text" @click="$emit('edit', item)">
+              <v-icon size="22">mdi-pencil-outline</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+        <v-tooltip :text="item.active_flag ? 'Deactivate Item' : 'Activate Item'" location="top">
+          <template #activator="{ props }">
+            <v-btn v-bind="props" icon variant="text" @click="$emit('deactivate', item)">
+              <v-icon size="22">{{ item.active_flag ? 'mdi-toggle-switch-off-outline' : 'mdi-toggle-switch-outline' }}</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+      </div>
     </template>
+
+    <!-- No Data State -->
+    <template #no-data>
+      <v-alert icon="mdi-alert-circle-outline" class="ma-4" color="info" variant="tonal">
+        No items found. Try adjusting your search.
+      </v-alert>
+    </template>
+
   </v-data-table-virtual>
 </template>
 
@@ -68,7 +87,6 @@ const props = defineProps<{
   items: MasterItem[];
   search: string;
   loading: boolean;
-  bgcolor?: string; //
 }>();
 
 defineEmits(['edit', 'deactivate']);
@@ -84,3 +102,50 @@ const filteredItems = computed(() => {
 });
 </script>
 
+<style scoped>
+.modern-table {
+  border-radius: 12px;
+  overflow: hidden; /* Ensures rounded corners are applied to content */
+}
+
+.modern-table .v-data-table-header {
+  background-color: #f5f5f5; /* Light grey header */
+  color: #333;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modern-table .v-data-table__tr:hover {
+  background-color: #e0f7fa !important; /* Light cyan on hover */
+}
+
+/* General table cell padding */
+.modern-table .v-data-table-header th,
+.modern-table .v-data-table__td {
+  padding: 12px 16px;
+}
+
+.modern-table .v-data-table__tr {
+  border-bottom: 1px solid #eee; /* Subtle row divider */
+}
+
+.modern-table .v-data-table__tr:last-child {
+  border-bottom: none; /* No border on the last row */
+}
+
+.status-chip {
+  font-weight: bold;
+  border-radius: 6px;
+}
+
+.action-buttons .v-btn {
+  color: #757575; /* Grey for actions */
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.action-buttons .v-btn:hover {
+  color: #00ACC1; /* Cyan on hover */
+  transform: scale(1.1);
+}
+</style>

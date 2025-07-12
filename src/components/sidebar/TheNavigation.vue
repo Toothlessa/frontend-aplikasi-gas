@@ -2,52 +2,40 @@
   <nav>
     <v-navigation-drawer
       v-model="drawer"
-      :rail="rail"
-      @click="rail = false"
-      permanent
       app
-      class="custom-drawer"
+      floating
+      :location="drawerLocation"
+      :class="theme.global.current.value.dark ? 'modern-drawer-dark' : 'modern-drawer'"
+      :style="{ borderRadius: '24px', margin: '12px' }"
     >
-
       <!-- Profile Section -->
-       <v-list-item
+      <v-list-item
         nav
         lines="two"
-        class="user-info"
-        prepend-icon="mdi-face-profile"
+        class="user-profile-section"
+        prepend-icon="mdi-account-circle"
         :title="result.username"
         :subtitle="result.email"
         @click="rail = false"
-      >
+      />
 
-
-        <template #append>
-          <v-btn
-            icon
-            variant="text"
-            color="white"
-            @click.stop="rail = !rail"
-          >
-            <v-icon>{{ rail ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
-          </v-btn>
-        </template>
-      </v-list-item>
-
-      <v-divider class="my-2" />
+      <v-divider class="my-3" />
 
       <!-- Navigation List -->
       <v-list dense nav class="mt-2">
         <v-list-item
-          prepend-icon="mdi-view-dashboard"
+          prepend-icon="mdi-view-dashboard-outline"
           title="Dashboard"
           to="/"
           class="nav-item"
+          rounded="xl"
         />
         <v-list-item
-          prepend-icon="mdi-file-document"
+          prepend-icon="mdi-file-document-outline"
           title="Transaction"
           to="/transaction"
           class="nav-item"
+          rounded="xl"
         />
 
         <!-- Master Group -->
@@ -56,8 +44,9 @@
             <v-list-item
               v-bind="props"
               title="Master"
-              prepend-icon="mdi-folder-cog"
+              prepend-icon="mdi-database-outline"
               class="nav-item"
+              rounded="xl"
             />
           </template>
 
@@ -68,6 +57,7 @@
             :title="title"
             :to="to"
             class="nav-subitem"
+            rounded="xl"
           />
         </v-list-group>
 
@@ -77,6 +67,7 @@
           :key="i"
           :to="item.to"
           class="nav-item"
+          rounded="xl"
           @click="actionClickNav(item.action)"
         >
           <template #prepend>
@@ -86,125 +77,145 @@
         </v-list-item>
       </v-list>
 
+      <!-- Theme Toggle -->
+      <v-list-item class="px-4">
+        <v-switch
+          v-model="isDarkTheme"
+          hide-details
+          inset
+          :label="`Dark Theme: ${isDarkTheme ? 'On' : 'Off'}`"
+          color="primary"
+        ></v-switch>
+      </v-list-item>
+
       <!-- Logout -->
       <template #append>
         <v-divider class="mx-4 my-2" />
         <v-list-item
-          prepend-icon="mdi-logout"
+          prepend-icon="mdi-logout-variant"
           title="Logout"
-          class="text-red-lighten-2 font-weight-bold"
+          class="nav-item logout-item"
+          rounded="xl"
           @click.prevent="actionClickNav('logout')"
         />
       </template>
     </v-navigation-drawer>
 
-  <v-app-bar
-    app
-    color="white"
-    class="shadow-sm"
-  >
-    <!-- Search Field -->
-    <v-text-field
-      v-model="search"
-      variant="solo-filled"
-      density="comfortable"
-      hide-details
+    <v-app-bar
+      app
       flat
-      rounded
-      prepend-inner-icon="mdi-magnify"
-      placeholder="Search..."
-      class="bg-white rounded-lg"
-      style="max-width: 350px;"
-    />
+      floating
+      :class="theme.global.current.value.dark ? 'app-bar-modern-dark' : 'app-bar-modern'"
+      :style="appBarStyles"
+    >
+      <v-app-bar-nav-icon @click="drawer = !drawer" />
 
-    <v-spacer />
-
-    <!-- Icon Buttons -->
-    <v-btn icon variant="text" class="mx-1">
-      <v-icon color="grey-darken-1">mdi-bell-outline</v-icon>
-    </v-btn>
-
-    <v-btn icon variant="text" class="mx-1">
-      <v-icon color="grey-darken-1">mdi-email-outline</v-icon>
-    </v-btn>
-
-    <v-menu location="bottom end">
-      <template #activator="{ props }">
-        <v-btn icon v-bind="props" variant="text" class="mx-1">
-          <v-avatar color="grey-lighten-3" size="32">
-            <v-icon size="24" color="grey-darken-2">mdi-face-profile</v-icon>
-          </v-avatar>
-        </v-btn>
-      </template>
-
-      <v-list elevation="3">
-        <v-list-item title="Profile" prepend-icon="mdi-account" />
-        <v-list-item title="Settings" prepend-icon="mdi-cog" />
-        <v-divider />
-        <v-list-item title="Logout" prepend-icon="mdi-logout" @click="dialogLogout = true" />
-      </v-list>
-    </v-menu>
-  </v-app-bar>
-
-  <v-dialog v-model="dialogLogout" max-width="400px" persistent transition="dialog-top-transition">
-  <v-card class="rounded-xl elevation-12">
-    
-    <!-- Title with colored background like Upload Customers -->
-    <v-card-title class="bg-teal text-white text-h6 font-weight-bold justify-center">
-      <v-icon size="28" start class="mr-2">mdi-logout</v-icon>
-      Logout
-    </v-card-title>
-
-    <!-- Body Text -->
-    <v-card-text class="text-body-2 text-medium-emphasis text-center pt-4 px-4">
-      Are you sure you want to logout?
-    </v-card-text>
-
-    <!-- Actions -->
-    <v-card-actions class="mt-6 justify-end px-4 pb-4">
-      <v-btn
-        variant="outlined"
-        color="grey-darken-1"
-        @click="dialogLogout = false"
-        class="rounded-pill"
-      >
-        <v-icon start>mdi-close</v-icon>
-        Cancel
+      <v-btn icon @click="toggleDrawerLocation" class="mr-2">
+        <v-icon>mdi-swap-horizontal</v-icon>
       </v-btn>
 
-      <v-btn
-        variant="elevated"
-        color="teal"
-        class="text-white rounded-pill"
-        @click="onLogout"
-      >
-        <!-- <v-icon start>mdi-logout</v-icon> -->
-        Logout
+      <v-toolbar-title class="font-weight-bold text-h6">Dashboard</v-toolbar-title>
+
+      <v-spacer />
+
+      <v-text-field
+        v-model="search"
+        density="compact"
+        label="Search"
+        prepend-inner-icon="mdi-magnify"
+        variant="solo-filled"
+        flat
+        hide-details
+        rounded="xl"
+        :class="theme.global.current.value.dark ? 'search-field-appbar-dark' : 'search-field-appbar'"
+      />
+
+      <v-btn icon class="mx-1">
+        <v-badge content="3" color="red-accent-2">
+          <v-icon>mdi-bell-outline</v-icon>
+        </v-badge>
       </v-btn>
-    </v-card-actions>
 
-  </v-card>
-</v-dialog>
+      <v-btn icon class="mx-1">
+        <v-badge content="5" color="blue-accent-2">
+          <v-icon>mdi-email-outline</v-icon>
+        </v-badge>
+      </v-btn>
 
+      <v-menu location="bottom end">
+        <template #activator="{ props }">
+          <v-btn icon v-bind="props" class="mx-1">
+            <v-avatar color="grey-lighten-3" size="40">
+              <v-icon size="30" color="grey-darken-2">mdi-account-circle-outline</v-icon>
+            </v-avatar>
+          </v-btn>
+        </template>
+
+        <v-list elevation="5" rounded="xl">
+          <v-list-item title="Profile" prepend-icon="mdi-account-outline" />
+          <v-list-item title="Settings" prepend-icon="mdi-cog-outline" />
+          <v-divider />
+          <v-list-item title="Logout" prepend-icon="mdi-logout-variant" @click="dialogLogout = true" />
+        </v-list>
+      </v-menu>
+    </v-app-bar>
+
+    <v-dialog v-model="dialogLogout" max-width="450px" persistent transition="dialog-top-transition">
+      <v-card class="rounded-xl elevation-12">
+        <v-card-title class="bg-red-darken-2 text-white text-h6 font-weight-bold justify-center py-4">
+          <v-icon size="32" start class="mr-2">mdi-logout</v-icon>
+          Confirm Logout
+        </v-card-title>
+
+        <v-card-text class="text-body-1 text-medium-emphasis text-center pt-6 px-6">
+          Are you sure you want to log out of your account?
+        </v-card-text>
+
+        <v-card-actions class="justify-end px-6 pb-4">
+          <v-btn
+            variant="outlined"
+            color="grey-darken-1"
+            @click="dialogLogout = false"
+            class="rounded-pill"
+          >
+            <v-icon start>mdi-cancel</v-icon>
+            Cancel
+          </v-btn>
+
+          <v-btn
+            variant="elevated"
+            color="red-darken-2"
+            class="text-white rounded-pill"
+            @click="onLogout"
+          >
+            <v-icon start>mdi-logout</v-icon>
+            Logout
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </nav>
 </template>
-  
+
 <script setup lang="ts">
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, watch, computed } from 'vue';
+import { useTheme } from 'vuetify';
 
-import { GET_USER_TOKEN_GETTER, LOGOUT_ACTION } from '@/store/storeconstant';
+import { LOGOUT_ACTION } from '@/store/storeconstant';
 
 // Vuex store and router
 const store = useStore();
 const router = useRouter();
+const theme = useTheme();
 
 // UI state
-const selectedItem = ref<number>(0);
-const drawer = ref<boolean>(true);
-const rail = ref<boolean>(true);
+const search = ref('');
+const drawer = ref<boolean>(false);
 const dialogLogout = ref<boolean>(false);
+const isDarkTheme = ref<boolean>(theme.global.current.value.dark);
+const drawerLocation = ref<string>(localStorage.getItem('drawerLocation') || 'left'); // Initialize from localStorage
 
 // User info
 const result = reactive({
@@ -216,19 +227,16 @@ const result = reactive({
 const items = [
   { icon: 'mdi-basket-fill', text: 'Stocks', to: '/stock' },
   { icon: 'mdi-cash', text: 'Debt', to: '/debt' },
-  { icon: 'mdi-odnoklassniki', text: 'Users', to: '/users' },
+  { icon: 'mdi-account-group', text: 'Users', to: '/users' },
 ];
 
 const masters = [
-  ['mdi-blur-linear', 'Master Item', '/masteritem'],
-  ['mdi-face-agent', 'Customers', '/customer'],
-  ['mdi-football-helmet', 'Asset', '/asset'],
+  ['mdi-package-variant', 'Master Item', '/masteritem'],
+  ['mdi-account-tie', 'Customers', '/customer'],
+  ['mdi-car', 'Asset', '/asset'],
 ];
 
-// Get token from store (optional use)
-const userToken = store.getters[`auth/${GET_USER_TOKEN_GETTER}`];
-
-// Load user info from localStorage
+// Load user info from localStorage and set initial theme
 onMounted(() => {
   const userDataString = localStorage.getItem('userData');
   if (userDataString) {
@@ -237,9 +245,21 @@ onMounted(() => {
       result.username = userData.username;
       result.email = userData.email;
     } catch (error) {
-      console.warn('Failed to parse user data:', error);
+      // console.warn('Failed to parse user data:', error);
     }
   }
+
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) {
+    isDarkTheme.value = savedTheme === 'dark';
+    theme.global.name.value = savedTheme;
+  }
+});
+
+// Watch for theme changes and persist
+watch(isDarkTheme, (newVal) => {
+  theme.global.name.value = newVal ? 'dark' : 'light';
+  localStorage.setItem('theme', newVal ? 'dark' : 'light');
 });
 
 // Actions
@@ -254,52 +274,173 @@ async function onLogout() {
     await store.dispatch(`auth/${LOGOUT_ACTION}`);
     router.push('/login');
   } catch (error) {
-    console.error('Logout failed:', error);
+    // console.error('Logout failed:', error);
   }
 }
+
+function toggleDrawerLocation() {
+  drawerLocation.value = drawerLocation.value === 'left' ? 'right' : 'left';
+  localStorage.setItem('drawerLocation', drawerLocation.value);
+}
+
+const appBarStyles = computed(() => {
+  return {
+    borderRadius: '24px',
+    top: '12px',
+  };
+});
 </script>
 
 <style scoped>
-.custom-drawer {
-  background-color: #009688; /* Teal base */
-  color: #ffffff; /* White text for contrast */
-  border-right: 1px solid #00796b; /* Darker teal border */
+.modern-drawer {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-.user-info {
-  background-color: #4db6ac; /* Medium teal for card */
-  border-radius: 8px;
-  margin: 8px;
-  padding: 8px;
+.modern-drawer-dark {
+  background-color: rgba(30, 30, 30, 0.9);
+  backdrop-filter: blur(10px);
+  color: #eee;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.user-profile-section {
+  padding: 20px 16px;
+  transition: background-color 0.3s ease;
+}
+
+.user-profile-section:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.modern-drawer-dark .user-profile-section:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .nav-item {
-  border-radius: 10px;
-  margin: 4px 8px;
-  color: #ffffff;
-  transition: background-color 0.2s;
+  margin: 6px 12px;
+  color: #555;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.modern-drawer-dark .nav-item {
+  color: #bbb;
 }
 
 .nav-item:hover {
-  background-color: #00796b; /* Darker teal on hover */
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #2E7D32;
+}
+
+.modern-drawer-dark .nav-item:hover {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #66BB6A;
+}
+
+.modern-drawer:not(.v-navigation-drawer--is-rail) .nav-item.v-list-item--active {
+  background-color: #4CAF50 !important;
+  color: white !important;
+  font-weight: 700;
+}
+
+.modern-drawer-dark:not(.v-navigation-drawer--is-rail) .nav-item.v-list-item--active {
+  background-color: #4CAF50 !important;
+  color: white !important;
 }
 
 .nav-subitem {
-  padding-left: 32px;
-  font-size: 0.9rem;
-  color: #c8fff4; /* Soft light teal for subitems */
+  padding-left: 56px !important;
+  font-size: 0.875rem;
+  color: #777;
+  transition: color 0.2s ease;
 }
 
-.v-list-item--active {
-  background-color: #004d40 !important; /* Deep teal active */
+.modern-drawer-dark .nav-subitem {
+  color: #999;
+}
+
+.nav-subitem:hover {
+  color: #2E7D32;
+}
+
+.modern-drawer-dark .nav-subitem:hover {
+  color: #66BB6A;
+}
+
+.modern-drawer:not(.v-navigation-drawer--is-rail) .nav-subitem.v-list-item--active {
+  color: #4CAF50 !important;
   font-weight: 600;
-  color: #ffffff !important;
 }
 
-.v-list-group__header .v-list-item-title {
-  font-weight: 500;
-  color: #e0f2f1; /* Light teal text */
+.modern-drawer-dark:not(.v-navigation-drawer--is-rail) .nav-subitem.v-list-item--active {
+  color: #4CAF50 !important;
+}
+
+.logout-item {
+  color: #C62828 !important;
+}
+
+.logout-item:hover {
+  background-color: rgba(198, 40, 40, 0.1) !important;
+  color: #B71C1C !important;
+}
+
+.app-bar-modern {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  width: auto;
+  left: 16px;
+  right: 16px;
+}
+
+.app-bar-modern-dark {
+  background-color: rgba(30, 30, 30, 0.85) !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+  width: auto;
+  left: 16px;
+  right: 16px;
+}
+
+.search-field-appbar {
+  background-color: rgba(238, 238, 238, 0.8);
+  transition: background-color 0.3s ease;
+}
+
+.search-field-appbar:focus-within {
+  background-color: white;
+}
+
+.search-field-appbar-dark {
+  background-color: rgba(60, 60, 60, 0.8);
+  transition: background-color 0.3s ease;
+}
+
+.search-field-appbar-dark:focus-within {
+  background-color: #424242;
+}
+
+.search-field-appbar .v-field__input,
+.search-field-appbar .v-label {
+  color: #424242;
+}
+
+.search-field-appbar-dark .v-field__input,
+.search-field-appbar-dark .v-label {
+  color: #eee;
+}
+
+.search-field-appbar .v-icon {
+  color: #757575;
+}
+
+.search-field-appbar-dark .v-icon {
+  color: #bbb;
 }
 </style>
-
-

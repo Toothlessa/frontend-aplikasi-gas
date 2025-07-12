@@ -1,14 +1,14 @@
 <template>
     <div>
-      <v-toolbar flat color="rgba(0,0,0,0)" class="mt-n5">
+      <v-toolbar color="transparent" class="mt-n5" rounded-t-xl>
         <v-toolbar-title class=" text-cyan text-lg-h5 font-weight-bold">Outstanding Transaction</v-toolbar-title>
       </v-toolbar>
       <v-divider></v-divider>
-      <v-card height="" flat color="transparent" class="mt-n5">
+      <v-card rounded="xl" elevation="4" class="mt-n5">
         <v-data-table-virtual
           :headers="outsTrxTable"
           :items="outsTransaction"
-           class="transparent text-black mt-n2 bg-cyan-lighten-3"
+           class="modern-table text-black mt-n2"
         >
           <template v-slot:[`item.actions`]="{ item }">
             <v-icon class="me-2" size="small" @click="editOutsTrx(item)"> 
@@ -20,35 +20,31 @@
       <v-dialog
         v-model="dialogDesc"
         max-width="400"
+        persistent
+        transition="dialog-top-transition"
       >
       <v-card
         class="elevation-12"
-        variant="outlined"
+        rounded="xl"
+        style="opacity: 0.9;"
       >
         <v-card-title class="text-h5 font-weight-regular bg-cyan-darken-2">
           <v-icon size="30"> mdi-unity </v-icon>&nbsp; Change Status
         </v-card-title>
-        <v-textarea
-          label="Description"
-          v-model="updateOutsTrx.description"
-          class="pa-2 ma-2"
-          row-height="25"
-          rows="3"
-          variant="outlined"
-          auto-grow
-          @keyup.enter="updateDescription()"
-        ></v-textarea>
-        <div class="pa-4 text-end">
-          <v-btn
-            class="text-none pa-2 ma-2"
-            color="medium-emphasis"
-            min-width="92"
+        <v-card-text>
+          <v-textarea
+            label="Description"
+            v-model="updateOutsTrx.description"
+            class="pa-1 ma-1"
+            row-height="20"
+            rows="2"
             variant="outlined"
-            rounded
-            @click="updateDescription()"
-          >
-            Change
-          </v-btn>
+            auto-grow
+            @keyup.enter="updateDescription()"
+          ></v-textarea>
+        </v-card-text>
+        <v-card-actions class="pa-2 text-end">
+          <v-spacer></v-spacer>
           <v-btn
             class="text-none"
             color="medium-emphasis"
@@ -59,7 +55,17 @@
           >
             Close
           </v-btn>
-        </div>
+          <v-btn
+            class="text-none"
+            color="cyan-darken-2"
+            min-width="92"
+            variant="elevated"
+            rounded
+            @click="updateDescription()"
+          >
+            Change
+          </v-btn>
+        </v-card-actions>
       </v-card>
       </v-dialog>
     </div>
@@ -150,7 +156,11 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
               this.outsTransaction = response.data.data;
           })
       } catch(error) {
-        this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0], );
+        if (error.response && error.response.data) {
+          this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0]);
+        } else {
+          this.error = "An unexpected error occurred.";
+        }
         this.alert = true;
       }
     },
@@ -160,6 +170,36 @@ import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
   }
   </script>
   
-  <style>
-  
+  <style scoped>
+.modern-table {
+  border-radius: 12px; /* Inherit from card, but good to be explicit */
+  overflow: hidden; /* Ensures rounded corners are applied to content */
+}
+
+.modern-table .v-data-table-header {
+  background-color: #f5f5f5; /* Light grey header */
+  color: #333;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modern-table .v-data-table__tr:hover {
+  background-color: #e0f7fa !important; /* Light cyan on hover */
+}
+
+/* General table cell padding */
+.modern-table .v-data-table-header th,
+.modern-table .v-data-table__td {
+  padding: 12px 16px;
+}
+
+/* Make the table rows slightly rounded if possible, though v-data-table-virtual might not fully support this directly on rows */
+.modern-table .v-data-table__tr {
+  border-bottom: 1px solid #eee; /* Subtle row divider */
+}
+
+.modern-table .v-data-table__tr:last-child {
+  border-bottom: none; /* No border on the last row */
+}
   </style>

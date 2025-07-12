@@ -11,6 +11,7 @@ const Transaction = () => import('@/views/transaction/TransactionView.vue')
 const Stock = () => import('@/views/stocks/StockView.vue')
 const Debt = () => import('@/views/debts/DebtView.vue')
 const Asset = () => import('@/views/assets/AssetView.vue')
+const AssetDetails = () => import('@/components/assets/AssetDetails.vue')
 
 import store from '@/store/store'
 import {
@@ -78,6 +79,14 @@ const routes = [{
     {
         path: '/asset',
         component: Asset,
+        meta: {
+            auth: true
+        }
+    },
+    {
+        path: '/asset/:ownerId/:assetName',
+        name: 'AssetDetails',
+        component: AssetDetails,
         meta: {
             auth: true
         }

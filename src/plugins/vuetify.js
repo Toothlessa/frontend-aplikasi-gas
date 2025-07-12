@@ -13,12 +13,30 @@ import {
 
 export default createVuetify({
     icons: {
-        iconfont: 'fa' || 'md' || 'mdi'
+        iconfont: 'mdi'
     },
     theme: {
+        defaultTheme: 'dark',
         themes: {
+            light: {
+                primary: '#2575fc',
+                secondary: '#424242',
+                accent: '#82B1FF',
+                error: '#FF5252',
+                info: '#2196F3',
+                success: '#4CAF50',
+                warning: '#FB8C00',
+            },
             dark: {
-                background: '#F5F6FA'
+                background: '#121212',
+                surface: '#1E1E1E',
+                primary: '#2575fc',
+                secondary: '#424242',
+                accent: '#FF4081',
+                error: '#FF5252',
+                info: '#2196F3',
+                success: '#4CAF50',
+                warning: '#FFC107',
             }
         }
     },

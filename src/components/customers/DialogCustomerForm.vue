@@ -1,51 +1,49 @@
 <template>
-  <v-dialog v-model="localDialog" max-width="700px" persistent>
-    <v-card class="rounded-xl elevation-12">
-      <v-card-title class="bg-blue-accent-2 text-white d-flex align-center">
-        <v-icon size="28" class="mr-2">{{ isEdit ? 'mdi-update' : 'mdi-new-box' }}</v-icon>
+  <v-dialog v-model="localDialog" max-width="600px" persistent>
+    <v-card class="dialog-card" rounded="xl">
+      <!-- Header -->
+      <v-card-title class="dialog-header">
+        <v-icon size="26" class="mr-3">{{ isEdit ? 'mdi-account-edit-outline' : 'mdi-account-plus-outline' }}</v-icon>
         <span class="text-h6 font-weight-medium">
-          {{ isEdit ? 'Edit Customer' : 'Create Customer' }}
+          {{ isEdit ? 'Edit Customer' : 'Add New Customer' }}
         </span>
       </v-card-title>
 
-      <v-card-text class="py-6 px-4">
-
+      <!-- Form Fields -->
+      <v-card-text class="pa-6">
         <v-row dense>
           <v-col
             v-for="field in allFields"
             :key="field.model"
             cols="12"
             sm="6"
-            class="mb-3"
           >
             <v-text-field
               v-model="localItem[field.model]"
               :label="field.label"
               variant="outlined"
               density="comfortable"
-              clearable
+              class="form-field"
             />
           </v-col>
         </v-row>
       </v-card-text>
 
-      <v-card-actions class="px-4 pb-4">
-        <v-spacer />
+      <!-- Actions -->
+      <v-card-actions class="dialog-actions">
         <v-btn
-          color="grey-darken-1"
           variant="text"
-          class="text-white"
+          class="cancel-btn"
           @click="$emit('close')"
         >
           Cancel
         </v-btn>
         <v-btn
-          color="blue-accent-4"
           variant="elevated"
-          class="text-white"
+          class="save-btn"
           @click="$emit('submit', localItem)"
         >
-          Save
+          {{ isEdit ? 'Save Changes' : 'Create Customer' }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -56,7 +54,6 @@
 import { ref, watch, reactive } from 'vue';
 import type { Customer, CustomerField } from '@/types/Customer';
 
-// 1. Define props and emits
 const props = defineProps<{
   dialog: boolean;
   isEdit: boolean;
@@ -70,7 +67,6 @@ const emit = defineEmits<{
   (e: 'update:dialog', val: boolean): void;
 }>();
 
-// 2. Create a local ref for dialog
 const localDialog = ref(props.dialog);
 const localItem = reactive<Partial<Customer>>({});
 
@@ -84,13 +80,48 @@ watch(
   { immediate: true }
 );
 
-// 3. Sync parent prop → local state
 watch(() => props.dialog, (val) => {
   localDialog.value = val;
 });
 
-// 4. Sync local state → emit to parent
 watch(localDialog, (val) => {
   emit('update:dialog', val);
 });
 </script>
+
+<style scoped>
+.dialog-card {
+  box-shadow: 0 10px 30px -5px rgba(0,0,0,0.2) !important;
+  background: #f9f9f9;
+}
+
+.dialog-header {
+  background: linear-gradient(to right, #1e88e5, #42a5f5);
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+}
+
+.form-field {
+  margin-bottom: 12px;
+}
+
+.dialog-actions {
+  padding: 16px 24px;
+  background-color: #f1f1f1;
+  border-top: 1px solid #e0e0e0;
+  justify-content: flex-end;
+}
+
+.cancel-btn {
+  color: #555;
+  margin-right: 8px;
+}
+
+.save-btn {
+  background-color: #1e88e5;
+  color: white;
+  font-weight: 500;
+}
+</style>

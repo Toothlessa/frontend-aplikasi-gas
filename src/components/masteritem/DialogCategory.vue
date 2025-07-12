@@ -1,60 +1,57 @@
 <template>
-  <v-dialog v-model="localDialog" max-width="600px" persistent>
-    <v-card class="rounded-xl elevation-12">
+  <v-dialog v-model="localDialog" max-width="700px" persistent>
+    <v-card class="dialog-card" rounded="xl">
       <!-- Header -->
-      <v-card-title class="bg-cyan-darken-2 text-white d-flex align-center">
-        <v-icon size="24" class="mr-2">mdi-new-box</v-icon>
-        <span class="text-h6 font-weight-medium">Add New Category</span>
+      <v-card-title class="dialog-header">
+        <v-icon size="26" class="mr-3">mdi-shape-plus</v-icon>
+        <span class="text-h6 font-weight-medium">Manage Categories</span>
       </v-card-title>
 
       <!-- Form -->
-      <v-card-text class="px-4 pt-6">
+      <v-card-text class="px-6 pt-6">
         <v-text-field
           v-model="localCategory.name"
           label="Category Name"
           variant="outlined"
           density="comfortable"
-          prepend-inner-icon="mdi-tag"
+          prepend-inner-icon="mdi-tag-plus-outline"
           clearable
-          class="mb-4"
+          class="form-field"
         />
       </v-card-text>
 
       <!-- Buttons -->
-      <v-card-actions class="px-4 pb-4">
+      <v-card-actions class="dialog-actions">
         <v-spacer />
-        <!-- Close Button -->
-          <v-btn
-            variant="text"
-            color="grey-darken-2"
-            class="text-white"
-            @click="handleClose"
-          >
-            Close
-          </v-btn>
-
-          <!-- Save Button -->
-          <v-btn
-            color="cyan-darken-1"
-            variant="elevated"
-            class="text-white"
-            @click="handleSave"
-          >
-            Save
-          </v-btn>
+        <v-btn
+          variant="text"
+          class="cancel-btn"
+          @click="handleClose"
+        >
+          Close
+        </v-btn>
+        <v-btn
+          color="cyan-darken-1"
+          variant="elevated"
+          class="save-btn"
+          @click="handleSave"
+        >
+          Save Category
+        </v-btn>
       </v-card-actions>
 
       <!-- Search Bar -->
-      <v-toolbar flat class="bg-cyan-lighten-5 px-4 pt-2" density="comfortable">
+      <v-toolbar flat class="category-search-toolbar" density="comfortable">
         <v-text-field
           :model-value="search"
           @update:model-value="$emit('update:search', $event)"
           label="Search Categories"
-          variant="solo-filled"
+          variant="solo"
           density="comfortable"
           prepend-inner-icon="mdi-magnify"
           clearable
-          class="flex-grow-1"
+          hide-details
+          class="search-field-category"
         />
       </v-toolbar>
 
@@ -62,7 +59,7 @@
       <v-data-table-virtual
         :headers="headers"
         :items="filteredItems"
-        class="px-4 pb-6"
+        class="modern-table-category"
         :filter-keys="['name']"
         :loading="loading"
         loading-text="Loading categories..."
@@ -70,38 +67,64 @@
         item-value="id"
         hover
       >
-        <template v-slot:[`item.active_flag`]="{ item }">
+        <!-- Custom Header -->
+        <template #header="{ props: headerProps }">
+          <thead class="table-header">
+            <tr>
+              <th 
+                v-for="header in headerProps.headers"
+                :key="header.key"
+                class="text-left px-4 py-3 font-weight-bold text-uppercase"
+              >
+                {{ header.title }}
+              </th>
+            </tr>
+          </thead>
+        </template>
+
+        <template #[`item.active_flag`]="{ item }">
           <v-chip
-            :color="item.active_flag ? 'green-darken-2' : 'red-darken-2'"
-            class="text-white"
-            size="small"
+            :color="item.active_flag ? '#4CAF50' : '#F44336'"
+            class="status-chip"
             label
+            size="small"
           >
             {{ item.active_flag ? 'Active' : 'Inactive' }}
           </v-chip>
         </template>
 
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-btn
-            icon
-            size="small"
-            color="primary"
-            variant="text"
-            class="mr-1"
-            @click="$emit('updateCategory', item)"
-          >
-            <v-icon size="18">mdi-pencil-outline</v-icon>
-          </v-btn>
-          
-          <v-btn
-            icon
-            size="small"
-            variant="text"
-            color="red-darken-2"
-            @click="$emit('deactivate', item)"
-          >
-            <v-icon size="18">mdi-radioactive</v-icon>
-          </v-btn>
+        <template #[`item.actions`]="{ item }">
+          <div class="action-buttons">
+            <v-tooltip text="Edit Category" location="top">
+              <template #activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  icon
+                  size="small"
+                  color="cyan-darken-1"
+                  variant="text"
+                  @click="$emit('updateCategory', item)"
+                >
+                  <v-icon size="22">mdi-pencil-outline</v-icon>
+                </v-btn>
+              </template>
+            </v-tooltip>
+            
+            <v-tooltip :text="item.active_flag ? 'Deactivate Category' : 'Activate Category'" location="top">
+              <template #activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  icon
+                  size="small"
+                  variant="text"
+                  color="red-darken-2"
+                  @click="$emit('deactivate', item)"
+                >
+                  <v-icon size="22">{{ item.active_flag ? 'mdi-toggle-switch-off-outline' : 'mdi-toggle-switch-outline' }}</v-icon>
+                </v-btn>
+              </template>
+            </v-tooltip>
+          </div>
         </template>
       </v-data-table-virtual>
     </v-card>
@@ -177,3 +200,84 @@ const handleSave = () => {
 };
 
 </script>
+
+<style scoped>
+.dialog-card {
+  box-shadow: 0 10px 30px -5px rgba(0,0,0,0.2) !important;
+  background: #f9f9f9;
+}
+
+.dialog-header {
+  background: linear-gradient(to right, #00BCD4, #4DD0E1); /* Cyan shades */
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+}
+
+.form-field {
+  margin-bottom: 12px;
+}
+
+.dialog-actions {
+  padding: 16px 24px;
+  background-color: #f1f1f1;
+  border-top: 1px solid #e0e0e0;
+  justify-content: flex-end;
+}
+
+.cancel-btn {
+  color: #555;
+  margin-right: 8px;
+}
+
+.save-btn {
+  background-color: #1e88e5;
+  color: white;
+  font-weight: 500;
+}
+
+.category-search-toolbar {
+  background-color: rgba(0, 188, 212, 0.1) !important; /* Light cyan background */
+  border-bottom: 1px solid #bbdefb;
+  padding: 8px 24px;
+}
+
+.search-field-category {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+}
+
+.modern-table-category {
+  border-radius: 0 0 16px 16px; /* Rounded bottom corners */
+  overflow: hidden;
+  box-shadow: none; /* Remove shadow as it's on the card */
+  border: none;
+}
+
+.modern-table-category .table-header {
+  background-color: #f5f5f5; /* Light grey background */
+  color: #333; /* Darker text for contrast */
+  font-size: 0.8rem;
+}
+
+.modern-table-category .status-chip {
+  color: white !important;
+  font-weight: bold;
+  border-radius: 6px;
+}
+
+.modern-table-category .action-buttons .v-btn {
+  color: #757575; /* Grey for actions */
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.modern-table-category .action-buttons .v-btn:hover {
+  color: #00ACC1; /* Cyan on hover */
+  transform: scale(1.1);
+}
+
+.modern-table-category .v-data-table-virtual__tr:hover {
+  background-color: #f9f9f9 !important;
+}
+</style>

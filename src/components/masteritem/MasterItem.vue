@@ -1,10 +1,9 @@
 <template>
-  <v-container fluid class="pa-0">
-
+  <v-container fluid class="pa-4 rounded-xl elevation-12">
     <ToolbarSimple
       title="Manage Items"
-      icon="mdi-new-box"
-      :color="'bg-cyan-darken-2'"
+      icon="mdi-package-variant-closed"
+      color="cyan"
       :search="search"
       :showUploadButton="false"
       @update:search="search = $event"
@@ -16,14 +15,8 @@
       "
     />
 
-    <!-- Error Snackbar -->
-     <SnackbarError :messages="Array.isArray(error) ? error : [error]" v-model="showError" :timeout="4000" />
-     
-    <!-- Success Snackbar -->
-     <SnackbarSuccess v-model="hasSaved" message="Item has been saved successfully!" />
-
     <!-- Master Item Table -->
-     <TableItem
+    <TableItem
       :headers="localHeaders"
       :items="mItems"
       :search="search"
@@ -32,6 +25,13 @@
       @submit="onCreateItem"
       @deactivate="deactivateItem"
     />
+      
+
+    <!-- Error Snackbar -->
+    <SnackbarError :messages="Array.isArray(error) ? error : [error]" v-model="showError" :timeout="4000" />
+
+    <!-- Success Snackbar -->
+    <SnackbarSuccess v-model="hasSaved" message="Item has been saved successfully!" />
 
     <!-- Create/Edit Master Item Dialog -->
     <DialogItemForm
@@ -49,7 +49,7 @@
       :dialog="openCategoryDialog"
       :newCategory="selectedCategory"
       :search="searchCategory"
-       @update:search="searchCategory = $event"
+      @update:search="searchCategory = $event"
       :categories="categories"
       :headers="localHCategory"
       :loading="loading"
@@ -59,8 +59,8 @@
       @updateCategory="onUpdateCategory"
     />
 
-  <!-- Deactivate Dialog -->
-   <DialogDeactivate
+    <!-- Deactivate Dialog -->
+    <DialogDeactivate
       :dialog="dialogDeactivate"
       title="Change Item Status?"
       message="Are you sure you want to deactivate this item?"
@@ -76,11 +76,11 @@
       @confirm="onDeactivatedCategory"
       @cancel="close"
     />
-
   </v-container>
 </template>
 
 <script setup lang="ts">
+
 import { SnackbarError, SnackbarSuccess, ToolbarSimple } from '@/components/globalComponent';
 import TableItem from './TableItem.vue';
 import DialogItemForm from './DialogItemForm.vue';
@@ -127,7 +127,7 @@ const hasSaved = computed({
 const editedIndex = ref(-1);
 
 // Fields
-const itemType = [ { name: "Asset" }, { name: "Item" },];
+const itemType = [ { name: "ASSET" }, { name: "ITEM" },];
 const localHeaders = headers; // Use the imported headers directly
 const localHCategory = headerscategory;
 
@@ -159,7 +159,7 @@ const defaultCategory: Partial<CategoryItem> = {
 };
 
 const allFields = computed<Field[]>(() => [
-  { model: 'item_type', label: 'Item Type', items: itemType, itemTitle: 'name' },
+  { model: 'item_type', label: 'Item Type', items: itemType.map(it => it.name) },
   { model: 'category_id', label: 'Category', items: categories.value, itemTitle: 'name', itemValue: 'id' },
   { model: 'cost_of_goods_sold', label: 'Cost of Goods' },
   { model: 'selling_price', label: 'Selling Price',  onEnterSubmit: true },
@@ -173,7 +173,7 @@ onMounted(() => {
 const loadMasterItem = () => store.dispatch(`masteritem/${LOAD_MASTER_ITEM}`);
 const loadCategories = () => store.dispatch(`masteritem/${LOAD_CATEGORY_ITEM}`);
 
-function editItem(item:any) {
+function editItem(item: MasterItem) {
   editedIndex.value = mItems.value.indexOf(item);
   Object.assign(editedItem, item);
   openCreateDialog.value = true;
@@ -193,15 +193,12 @@ Object.assign(editedItem, defaultItem);
 
 function onSubmit(item: Partial<MasterItem>) {
   Object.assign(editedItem, item); 
-  console.log('Submitted item:', item);
   onCreateItem(); 
 }
 
 async function onCreateItem() {
   try {
     error.value = '';
-    console.log('Creating item:', editedItem);
-
     await store.dispatch(`masteritem/${CREATE_ITEM}`, editedItem);
     openCreateDialog.value = false;
   } catch (e) {
@@ -217,7 +214,7 @@ async function onCreateItem() {
   }
 }
 
-function deactivateItem(item:any) {
+function deactivateItem(item: MasterItem) {
   // editedIndex.value = mItems.value.indexOf(item);
   Object.assign(editedItem, item);
   dialogDeactivate.value = true;
@@ -253,7 +250,6 @@ const onClose = () => {
 };
 
 async function onCreateCategory(item: Partial<CategoryItem>) {
-  console.log("catogory: ", item);
   try {
     error.value = '';
 
@@ -273,7 +269,7 @@ async function onCreateCategory(item: Partial<CategoryItem>) {
   }
 }
 
-function deactivateCategory(item:any) {
+function deactivateCategory(item: CategoryItem) {
   Object.assign(newCategory, item);
   dialogDeactivateCategory.value = true;
 }
@@ -296,5 +292,4 @@ async function onDeactivatedCategory() {
     }
   }
 }
-
 </script>

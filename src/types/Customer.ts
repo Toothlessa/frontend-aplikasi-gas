@@ -10,9 +10,9 @@ type CustomerKey = keyof Customer;
 export interface CustomerField {
   model: CustomerKey;
   label: string;
-  items?: any[];          // Optional
-  itemTitle?: string;     // Optional
-  itemValue?: string;     // Optional
+  items?: string[];
+  itemTitle?: string;
+  itemValue?: string;
   onEnterSubmit?: boolean;
 }
 
@@ -25,12 +25,25 @@ export interface Customer {
   address: string;
   phone: string;
   active_flag: boolean;
+  in_stock: boolean;
+}
+
+export interface RawCustomer {
+  id: number | string;
+  customer_name: string;
+  type: string;
+  nik: string;
+  email: string;
+  address: string;
+  phone: string;
+  active_flag: string;
+  in_stock: string;
 }
 
 export interface HeaderCustomer {
   title: string;
   key: string;
-  value?: string | ((item: any) => any);
+  value?: string | ((item: Customer) => string | boolean);
   align?: 'start' | 'center' | 'end';
   sortable?: boolean;
 }

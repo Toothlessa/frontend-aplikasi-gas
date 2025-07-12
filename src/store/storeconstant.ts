@@ -55,6 +55,8 @@ export const DEACTIVE_ASSET = '[actions] deactivate asset'
 export const CREATE_OWNER = '[actions] create owner'
 export const LOAD_OWNER = '[actions] load owner'
 export const DEACTIVE_OWNER = '[actions] deactivate owner'
+export const LOAD_ASSET_DETAILS_BY_SUMMARY = '[actions] load asset details by summary'
+export const UPDATE_ASSET = '[actions] update asset'
 
 /* getters */
 

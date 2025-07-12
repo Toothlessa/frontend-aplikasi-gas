@@ -1,23 +1,22 @@
 <template>
-  <!-- <v-card variant="tonal"> -->
-   <v-toolbar flat color="rgba(0,0,0,0)" class="mt-n5">
-    <v-toolbar-title class="text-center text-teal text-lg-h5 font-weight-bold">Top 7 Customer</v-toolbar-title>
-  </v-toolbar>
-  <v-card height="" flat color="transparent" class="mt-n5">
-  <PolarArea 
-    :data="data" 
-    :options="options"
-    :width="width"
-    height="300px"
-    :css-classes="cssClasses"
-    :styles="styles"
-    :plugins="plugins"
-  />
-</v-card>
-<!-- </v-card> -->
-</template>
-
-<script>
+    <div>
+      <v-toolbar color="transparent" class="mt-n5" rounded-t-xl>
+        <v-toolbar-title class=" text-deep-orange text-lg-h5 font-weight-bold">Top 5 Buyer</v-toolbar-title>
+      </v-toolbar>
+      <v-divider></v-divider>
+      <v-card rounded="xl" elevation="4" class="mt-n5">
+        <PolarArea
+          :data="data"
+          :options="options"
+          :css-classes="cssClasses"
+          :styles="styles"
+          :plugins="plugins"
+        />
+      </v-card>
+    </div>
+  </template>
+  
+  <script>
 import {
   Chart as ChartJS,
   RadialLinearScale,
@@ -26,7 +25,7 @@ import {
   Legend
 } from 'chart.js'
 import { PolarArea } from 'vue-chartjs'
-import * as chartConfig from '../../chart/PolarChart.js'
+import * as chartConfig from '../../chart/PolarChart.ts'
 
 ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend)
 
@@ -62,3 +61,7 @@ export default {
   }
 }
 </script>
+  
+  <style>
+  
+  </style>

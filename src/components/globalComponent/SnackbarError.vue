@@ -2,28 +2,23 @@
   <v-snackbar
     v-model="model"
     :timeout="timeout"
-    location="top center"
-    elevation="10"
+    location="bottom right"
     color="red-darken-3"
+    elevation="24"
     rounded="lg"
-    class="text-white shadow-lg"
     multi-line
   >
-
-    <div class="d-flex align-start">
-      <v-icon size="24" class="me-2 text-white">mdi-alert-circle</v-icon>
+    <div class="d-flex align-center">
+      <v-icon size="22" class="mr-3">mdi-alert-circle-outline</v-icon>
       <div>
-        <span class="font-weight-medium text-subtitle-2">
-          Please fix the following errors:
-        </span>
-        <ul class="pl-4 list-disc text-body-2 mt-1">
+        <div class="font-weight-medium">Error Occurred</div>
+        <ul class="text-caption mt-1 pl-1">
           <li v-for="(e, i) in messages" :key="i">{{ e }}</li>
         </ul>
       </div>
     </div>
-
     <template #actions>
-      <v-btn icon variant="text" color="white" @click="model = false">
+      <v-btn icon variant="text" @click="model = false">
         <v-icon>mdi-close</v-icon>
       </v-btn>
     </template>

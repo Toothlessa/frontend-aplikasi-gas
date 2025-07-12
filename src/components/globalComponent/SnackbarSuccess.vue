@@ -2,21 +2,17 @@
   <v-snackbar
     v-model="model"
     :timeout="timeout"
-    location="top center"
-    elevation="10"
+    location="bottom right"
     color="green-darken-2"
+    elevation="24"
     rounded="lg"
-    class="text-white shadow-lg"
-    multi-line
   >
-   <div class="d-flex align-center">
-      <span class="text-body-2 font-weight-medium">
-        ✅ {{ message }}
-      </span>
+    <div class="d-flex align-center">
+      <v-icon size="22" class="mr-3">mdi-check-circle-outline</v-icon>
+      <div class="font-weight-medium">{{ message }}</div>
     </div>
-
     <template #actions>
-      <v-btn icon variant="text" color="white" @click="model = false">
+      <v-btn icon variant="text" @click="model = false">
         <v-icon>mdi-close</v-icon>
       </v-btn>
     </template>

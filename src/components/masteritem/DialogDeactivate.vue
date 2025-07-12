@@ -1,33 +1,33 @@
 <template>
-  <v-dialog v-model="localDialog" max-width="460px" persistent>
-    <v-card class="rounded-xl elevation-12">
-        <v-card-title class="bg-cyan-darken-2 text-white d-flex align-center py-4">
-            <v-icon class="mr-2" size="24">mdi-alert-circle-outline</v-icon>
-            <span class="text-h6 font-weight-medium">{{ title }}</span>
-        </v-card-title>
+  <v-dialog v-model="localDialog" max-width="450px" persistent>
+    <v-card class="rounded-xl elevation-12" rounded="xl">
+      <v-card-title class="dialog-header-deactivate">
+        <v-icon class="mr-2" size="28">mdi-alert-circle-outline</v-icon>
+        <span class="text-h6 font-weight-medium">{{ title }}</span>
+      </v-card-title>
 
-      <v-card-text class="text-center text-body-2 pt-2">
+      <v-card-text class="text-center text-body-1 pt-6 px-6">
         {{ message }}
       </v-card-text>
 
-      <v-card-actions class="justify-center py-4">
+      <v-card-actions class="justify-end px-6 pb-4">
         <v-btn
-          color="grey-darken-2"
-          variant="text"
-          class="text-white px-4"
+          color="grey-darken-1"
+          variant="outlined"
+          class="rounded-pill"
           @click="$emit('cancel')"
         >
-          <v-icon class="mr-1">mdi-cancel</v-icon>
+          <v-icon start>mdi-cancel</v-icon>
           Cancel
         </v-btn>
 
         <v-btn
-          color="red-darken-2"
+          color="cyan-darken-1"
           variant="elevated"
-          class="text-white px-4"
+          class="text-white rounded-pill"
           @click="$emit('confirm')"
         >
-          <v-icon class="mr-1">mdi-check-decagram</v-icon>
+          <v-icon start>mdi-check-circle-outline</v-icon>
           Confirm
         </v-btn>
       </v-card-actions>
@@ -63,3 +63,14 @@ watch(localDialog, (val) => {
 });
 
 </script>
+
+<style scoped>
+.dialog-header-deactivate {
+  background: linear-gradient(to right, #00BCD4, #4DD0E1);
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
