@@ -54,9 +54,10 @@ import TableDebt from "@/components/chart/TableDebt.vue";
 import TableOutstandingTrx from "@/components/chart/TableOutstandingTrx.vue";
 import TopBuyer from "@/components/chart/TopBuyer";
 import AxiosInstance from "@/services/AxiosInstance";
-import store from "@/store/store";
-import { GET_USER_TOKEN_GETTER } from "@/store/storeconstant";
+
 import { useTheme } from 'vuetify';
+import store from '@/store/store';
+import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
 
 interface StockDisplay {
   running_stock: string;
@@ -92,13 +93,7 @@ const lists = ref([
 
 const getDisplayStock = async () => {
   try {
-    const response = await AxiosInstance.get<StockDisplay>(`http://127.0.0.1:8000/api/stockitems/displaystock`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    });
+    const response = await AxiosInstance.get<StockDisplay>('/stockitems/displaystock');
 
     if (response.status === 200) {
       lists.value[0].count = response.data.running_stock;
@@ -106,10 +101,32 @@ const getDisplayStock = async () => {
       lists.value[2].count = response.data.empty_gas;
       lists.value[3].count = response.data.empty_gas_owned;
     }
-  } catch (error) {
-    // console.error("Error fetching stock data:", Validations.getErrorMessageFromCode(error.response.data.errors[0]));
+  } catch (error: any) {
+    console.error("Error fetching stock data:", error?.response?.data || error.message);
   }
 };
+
+
+// const getDisplayStock = async () => {
+//   try {
+//     const response = await AxiosInstance.get<StockDisplay>(`http://127.0.0.1:8000/api/stockitems/displaystock`, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Accept': 'application/json',
+//         'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
+//       },
+//     });
+
+//     if (response.status === 200) {
+//       lists.value[0].count = response.data.running_stock;
+//       lists.value[1].count = response.data.yesterday_stock;
+//       lists.value[2].count = response.data.empty_gas;
+//       lists.value[3].count = response.data.empty_gas_owned;
+//     }
+//   } catch (error) {
+//     // console.error("Error fetching stock data:", Validations.getErrorMessageFromCode(error.response.data.errors[0]));
+//   }
+// };
 
 onMounted(() => {
   getDisplayStock();

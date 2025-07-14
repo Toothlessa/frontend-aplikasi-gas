@@ -1,4 +1,4 @@
-import Axios from "axios";
+import AxiosInstance from "@/services/AxiosInstance";
 import Validations from "@/services/Validations";
 import {
     SIGNUP_ACTION,
@@ -19,14 +19,14 @@ export default {
     async [SIGNUP_ACTION](context, payload) {
         return context.dispatch(AUTH_ACTION, {
             ...payload,
-            url: 'http://127.0.0.1:8000/api/users',
+            url: 'users',
         });
     },
 
     async [LOGIN_ACTION](context, payload) {
         return context.dispatch(AUTH_ACTION, {
             ...payload,
-            url: 'http://127.0.0.1:8000/api/users/login',
+            url: 'users/login',
         });
     },
 
@@ -62,14 +62,6 @@ export default {
     },
 
     async [LOGOUT_ACTION](context) {
-        await Axios.delete('http://127.0.0.1:8000/api/users/logout', {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-            }
-        });
-
         context.commit(SET_USER_TOKEN_DATA_MUTATION, {
             userId: null,
             username: null,
@@ -81,6 +73,7 @@ export default {
         if (timer) {
             clearTimeout(timer);
         }
+        await AxiosInstance.delete('users/logout');
     },
 
     [AUTO_LOGOUT_ACTION](context) {
@@ -99,7 +92,7 @@ export default {
         let response = '';
 
         try {
-            response = await Axios.post(payload.url, postData);
+            response = await AxiosInstance.post(payload.url, postData);
         } catch (error) {
             let errorMessage = Validations.getErrorMessageFromCode(
                 error.response.data.errors[0],

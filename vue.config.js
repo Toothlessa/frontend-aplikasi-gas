@@ -5,7 +5,5 @@ module.exports = {
   pluginOptions: {
     vuetify: {},
   },
-  devServer: {
-    watchFiles: [path.resolve(__dirname, 'src')],
-  },
+  
 };

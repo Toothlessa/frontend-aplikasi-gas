@@ -1,4 +1,5 @@
-import axios, { AxiosResponse } from 'axios';
+import AxiosInstance from '@/services/AxiosInstance';
+import { AxiosResponse } from 'axios';
 import {
   CREATE_CUSTOMER,
   DEACTIVATE_CUSTOMER,
@@ -22,12 +23,7 @@ const actions: ActionTree<CustomerState, RootState> = {
     commit(SET_LOADING, true);
     try {
 
-      const token = store.getters[`auth/${GET_USER_TOKEN_GETTER}`];
-      const response: AxiosResponse<{ data: RawCustomer[] }> = await axios.get('http://127.0.0.1:8000/api/customers/all', {
-        headers: {
-          Authorization: token,
-        },
-      });
+      const response: AxiosResponse<{ data: RawCustomer[] }> = await AxiosInstance.get('customers/all');
 
       const data: Customer[] = response.data.data.map((item) => ({
         ...item,
@@ -49,16 +45,12 @@ const actions: ActionTree<CustomerState, RootState> = {
   ): Promise<void> {
     try {
       const url = customer.id
-        ? `http://127.0.0.1:8000/api/customers/${customer.id}`
-        : 'http://127.0.0.1:8000/api/customers';
+        ? `customers/${customer.id}`
+        : 'customers';
 
       const method: 'put' | 'post' = customer.id ? 'put' : 'post';
 
-      const response = await axios[method](url, customer, {
-        headers: {
-          Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-        },
-      });
+      const response = await AxiosInstance[method](url, customer);
 
       if ([200, 201].includes(response.status)) {
         dispatch(LOAD_CUSTOMER_DATA);
@@ -91,13 +83,9 @@ const actions: ActionTree<CustomerState, RootState> = {
     { dispatch, commit }: Context, id: number
   ): Promise<void> {
     try {
-      const url = `http://127.0.0.1:8000/api/customers/inactive/${id}`;
+      const url = `customers/inactive/${id}`;
 
-      const response = await axios.patch(url, [], {
-        headers: {
-          Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-        },
-      });
+      const response = await AxiosInstance.patch(url, []);
 
       if ([200].includes(response.status)) {
         dispatch(LOAD_CUSTOMER_DATA);
@@ -134,15 +122,9 @@ const actions: ActionTree<CustomerState, RootState> = {
     formData.append('csvFile', file);
 
     try {
-      const response = await axios.post(
-        'http://127.0.0.1:8000/api/customers/import-csv',
-        formData,
-        {
-          headers: {
-            'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-            'Content-Type': 'multipart/form-data',
-          },
-        }
+      const response = await AxiosInstance.post(
+        'customers/import-csv',
+        formData
       );
 
       if (response.status === 200) {

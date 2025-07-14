@@ -1,4 +1,5 @@
-import axios, { AxiosResponse } from 'axios';
+import AxiosInstance from '@/services/AxiosInstance';
+import { AxiosResponse } from 'axios';
 import {
   GET_USER_TOKEN_GETTER,
   LOAD_MASTER_ITEM,
@@ -26,12 +27,7 @@ const actions: ActionTree<MasterItemState, RootState> = {
     commit(SET_LOADING, true);
     try {
 
-      const token = store.getters[`auth/${GET_USER_TOKEN_GETTER}`];
-      const response: AxiosResponse<{ data: RawMasterItem[] }> = await axios.get('http://127.0.0.1:8000/api/masteritems/all', {
-        headers: {
-          Authorization: token,
-        },
-      });
+      const response: AxiosResponse<{ data: RawMasterItem[] }> = await AxiosInstance.get('masteritems/all');
 
       const data: MasterItem[] = response.data.data.map((item) => ({
         ...item,
@@ -52,14 +48,7 @@ const actions: ActionTree<MasterItemState, RootState> = {
     commit(SET_LOADING, true);
     try {
 
-      const url = `http://127.0.0.1:8000/api/categoryitems/all`;
-      const token = store.getters[`auth/${GET_USER_TOKEN_GETTER}`];
-      
-      const response: AxiosResponse<{ data: RawCategoryItem[] }> = await axios.get(url, {
-        headers: {
-          Authorization: token,
-        },
-      });
+      const response: AxiosResponse<{ data: RawCategoryItem[] }> = await AxiosInstance.get('categoryitems/all');
 
       const data: CategoryItem[] = response.data.data.map((item) => ({
         ...item,
@@ -80,16 +69,12 @@ const actions: ActionTree<MasterItemState, RootState> = {
   ): Promise<void> {
     try {
       const url = masteritem.id
-        ? `http://127.0.0.1:8000/api/masteritems/${masteritem.id}`
-        : 'http://127.0.0.1:8000/api/masteritems';
+        ? `masteritems/${masteritem.id}`
+        : 'masteritems';
 
       const method: 'put' | 'post' = masteritem.id ? 'put' : 'post';
 
-      const response = await axios[method](url, masteritem, {
-        headers: {
-          Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-        },
-      });
+      const response = await AxiosInstance[method](url, masteritem);
 
       if ([200, 201].includes(response.status)) {
         dispatch(LOAD_MASTER_ITEM);
@@ -122,13 +107,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
     { dispatch, commit }: Context, id: number
   ): Promise<void> {
     try {
-      const url = `http://127.0.0.1:8000/api/masteritems/inactive/${id}`;
+      const url = `masteritems/inactive/${id}`;
 
-      const response = await axios.patch(url, [], {
-        headers: {
-          Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-        },
-      });
+      const response = await AxiosInstance.patch(url, []);
 
       if ([200].includes(response.status)) {
         dispatch(LOAD_MASTER_ITEM);
@@ -162,16 +143,12 @@ const actions: ActionTree<MasterItemState, RootState> = {
   ): Promise<void> {
     try {
       const url = categoryitem.id
-        ? `http://127.0.0.1:8000/api/categoryitems/${categoryitem.id}`
-        : 'http://127.0.0.1:8000/api/categoryitems';
+        ? `categoryitems/${categoryitem.id}`
+        : 'categoryitems';
 
       const method: 'patch' | 'post' = categoryitem.id ? 'patch' : 'post';
 
-      const response = await axios[method](url, categoryitem, {
-        headers: {
-          Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-        },
-      });
+      const response = await AxiosInstance[method](url, categoryitem);
 
       if ([200, 201].includes(response.status)) {
         dispatch(LOAD_CATEGORY_ITEM);
@@ -204,13 +181,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
     { dispatch, commit }: Context, id: number
   ): Promise<void> {
     try {
-      const url = `http://127.0.0.1:8000/api/categoryitems/inactive/${id}`;
+      const url = `categoryitems/inactive/${id}`;
 
-      const response = await axios.patch(url, [], {
-        headers: {
-          Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-        },
-      });
+      const response = await AxiosInstance.patch(url, []);
 
       if ([200].includes(response.status)) {
         dispatch(LOAD_CATEGORY_ITEM);
