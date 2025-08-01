@@ -87,6 +87,7 @@
                 :disabled="!fieldDisabled"
                 prepend-inner-icon="mdi-note-text-outline"
                 class="mb-4"
+                @keyup.enter="save"
               />
 
               <v-autocomplete
@@ -516,7 +517,7 @@ const save = async () => {
         amount: updateTrx.amount,
         total: (updateTrx.amount || 0) * (updateTrx.quantity || 0),
       };
-      response = await AxiosInstance.patch(`http://127.0.0.1:8000/api/transactions/${updateTrx.id}`, postData, {
+      response = await AxiosInstance.patch(`transactions/${updateTrx.id}`, postData, {
          headers: {
           'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
         },
@@ -525,14 +526,14 @@ const save = async () => {
       // Create logic
       const postData = {
         stock: -(editedItem.quantity || 0),
-        customer_id: selectedCustomer.value,
+        customer_id: selectedCustomer.value || 1,
         item_id: selectedItem.value,
-        quantity: editedItem.quantity,
+        quantity: editedItem.quantity || 1,
         description: editedItem.description,
         amount: editedItem.amount,
         total: (editedItem.amount || 0) * (editedItem.quantity || 0),
       };
-      response = await AxiosInstance.post('http://127.0.0.1:8000/api/transactions', postData, {
+      response = await AxiosInstance.post('/transactions', postData, {
          headers: {
           'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
         },

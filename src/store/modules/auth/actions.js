@@ -62,6 +62,7 @@ export default {
     },
 
     async [LOGOUT_ACTION](context) {
+        await AxiosInstance.delete('users/logout');
         context.commit(SET_USER_TOKEN_DATA_MUTATION, {
             userId: null,
             username: null,
@@ -73,7 +74,6 @@ export default {
         if (timer) {
             clearTimeout(timer);
         }
-        await AxiosInstance.delete('users/logout');
     },
 
     [AUTO_LOGOUT_ACTION](context) {
@@ -104,7 +104,7 @@ export default {
             let expirationTime = +response.data.data.expiresIn * 1000000000;
 
             timer = setTimeout(() => {
-                // context.dispatch(AUTO_LOGOUT_ACTION);
+                context.dispatch(AUTO_LOGOUT_ACTION);
                 context.dispatch(LOGOUT_ACTION);
             }, expirationTime);
 
