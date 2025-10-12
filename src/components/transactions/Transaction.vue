@@ -220,7 +220,7 @@
         </v-col>
       </v-row>
 
-      <!-- Dialogs -->
+      Dialogs
       <v-dialog v-model="dialogUpdate" max-width="600px" persistent>
         <v-card rounded="xl">
           <v-card-title :class="theme.global.current.value.dark ? 'dialog-header-dark' : 'dialog-header-light'">
@@ -292,7 +292,7 @@
           </v-card-text>
           <v-card-actions class="pa-4">
             <v-spacer />
-            <v-btn text @click="close" rounded="lg">Cancel</v-btn>
+            <v-btn @click="close" rounded="lg">Cancel</v-btn>
             <v-btn
               color="cyan-darken-1"
               class="text-white"
@@ -452,7 +452,7 @@ const getDateOptions = (dateConv: Date) => {
 
 const getCustomer = async () => {
   try {
-    const response = await AxiosInstance.get<{data: {id: number, customer_name: string, nik: string}[]}>(`http://127.0.0.1:8000/api/customers/all`, {
+    const response = await AxiosInstance.get<{data: {id: number, customer_name: string, nik: string}[]}>(`customers/all`, {
       headers: {
         'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
       },
@@ -466,7 +466,7 @@ const getCustomer = async () => {
 
 const getMasterItem = async () => {
   try {
-    const response = await AxiosInstance.get<{data: {id: number, item_name: string}[]}>(`http://127.0.0.1:8000/api/masteritems/itemtype/ITEM`, {
+    const response = await AxiosInstance.get<{data: {id: number, item_name: string}[]}>(`masteritems/itemtype/ITEM`, {
        headers: {
         'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
       },
@@ -482,7 +482,7 @@ const getTransactionByDate = async () => {
   loadingData.value = true;
   try {
     const formattedDate = getDateOptions(pickDate.value);
-    const response = await AxiosInstance.get<{data: Transaction[]}>(`http://127.0.0.1:8000/api/transactions/today/${formattedDate}`, {
+    const response = await AxiosInstance.get<{data: Transaction[]}>(`transactions/today/${formattedDate}`, {
        headers: {
         'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
       },
@@ -525,13 +525,13 @@ const save = async () => {
     } else {
       // Create logic
       const postData = {
-        stock: -(editedItem.quantity || 0),
+        stock: -(editedItem.quantity || 1),
         customer_id: selectedCustomer.value || 1,
         item_id: selectedItem.value,
         quantity: editedItem.quantity || 1,
         description: editedItem.description,
         amount: editedItem.amount,
-        total: (editedItem.amount || 0) * (editedItem.quantity || 0),
+        total: (editedItem.amount || 0) * (editedItem.quantity || 1),
       };
       response = await AxiosInstance.post('/transactions', postData, {
          headers: {

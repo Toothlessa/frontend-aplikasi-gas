@@ -44,6 +44,17 @@ export interface RawOwner {
   inactive_date: string;
 }
 
+export interface RawAsset {
+  id: number | string;
+  owner_name: string;
+  asset_name: string;
+  quantity: number;
+  cogs: number;
+  selling_price: number;
+  description: string;
+  created_by: number | string;
+}
+
 export interface HeaderAsset {
   title: string;
   key: string;

@@ -188,11 +188,15 @@ const handleSave = () => {
 const openDeactivateDialog = (item: Owner) => {
   selectedItem.value = item;
   dialogDeactivate.value = true;
+  console.log(selectedItem.value);
 };
 
 const onDeactivateConfirm = async () => {
+  console.log('Start onDeactivate Confirm');
   if (selectedItem.value) {
+    
     try {
+       console.log('execute');
       await store.dispatch(`asset/${DEACTIVE_OWNER}`, selectedItem.value.id);
       dialogDeactivate.value = false;
     } catch (e) {

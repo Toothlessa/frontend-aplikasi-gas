@@ -225,14 +225,14 @@ const result = reactive({
 
 // Sidebar items
 const items = [
-  { icon: 'mdi-basket-fill', text: 'Stocks', to: '/stock' },
+  { icon: 'mdi-basket-fill', text: 'Stock', to: '/stock' },
   { icon: 'mdi-cash', text: 'Debt', to: '/debt' },
-  { icon: 'mdi-account-group', text: 'Users', to: '/users' },
+  { icon: 'mdi-account-group', text: 'User', to: '/users' },
 ];
 
 const masters = [
-  ['mdi-package-variant', 'Master Item', '/masteritem'],
-  ['mdi-account-tie', 'Customers', '/customer'],
+  ['mdi-package-variant', 'Item', '/masteritem'],
+  ['mdi-account-tie', 'Customer', '/customer'],
   ['mdi-car', 'Asset', '/asset'],
 ];
 

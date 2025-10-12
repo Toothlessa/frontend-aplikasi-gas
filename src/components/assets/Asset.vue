@@ -144,7 +144,7 @@
           <v-data-table
             :headers="assetHeaders"
             :items="assets"
-            :loading="isLoadingAssets"
+            :loading="loading"
             class="modern-table"
             hover
           >
@@ -171,14 +171,12 @@
         :owners="assetOwners"
         :newOwner="newOwnerData"
         :search="searchQuery"
-        :loading="isLoadingOwners"
+        :loading="loading"
         @close="openDialogOwner = false"
         @submit="handleCreateOwner"
         @update:search="searchQuery = $event"
         @updateOwner="onUpdateOwner"
       />
-
-      
 
       <!-- Snackbar for notifications -->
       <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="top right" rounded="xl" elevation="12">
@@ -193,7 +191,7 @@
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { Asset, Owner } from '@/types/asset';
+import { Asset, headerOwner, Owner } from '@/types/asset';
 import {
   CREATE_ASSET,
   LOAD_ASSET,
@@ -223,7 +221,6 @@ const openDialogOwner = ref(false);
 
 const isCreatingAsset = ref(false);
 const isUpdatingAsset = ref(false);
-const isLoadingAssets = ref(false);
 const isLoadingOwners = ref(false);
 const searchQuery = ref('');
 
@@ -251,6 +248,7 @@ const assetHeaders = [
 const loadMasterItem = () => store.dispatch(`masteritem/${LOAD_MASTER_ITEM}`);
 const loadAssets = () => store.dispatch(`asset/${LOAD_ASSET}`);
 const loadOwners = () => store.dispatch(`asset/${LOAD_OWNER}`);
+const loading = computed(() => store.state.asset.loading);
 // --- Lifecycle Hooks ---
 onMounted(() => {
   loadMasterItem();
