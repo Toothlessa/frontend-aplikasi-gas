@@ -17,27 +17,14 @@ export interface CustomerField {
 }
 
 export interface Customer {
-  id: number | string;
+  id: number;
   customer_name: string;
-  type: string;
+  customer_type: string;
   nik: string;
   email: string;
   address: string;
   phone: string;
-  active_flag: boolean;
-  in_stock: boolean;
-}
-
-export interface RawCustomer {
-  id: number | string;
-  customer_name: string;
-  type: string;
-  nik: string;
-  email: string;
-  address: string;
-  phone: string;
-  active_flag: string;
-  in_stock: string;
+  active_flag: boolean | string;
 }
 
 export interface HeaderCustomer {
@@ -50,7 +37,7 @@ export interface HeaderCustomer {
 
 export const headerCustomer: HeaderCustomer[] = [
     { title: 'Customer Name', align: 'start', key: 'customer_name' },
-    { title: 'Type', align: 'start', key: 'type' },
+    { title: 'Type', align: 'start', key: 'customer_type' },
     { title: 'NIK', align: 'start', key: 'nik' },
     { title: 'E-mail', align: 'start', key: 'email' },
     { title: 'Address', align: 'start', key: 'address' },

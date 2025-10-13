@@ -64,6 +64,7 @@ import {
   DEACTIVATE_CUSTOMER, 
   LOAD_CUSTOMER_DATA, 
   SET_HASSAVED, 
+  UPDATE_CUSTOMER, 
   UPLOAD_CUSTOMER 
 } from '@/store/storeconstant';
 import { Customer, CustomerField, headerCustomer } from '@/types/Customer';
@@ -78,9 +79,9 @@ const search = ref('');
 const editedIndex = ref(-1);
 const editedItem = reactive<Partial<Customer>>({});
 const defaultItem: Partial<Customer> = {
-  id: '',
+  id: 0,
   customer_name: '',
-  type: '',
+  customer_type: '',
   nik: '',
   email: '',
   address: '',
@@ -109,7 +110,7 @@ const errorMessages = computed(() => Array.isArray(error.value) ? error.value : 
 
 const allFields = computed<CustomerField[]>(() => [
   { model: 'customer_name', label: 'Customer Name' },
-  { model: 'type', label: 'Type' },
+  { model: 'customer_type', label: 'Type' },
   { model: 'nik', label: 'NIK' },
   { model: 'email', label: 'E-Mail', onEnterSubmit: true },
   { model: 'address', label: 'Address', onEnterSubmit: true },
@@ -164,9 +165,19 @@ const onSubmit = (item: Partial<Customer>) => {
 };
 
 async function onCreateItem() {
+  
+  error.value = '';
   try {
-    error.value = '';
     await store.dispatch(`customer/${CREATE_CUSTOMER}`, editedItem);
+    closeDialogs();
+  } catch (e) {
+    handleError(e);
+  }
+}
+
+async function onUpdateCustomer() {
+  try {
+    await store.dispatch(`customer/${UPDATE_CUSTOMER}`,editedItem);
     closeDialogs();
   } catch (e) {
     handleError(e);

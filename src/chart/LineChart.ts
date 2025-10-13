@@ -27,7 +27,7 @@ interface ChartOptions {
 let response: any; // Will be typed more specifically after fetching
 try {
   response = await AxiosInstance.get<SalesData[]>(
-    `http://127.0.0.1:8000/api/transactions/salesperweek`,
+    `http://127.0.0.1:8000/api/transactions/dailysale`,
     {
       headers: {
         "Content-Type": "application/json",

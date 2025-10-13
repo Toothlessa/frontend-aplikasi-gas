@@ -1,0 +1,63 @@
+src/
+├── api/
+│   ├── AxiosInstance.ts
+│   ├── customerApi.ts
+│   ├── stockApi.ts
+│   └── ...
+│
+├── composables/
+│   ├── useCustomer.ts
+│   ├── useStock.ts
+│   └── ...
+│
+├── services/
+│   ├── CustomerService.ts
+│   ├── StockService.ts
+│   └── ...
+│
+├── store/
+│   ├── modules/
+│   │   ├── customer/
+│   │   │   ├── actions.ts
+│   │   │   ├── mutations.ts
+│   │   │   ├── state.ts
+│   │   │   ├── getters.ts
+│   │   │   └── index.ts
+│   │   └── stock/
+│   │       └── ...
+│   ├── types.ts
+│   └── store.ts
+│
+├── types/
+│   ├── Customer.ts
+│   ├── Stock.ts
+│   └── Common.ts
+│
+├── utils/
+│   ├── formatters.ts
+│   ├── validators.ts
+│   └── errorHandler.ts
+│
+├── views/
+│   ├── CustomerManagement.vue
+│   ├── StockDashboard.vue
+│   └── ...
+│
+└── components/
+    ├── customer/
+    │   ├── TableCustomer.vue
+    │   ├── DialogCustomerForm.vue
+    │   └── ...
+    └── global/
+        ├── SnackbarError.vue
+        ├── SnackbarSuccess.vue
+        └── ToolbarSimple.vue
+
+| Layer         | Tanggung Jawab                               | Mirip di Laravel                    |
+| ------------- | -------------------------------------------- | ----------------------------------- |
+| `api/`        | Akses endpoint backend                       | Repository                          |
+| `services/`   | Business logic, mapping data, error handling | Service                             |
+| `store/`      | State management (data + action)             | Controller (dalam konteks frontend) |
+| `components/` | UI (View)                                    | Blade / Vue View                    |
+| `utils/`      | Helper, formatter, validator                 | Helpers / Traits                    |
+| `types/`      | Definisi TypeScript (model)                  | Model / Resource                    |

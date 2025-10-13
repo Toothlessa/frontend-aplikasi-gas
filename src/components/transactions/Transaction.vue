@@ -482,7 +482,7 @@ const getTransactionByDate = async () => {
   loadingData.value = true;
   try {
     const formattedDate = getDateOptions(pickDate.value);
-    const response = await AxiosInstance.get<{data: Transaction[]}>(`transactions/today/${formattedDate}`, {
+    const response = await AxiosInstance.get<{data: Transaction[]}>(`transactions/date/${formattedDate}`, {
        headers: {
         'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
       },

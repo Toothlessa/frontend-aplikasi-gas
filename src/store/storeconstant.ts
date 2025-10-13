@@ -37,6 +37,7 @@ export const SET_DATA_CATEGORY = '[mutations] set category item data'
 /* CUSTOMER */
 /* actions */
 export const CREATE_CUSTOMER = '[actions] create customer'
+export const UPDATE_CUSTOMER = '[actions] update customer' 
 export const LOAD_CUSTOMER_DATA = '[actions] load data customers'
 export const DEACTIVATE_CUSTOMER = '[actions] deactivate customer'
 export const UPLOAD_CUSTOMER = '[actions] upload customer data'

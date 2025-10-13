@@ -3,18 +3,18 @@ import { AxiosResponse } from 'axios';
 import {
   CREATE_CUSTOMER,
   DEACTIVATE_CUSTOMER,
-  GET_USER_TOKEN_GETTER,
   LOAD_CUSTOMER_DATA,
   SET_DATA_CUSTOMER,
   SET_HASSAVED,
   SET_LOADING,
+  UPDATE_CUSTOMER,
   UPLOAD_CUSTOMER
 } from '@/store/storeconstant';
 import Validations from '@/services/Validations';
-import store from '@/store/store';
 import { ActionContext, ActionTree } from 'vuex';
-import { CustomerState, Customer, RawCustomer } from '@/types/Customer';
+import { CustomerState, Customer } from '@/types/Customer';
 import { RootState } from '@/store/types'; // ← create this file too
+import { CustomerAPI } from '@/api/CustomerApi';
 
 type Context = ActionContext<CustomerState,  RootState>;
 
@@ -23,12 +23,11 @@ const actions: ActionTree<CustomerState, RootState> = {
     commit(SET_LOADING, true);
     try {
 
-      const response: AxiosResponse<{ data: RawCustomer[] }> = await AxiosInstance.get('customers/all');
+      const response: AxiosResponse<{ data: Customer[] }> = await CustomerAPI.getAll();
 
       const data: Customer[] = response.data.data.map((item) => ({
         ...item,
         active_flag: item.active_flag === 'Y',
-        in_stock: item.in_stock === 'Y',
       }));
 
       commit(SET_DATA_CUSTOMER, data);
@@ -41,16 +40,12 @@ const actions: ActionTree<CustomerState, RootState> = {
   },
 
   async [CREATE_CUSTOMER](
-    { dispatch, commit }: Context, customer: Customer
+    { dispatch, commit }: Context,
+    customer: Customer
   ): Promise<void> {
     try {
-      const url = customer.id
-        ? `customers/${customer.id}`
-        : 'customers';
 
-      const method: 'put' | 'post' = customer.id ? 'put' : 'post';
-
-      const response = await AxiosInstance[method](url, customer);
+      const response = await CustomerAPI.create(customer);
 
       if ([200, 201].includes(response.status)) {
         dispatch(LOAD_CUSTOMER_DATA);
@@ -59,12 +54,21 @@ const actions: ActionTree<CustomerState, RootState> = {
           commit(SET_HASSAVED, false);
         }, 2000);
       }
-    } catch (error) {
-      const axiosError = error as { response?: { data?: { errors?: { [key: string]: string[] } } } };
+    } catch (error: any) {
+      const axiosError = error as {
+        response?: {
+          data?: {
+            errors?: { [key: string]: string[] };
+            error?: string;
+            message?: string;
+          };
+        };
+      };
+
+      // Bentuk Laravel default (errors)
       const errors = axiosError.response?.data?.errors;
       if (errors) {
         const messages: string[] = [];
-
         for (const field in errors) {
           if (Array.isArray(errors[field])) {
             const message = errors[field][0];
@@ -73,11 +77,125 @@ const actions: ActionTree<CustomerState, RootState> = {
             );
           }
         }
-
         throw messages;
       }
+      const singleError =
+        axiosError.response?.data?.error ||
+        axiosError.response?.data?.message ||
+        'Unknown error occurred';
+
+      // lempar agar bisa ditangkap di component
+      throw Validations.getErrorMessageFromCodeCustomer(singleError);
     }
   },
+
+
+  async [UPDATE_CUSTOMER] (
+    {dispatch, commit}: 
+      Context,
+      customer: Customer
+  ): Promise<void> {
+    try {
+      const response = await CustomerAPI.update(customer.id, customer);
+
+      if([200].includes(response.status)) {
+        dispatch(LOAD_CUSTOMER_DATA);
+        commit(SET_HASSAVED, true);
+
+        setTimeout(() => {
+          commit(SET_HASSAVED, false);
+        }, 2000);
+      }
+    } catch(error: any) {
+      const axiosError = error as {
+        response?: {
+          data?: {
+            error?: string;
+            errors?: { [key: string]: string[] };
+            message?: string;
+          };
+        };
+      };
+
+      const errors = axiosError.response?.data?.errors;
+
+      if(errors) {
+        const messages: string[] =[];
+        
+        for(const field in errors) {
+          if(Array.isArray(errors[field])) {
+            const message = errors[field][0];
+            messages.push(
+              Validations.getErrorMessageFromCodeCustomer(message)
+            );
+          }
+        }
+        throw messages;
+      }
+
+      const singleError = axiosError.response?.data?.error ||
+                          axiosError.response?.data?.message;
+      
+      throw Validations.getErrorMessageFromCodeCustomer(singleError);
+    }
+  },
+
+  // async [CREATE_CUSTOMER](
+  //   { dispatch, commit }: Context,
+  //   customer: Customer
+  // ): Promise<void> {
+  //   try {
+  //     const url = customer.id
+  //       ? `customers/${customer.id}`
+  //       : 'customers';
+
+  //     const method: 'put' | 'post' = customer.id ? 'put' : 'post';
+
+  //     const response = await AxiosInstance[method](url, customer);
+
+  //     if ([200, 201].includes(response.status)) {
+  //       dispatch(LOAD_CUSTOMER_DATA);
+  //       commit(SET_HASSAVED, true);
+  //       setTimeout(() => {
+  //         commit(SET_HASSAVED, false);
+  //       }, 2000);
+  //     }
+  //   } catch (error: any) {
+  //     const axiosError = error as {
+  //       response?: {
+  //         data?: {
+  //           errors?: { [key: string]: string[] };
+  //           error?: string;
+  //           message?: string;
+  //         };
+  //       };
+  //     };
+
+  //     // Bentuk Laravel default (errors)
+  //     const errors = axiosError.response?.data?.errors;
+  //     if (errors) {
+  //       const messages: string[] = [];
+  //       for (const field in errors) {
+  //         if (Array.isArray(errors[field])) {
+  //           const message = errors[field][0];
+  //           messages.push(
+  //             Validations.getErrorMessageFromCodeCustomer(message)
+  //           );
+  //         }
+  //       }
+  //       throw messages;
+  //     }
+
+      // Bentuk custom error (error/message tunggal)
+  //     const singleError =
+  //       axiosError.response?.data?.error ||
+  //       axiosError.response?.data?.message ||
+  //       'Unknown error occurred';
+
+  //     // lempar agar bisa ditangkap di component
+  //     throw Validations.getErrorMessageFromCodeCustomer(singleError);
+  //   }
+  // },
 
   async [DEACTIVATE_CUSTOMER](
     { dispatch, commit }: Context, id: number

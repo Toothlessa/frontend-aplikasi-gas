@@ -93,43 +93,23 @@ const lists = ref([
 
 const getDisplayStock = async () => {
   try {
-    const response = await AxiosInstance.get<StockDisplay>('/stockitems/displaystock');
-
+    console.log('call display stock');
+    const response = await AxiosInstance.get<StockDisplay>('/stockitems/displaystock/1/2');
+    console.log('output stock : ', response);
     if (response.status === 200) {
-      lists.value[0].count = response.data.running_stock;
-      lists.value[1].count = response.data.yesterday_stock;
-      lists.value[2].count = response.data.empty_gas;
-      lists.value[3].count = response.data.empty_gas_owned;
+      lists.value[0].count = response.data.data.running_stock;//response.data.running_stock;
+      lists.value[1].count = response.data.data.yesterday_stock;
+      lists.value[2].count = response.data.data.empty_gas;
+      lists.value[3].count = response.data.data.gas_owned;
     }
   } catch (error: any) {
     console.error("Error fetching stock data:", error?.response?.data || error.message);
   }
 };
 
-
-// const getDisplayStock = async () => {
-//   try {
-//     const response = await AxiosInstance.get<StockDisplay>(`http://127.0.0.1:8000/api/stockitems/displaystock`, {
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Accept': 'application/json',
-//         'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-//       },
-//     });
-
-//     if (response.status === 200) {
-//       lists.value[0].count = response.data.running_stock;
-//       lists.value[1].count = response.data.yesterday_stock;
-//       lists.value[2].count = response.data.empty_gas;
-//       lists.value[3].count = response.data.empty_gas_owned;
-//     }
-//   } catch (error) {
-//     // console.error("Error fetching stock data:", Validations.getErrorMessageFromCode(error.response.data.errors[0]));
-//   }
-// };
-
 onMounted(() => {
   getDisplayStock();
+ 
 });
 </script>
 

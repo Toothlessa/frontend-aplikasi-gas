@@ -1,335 +1,272 @@
 <template>
-  <v-container class="github-login-container">
-    <v-row justify="center">
-      <v-col cols="12" sm="8" md="6" lg="4">
-        <!-- <div class="text-center mb-6">
-          <v-icon size="64" color="grey-darken-3">mdi-login</v-icon>
-        </div> -->
+  <div class="modern-login">
+    <v-container class="fill-height">
+      <v-row justify="center" align="center">
+        <v-col cols="12" sm="8" md="5" lg="4">
+          <div class="text-center mb-8">
+            <v-icon
+              icon="mdi-rocket-launch-outline"
+              size="80"
+              color="#10B981"
+            ></v-icon>
+          </div>
 
-        <v-card class="github-card elevation-0 rounded-lg">
-          <v-window v-model="step">
-            <v-window-item :value="1">
-              <v-card-text class="pa-6">
-                <h2 class="text-center text-h5 font-weight-medium mb-6">
-                  Sign in to your account
-                </h2>
-                <v-alert
-                  class="mb-4"
-                  v-model="alert"
-                  border="start"
-                  variant="tonal"
-                  closable
-                  type="error"
-                  v-if="error"
-                >
-                  {{ error }}
-                </v-alert>
-                <v-form @submit.prevent="onLogin">
-                  <label class="github-label">Email address</label>
-                  <v-text-field
-                    v-model="loginEmail"
+          <v-card class="glass-card rounded-xl">
+            <v-window v-model="step">
+              <!-- Sign In Form -->
+              <v-window-item :value="1">
+                <v-card-text class="pa-8">
+                  <h2 class="text-center text-h5 font-weight-bold mb-2 card-title">Welcome Back!</h2>
+                  <p class="text-center text-medium-emphasis mb-8">Sign in to continue</p>
+
+                  <v-alert
+                    v-if="error"
+                    class="mb-4"
                     density="compact"
-                    variant="outlined"
-                    class="github-input mb-4"
-                    hide-details
-                  ></v-text-field>
+                    border="start"
+                    variant="tonal"
+                    closable
+                    type="error"
+                    @update:model-value="error = ''"
+                  >
+                    {{ error }}
+                  </v-alert>
 
-                  <div class="d-flex justify-space-between align-center">
-                    <label class="github-label">Password</label>
-                    <a
-                      class="text-caption text-decoration-none github-link"
-                      href="#"
-                      rel="noopener noreferrer"
-                      target="_blank"
+                  <v-form @submit.prevent="handleLogin">
+                    <label class="form-label">Email address</label>
+                    <v-text-field
+                      v-model="loginForm.email"
+                      density="compact"
+                      variant="outlined"
+                      class="mb-4"
+                      hide-details="auto"
+                      prepend-inner-icon="mdi-email-outline"
+                    ></v-text-field>
+
+                    <password-input v-model="loginForm.password">
+                      <template #forgot-password>
+                        <a class="text-caption text-decoration-none form-link" href="#" rel="noopener noreferrer">
+                          Forgot password?
+                        </a>
+                      </template>
+                    </password-input>
+
+                    <v-btn
+                      block
+                      size="large"
+                      class="form-button mt-6"
+                      :loading="loading"
+                      type="submit"
                     >
-                      Forgot password?
-                    </a>
-                  </div>
-                  <v-text-field
-                    v-model="loginPassword"
+                      Sign in
+                    </v-btn>
+                  </v-form>
+                </v-card-text>
+              </v-window-item>
+
+              <!-- Sign Up Form -->
+              <v-window-item :value="2">
+                <v-card-text class="pa-8">
+                  <h2 class="text-center text-h5 font-weight-bold mb-2 card-title">Create Account</h2>
+                  <p class="text-center text-medium-emphasis mb-8">Get started with us</p>
+
+                  <v-alert
+                    v-if="error"
+                    class="mb-4"
                     density="compact"
-                    variant="outlined"
-                    :type="visible ? 'text' : 'password'"
-                    @click:append-inner="visible = !visible"
-                    class="github-input mb-6"
-                    hide-details
+                    border="start"
+                    variant="tonal"
+                    closable
+                    type="error"
+                    @update:model-value="error = ''"
                   >
-                    <template #append-inner>
-                      <v-icon @click="visible = !visible">{{ visible ? 'mdi-eye-off' : 'mdi-eye' }}</v-icon>
-                    </template>
-                  </v-text-field>
+                    {{ error }}
+                  </v-alert>
 
-                  <v-btn
-                    block
-                    size="large"
-                    class="github-button github-button-primary text-white"
-                    :loading="loading"
-                    type="submit"
-                  >
-                    Sign in
-                  </v-btn>
-                </v-form>
-              </v-card-text>
-            </v-window-item>
+                  <v-form @submit.prevent="handleSignup">
+                    <label class="form-label">Username</label>
+                    <v-text-field
+                      v-model="signupForm.username"
+                      density="comfortable"
+                      variant="outlined"
+                      class="mb-4"
+                      hide-details="auto"
+                      prepend-inner-icon="mdi-account-outline"
+                    ></v-text-field>
 
-            <v-window-item :value="2">
-              <v-card-text class="pa-6">
-                <h2 class="text-center text-h5 font-weight-medium mb-6">
-                  Create your account
-                </h2>
-                <v-alert
-                  class="mb-4"
-                  v-model="alert"
-                  border="start"
-                  variant="tonal"
-                  closable
-                  type="error"
-                  v-if="error"
-                >
-                  {{ error }}
-                </v-alert>
-                <v-form @submit.prevent="onSignUp">
-                  <label class="github-label">Username</label>
-                  <v-text-field
-                    v-model="username"
-                    density="compact"
-                    variant="outlined"
-                    class="github-input mb-4"
-                    hide-details
-                  ></v-text-field>
+                    <label class="form-label">Email address</label>
+                    <v-text-field
+                      v-model="signupForm.email"
+                      density="comfortable"
+                      variant="outlined"
+                      class="mb-4"
+                      hide-details="auto"
+                      prepend-inner-icon="mdi-email-outline"
+                    ></v-text-field>
 
-                  <label class="github-label">Email address</label>
-                  <v-text-field
-                    v-model="email"
-                    density="compact"
-                    variant="outlined"
-                    class="github-input mb-4"
-                    hide-details
-                  ></v-text-field>
+                    <password-input v-model="signupForm.password" class="mb-2" />
+                    <password-input v-model="signupForm.confirmPassword" label="Confirm Password" />
 
-                  <label class="github-label">Password</label>
-                  <v-text-field
-                    v-model="password"
-                    density="compact"
-                    variant="outlined"
-                    :type="visible ? 'text' : 'password'"
-                    @click:append-inner="visible = !visible"
-                    class="github-input mb-4"
-                    hide-details
-                  >
-                    <template #append-inner>
-                      <v-icon @click="visible = !visible">{{ visible ? 'mdi-eye-off' : 'mdi-eye' }}</v-icon>
-                    </template>
-                  </v-text-field>
+                    <v-btn
+                      block
+                      size="large"
+                      class="form-button mt-6"
+                      :loading="loading"
+                      type="submit"
+                    >
+                      Sign up
+                    </v-btn>
+                  </v-form>
+                </v-card-text>
+              </v-window-item>
+            </v-window>
+          </v-card>
 
-                  <label class="github-label">Confirm Password</label>
-                  <v-text-field
-                    v-model="password1"
-                    density="compact"
-                    variant="outlined"
-                    :type="visible ? 'text' : 'password'"
-                    @click:append-inner="visible = !visible"
-                    class="github-input mb-6"
-                    hide-details
-                  >
-                    <template #append-inner>
-                      <v-icon @click="visible = !visible">{{ visible ? 'mdi-eye-off' : 'mdi-eye' }}</v-icon>
-                    </template>
-                  </v-text-field>
-
-                  <v-btn
-                    block
-                    size="large"
-                    class="github-button github-button-primary text-white"
-                    :loading="loading"
-                    type="submit"
-                  >
-                    Sign up
-                  </v-btn>
-                </v-form>
-              </v-card-text>
-            </v-window-item>
-          </v-window>
-        </v-card>
-
-        <v-card class="github-card-alt elevation-0 rounded-lg mt-4">
-          <v-card-text class="text-center text-body-2">
-            <span v-if="step === 1">
-              New to this site?
-              <a
-                class="text-decoration-none github-link"
-                @click="step++"
-              >
-                Create an account.
-              </a>
+          <div class="text-center mt-6">
+            <span v-if="step === 1" class="text-medium-emphasis">
+              New to our platform?
+              <a class="font-weight-bold text-decoration-none form-link" @click="step++">Create an account.</a>
             </span>
-            <span v-else>
+            <span v-else class="text-medium-emphasis">
               Already have an account?
-              <a
-                class="text-decoration-none github-link"
-                @click="step--"
-              >
-                Sign in.
-              </a>
+              <a class="font-weight-bold text-decoration-none form-link" @click="step--">Sign in.</a>
             </span>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { LOGIN_ACTION, SIGNUP_ACTION } from '@/store/storeconstant';
+import PasswordInput from './PasswordInput.vue';
 
+// --- Setup ---
 const store = useStore();
 const router = useRouter();
 
-const visible = ref(false);
-const loading = ref(false);
+// --- State ---
 const step = ref(1);
-const alert = ref(false);
-const loginEmail = ref('');
-const loginPassword = ref('');
-const username = ref('');
-const email = ref('');
-const password = ref('');
-const password1 = ref('');
+const loading = ref(false);
 const error = ref('');
 
-const onLogin = async () => {
+const initialLoginForm = { email: '', password: '' };
+const initialSignupForm = { username: '', email: '', password: '', confirmPassword: '' };
+
+const loginForm = reactive({ ...initialLoginForm });
+const signupForm = reactive({ ...initialSignupForm });
+
+// --- Logic ---
+const handleLogin = async () => {
   loading.value = true;
+  error.value = '';
   try {
     await store.dispatch(`auth/${LOGIN_ACTION}`, {
-      email: loginEmail.value,
-      password: loginPassword.value,
+      email: loginForm.email,
+      password: loginForm.password,
     });
     router.push('/');
-  } catch (err) {
-    error.value = (err as Error).message;
-    alert.value = true;
+  } catch (err: any) {
+    error.value = err.message || 'An unknown error occurred.';
   } finally {
     loading.value = false;
   }
 };
 
-const onSignUp = async () => {
-  loading.value = true;
-  if (password.value !== password1.value) {
-    error.value = 'Password does not match';
-    alert.value = true;
-    loading.value = false;
+const handleSignup = async () => {
+  if (signupForm.password !== signupForm.confirmPassword) {
+    error.value = 'Passwords do not match.';
     return;
   }
 
+  loading.value = true;
+  error.value = '';
   try {
     await store.dispatch(`auth/${SIGNUP_ACTION}`, {
-      username: username.value,
-      email: email.value,
-      password: password.value,
+      username: signupForm.username,
+      email: signupForm.email,
+      password: signupForm.password,
     });
-    router.push('/');
-  } catch (err) {
-    error.value = (err as Error).message;
-    alert.value = true;
+    step.value = 1;
+  } catch (err: any) {
+    error.value = err.message || 'An unknown error occurred.';
   } finally {
     loading.value = false;
   }
 };
+
+// --- Watchers ---
+watch(step, () => {
+  Object.assign(loginForm, initialLoginForm);
+  Object.assign(signupForm, initialSignupForm);
+  error.value = '';
+});
 </script>
 
 <style scoped>
-.github-login-container {
-  background-color: #f6f8fa;
+.modern-login {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  background: linear-gradient(to bottom right, #f1f5f9, #e2e8f0); /* Subtle Slate Gradient */
+  background-size: cover;
+  background-position: center;
 }
 
-.github-card {
-  border: 1px solid #d8dee4;
-  box-shadow: 0 1px 0 rgba(27, 31, 35, 0.04);
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;
 }
 
-.github-card-alt {
-  background-color: #f6f8fa;
-  border: 1px solid #d8dee4;
-  box-shadow: none;
+.card-title {
+  color: #1E293B; /* A darker slate color */
 }
 
-.github-label {
+.form-label {
   display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  color: #24292e;
+  margin-bottom: 4px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #475569; /* A medium slate color */
 }
 
-.github-input.v-text-field {
-  background-color: #ffffff;
-  border: 1px solid #d1d5da;
-  border-radius: 6px;
-  box-shadow: inset 0 1px 2px rgba(27, 31, 35, 0.075);
-}
-
-.github-input.v-text-field:focus-within {
-  border-color: #0366d6;
-  box-shadow: inset 0 1px 2px rgba(27, 31, 35, 0.075), 0 0 0 0.2em rgba(3, 102, 214, 0.3);
-  outline: none;
-}
-
-.github-input.v-text-field .v-input__control {
-  border-radius: 6px;
-}
-
-.github-input.v-text-field .v-field__input {
-  padding: 8px 12px;
-  min-height: unset;
-}
-
-.github-button {
-  background-color: #2ea44f !important;
-  border: 1px solid rgba(27, 31, 35, 0.15) !important;
-  box-shadow: 0 1px 0 rgba(27, 31, 35, 0.1) !important;
-  color: #ffffff !important;
-  font-weight: 600;
-  position: relative;
-  display: inline-block;
-  padding: 6px 12px;
-  font-size: 14px;
-  line-height: 20px;
-  white-space: nowrap;
-  vertical-align: middle;
+.form-link {
+  color: #10B981; /* Emerald Green */
   cursor: pointer;
-  user-select: none;
-  border-radius: 6px;
-  appearance: none;
+  transition: color 0.2s ease-in-out;
 }
 
-.github-button:hover {
-  background-color: #2c974b !important;
-  border-color: rgba(27, 31, 35, 0.15) !important;
-}
-
-.github-button:active {
-  background-color: #2ea44f !important;
-  box-shadow: inset 0 1px 0 rgba(27, 31, 35, 0.15) !important;
-}
-
-.github-button-primary {
-  background-color: #2ea44f !important;
-}
-
-.github-link {
-  color: #0366d6;
-}
-
-.github-link:hover {
+.form-link:hover {
+  color: #059669; /* Darker Emerald Green */
   text-decoration: underline !important;
+}
+
+.form-button {
+  background: linear-gradient(45deg, #10B981, #059669); /* Emerald Green Gradient */
+  color: white !important;
+  font-weight: bold;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 15px 0 rgba(16, 185, 129, 0.5) !important;
+  transition: all 0.3s ease;
+}
+
+.form-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.6) !important;
+}
+
+/* Style for filled text fields */
+:deep(.v-text-field.v-input--density-comfortable .v-field__input) {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+:deep(.v-text-field .v-input__control .v-field) {
+  background-color: rgba(230, 230, 230, 0.6) !important;
+  box-shadow: none !important;
 }
 </style>
