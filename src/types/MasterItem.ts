@@ -8,16 +8,16 @@ export interface MasterItemState {
 }
 
 export interface MasterItem {
-  id: number | string;
+  id: number;
   item_name: string;
   item_code: string;
   item_type: string | null | undefined;
   category_id: string | null | undefined;
-  category: string;
+  category_name: string;
   cost_of_goods_sold: number | string;
   selling_price: number | string;
-  in_stock: boolean;
-  active_flag: boolean;
+  in_stock: boolean | string;
+  active_flag: boolean | string; 
 }
 
 export interface RawMasterItem {
@@ -26,16 +26,17 @@ export interface RawMasterItem {
   item_code: string;
   item_type: string | null | undefined;
   category_id: string | null | undefined;
-  category: string;
+  category_name: string;
   cost_of_goods_sold: number | string;
   selling_price: number | string;
-  in_stock: string;
-  active_flag: string;
+  in_stock: string | string;
+  active_flag: string | string;
 }
 
 export interface CategoryItem {
-  id: number | string;
+  id: number;
   name: string;
+  prefix: string;
   active_flag: boolean | string;
   inactive_date: string;
 }
@@ -43,6 +44,7 @@ export interface CategoryItem {
 export interface RawCategoryItem {
   id: number | string;
   name: string;
+  prefix: string;
   active_flag: string;
   inactive_date: string;
 }
@@ -83,7 +85,7 @@ export const headers: Header[] = [
   { title: 'Item Name', align: 'start', key: 'item_name' },
   { title: 'Item Code', align: 'start', key: 'item_code' },
   { title: 'Item Type', align: 'start', key: 'item_type' },
-  { title: 'Category', align: 'start', key: 'category' },
+  { title: 'Category', align: 'start', key: 'category_name' },
   {
     title: 'Cost of Goods',
     align: 'start',
@@ -103,6 +105,7 @@ export const headers: Header[] = [
 
 export const headerscategory: HeaderCategory[] = [
   { title: 'Category Name', align: 'start', key: 'name' },
+  { title: 'Prefix', align: 'center', key: 'prefix'},
   { title: 'Status', align: 'start', key: 'active_flag' },
   { title: 'Last Active', align: 'start', key: 'inactive_date' },
   { title: 'Actions', key: 'actions', align: 'center', sortable: false },

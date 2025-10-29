@@ -8,7 +8,7 @@
       :showUploadButton="false"
       @update:search="search = $event"
       @create="
-        openCreateDialog = true;
+        DialogOpenCreate = true;
         resetEditedItem();
         error = '';
         editedIndex = -1;
@@ -35,18 +35,18 @@
 
     <!-- Create/Edit Master Item Dialog -->
     <DialogItemForm
-      :dialog="openCreateDialog"
+      :dialog="DialogOpenCreate"
       :isEdit="editedIndex !== -1"
       :editedItem="editedItem"
       :allFields="allFields"
       @close="close"
       @submit="onSubmit"
-      @add-category="openCategoryDialog = true, selectedCategory = {}"
+      @add-category="DialogOpenCategory = true, selectedCategory = {}"
     />
 
     <!-- Add New Category Dialog -->
     <DialogCategory
-      :dialog="openCategoryDialog"
+      :dialog="DialogOpenCategory"
       :newCategory="selectedCategory"
       :search="searchCategory"
       @update:search="searchCategory = $event"
@@ -80,115 +80,83 @@
 </template>
 
 <script setup lang="ts">
-
 import { SnackbarError, SnackbarSuccess, ToolbarSimple } from '@/components/globalComponent';
 import TableItem from './TableItem.vue';
 import DialogItemForm from './DialogItemForm.vue';
 import DialogCategory from './DialogCategory.vue';
 import DialogDeactivate from './DialogDeactivate.vue';
 import type { CategoryItem, MasterItem, Field } from '@/types/MasterItem'; // ✅ type-only
-import { headers, headerscategory } from '@/types/MasterItem';         // ✅ runtime value 
 
 // import SuccessSnackbar from '@/components/globalcomponent/SuccessSnackbar.vue';
-import { ref, reactive, computed, onMounted, } from 'vue';
-import { useStore } from 'vuex';
+import {  onMounted } from 'vue';
 import { 
-  LOAD_CATEGORY_ITEM, 
-  LOAD_MASTER_ITEM, 
   CREATE_ITEM, 
   DEACTIVATE_ITEM, 
   CREATE_CATEGORY_ITEM,
-  SET_HASSAVED,
   DEACTIVATE_ITEM_CATEGORY,
 } from '@/store/storeconstant';
+import { useMasterItem } from '@/composables/useMasterItem';
+import { useCategoryItem } from '@/composables/useCategoryItem';
 
-const store = useStore();
+const {
+  store,
+  
+  dialogDeactivate,
+  dialogDeactivateCategory,
 
-const search = ref<string>('');
-const searchCategory = ref<string>('');
-const openCreateDialog = ref<boolean>(false);
-const openCategoryDialog = ref<boolean>(false);
-const dialogDeactivate = ref<boolean>(false);
-const dialogDeactivateCategory = ref<boolean>(false);
+  search,
+  editedIndex,
+  editedItem,
+  defaultItem,
+  localHeaders,
+  allFields,
 
-const error = ref<string | string[]>('');
-const showError = ref<boolean>(false);
+  mItems,
+  loadMasterItem,
+  loadCategories,
 
-const mItems = computed<MasterItem[]>(() => store.state.masteritem.mItems);
-const categories = computed<CategoryItem[]>(() => store.state.masteritem.categories);
-const loading = computed<boolean>(() => store.state.masteritem.loading);
-const hasSaved = computed({
-  get: () => store.state.masteritem.hasSaved,
-  set: (val: boolean) => {
-    store.commit(`masteritem/${SET_HASSAVED}`, val);
-  },
-});
+  hasSaved,
+  loading,
+  error,
+  showError,
+} = useMasterItem();
 
-const editedIndex = ref(-1);
+const {
+    DialogOpenCategory,
+    DialogOpenCreate,
 
-// Fields
-const itemType = [ { name: "ASSET" }, { name: "ITEM" },];
-const localHeaders = headers; // Use the imported headers directly
-const localHCategory = headerscategory;
+    searchCategory,
+    newCategory,
+    selectedCategory,
+    localHCategory,
 
-const editedItem = reactive<Partial<MasterItem>>({});
-const defaultItem: Partial<MasterItem> = {
-  id: '',
-  item_name: '',
-  item_code: '',
-  item_type: null,
-  category_id: null,
-  category: '',
-  cost_of_goods_sold: '',
-  selling_price: '',
-  in_stock: false,
-  active_flag: false,
-};
+    categories,
 
-const newCategory = reactive<Partial<CategoryItem>>({
-  name: '',
-  active_flag: 'Y',
-  inactive_date: '',
-});
-
-const defaultCategory: Partial<CategoryItem> = {
-  id: '',
-  name: '',
-  active_flag: 'Y',
-  inactive_date: '',
-};
-
-const allFields = computed<Field[]>(() => [
-  { model: 'item_type', label: 'Item Type', items: itemType.map(it => it.name) },
-  { model: 'category_id', label: 'Category', items: categories.value, itemTitle: 'name', itemValue: 'id' },
-  { model: 'cost_of_goods_sold', label: 'Cost of Goods' },
-  { model: 'selling_price', label: 'Selling Price',  onEnterSubmit: true },
-]);
+    onUpdateCategory,
+    onClose,
+} = useCategoryItem();
 
 onMounted(() => {
   loadMasterItem();
   loadCategories();
 });
 
-const loadMasterItem = () => store.dispatch(`masteritem/${LOAD_MASTER_ITEM}`);
-const loadCategories = () => store.dispatch(`masteritem/${LOAD_CATEGORY_ITEM}`);
-
 function editItem(item: MasterItem) {
   editedIndex.value = mItems.value.indexOf(item);
   Object.assign(editedItem, item);
-  openCreateDialog.value = true;
+  DialogOpenCreate.value = true;
 }
 
 function close() {
-  openCreateDialog.value = false;
+  DialogOpenCreate.value = false;
   dialogDeactivate.value = false;
   dialogDeactivateCategory.value = false;
   editedIndex.value = -1;
 }
 
 function resetEditedItem() {
-// Reset field edit and update item
-Object.assign(editedItem, defaultItem);
+  // Reset field edit and update item
+  Object.assign(editedItem, defaultItem);
 }
 
 function onSubmit(item: Partial<MasterItem>) {
@@ -196,11 +164,22 @@ function onSubmit(item: Partial<MasterItem>) {
   onCreateItem(); 
 }
 
+function deactivateItem(item: MasterItem) {
+  // editedIndex.value = mItems.value.indexOf(item);
+  Object.assign(editedItem, item);
+  dialogDeactivate.value = true;
+}
+
+function deactivateCategory(item: CategoryItem) {
+  Object.assign(newCategory, item);
+  dialogDeactivateCategory.value = true;
+}
+
 async function onCreateItem() {
   try {
     error.value = '';
     await store.dispatch(`masteritem/${CREATE_ITEM}`, editedItem);
-    openCreateDialog.value = false;
+    DialogOpenCreate.value = false;
   } catch (e) {
     showError.value = true;
     
@@ -212,12 +191,6 @@ async function onCreateItem() {
       error.value = String(e); // fallback
     }
   }
-}
-
-function deactivateItem(item: MasterItem) {
-  // editedIndex.value = mItems.value.indexOf(item);
-  Object.assign(editedItem, item);
-  dialogDeactivate.value = true;
 }
 
 async function onDeactivated() {
@@ -239,22 +212,12 @@ async function onDeactivated() {
   }
 }
 
-// Category
-const selectedCategory = ref<Partial<CategoryItem>>({});
-const onUpdateCategory = (item: CategoryItem) => {
-  selectedCategory.value = { ...item }; // Set item to pass to the dialog
-};
-const onClose = () => {
-  openCategoryDialog.value = false;                         // Close the dialog
-  Object.assign(selectedCategory, defaultCategory );        // Clear the selected data
-};
-
 async function onCreateCategory(item: Partial<CategoryItem>) {
   try {
     error.value = '';
 
     await store.dispatch(`masteritem/${CREATE_CATEGORY_ITEM}`, item);
-    openCategoryDialog.value = false;
+    DialogOpenCategory.value = false;
     newCategory.name = '';
   } catch (e) {
     showError.value = true;
@@ -267,11 +230,6 @@ async function onCreateCategory(item: Partial<CategoryItem>) {
       error.value = String(e); // fallback
     }
   }
-}
-
-function deactivateCategory(item: CategoryItem) {
-  Object.assign(newCategory, item);
-  dialogDeactivateCategory.value = true;
 }
 
 async function onDeactivatedCategory() {

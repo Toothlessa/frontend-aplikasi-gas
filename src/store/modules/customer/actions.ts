@@ -1,5 +1,3 @@
-import AxiosInstance from '@/services/AxiosInstance';
-import { AxiosResponse } from 'axios';
 import {
   CREATE_CUSTOMER,
   DEACTIVATE_CUSTOMER,
@@ -7,272 +5,84 @@ import {
   SET_DATA_CUSTOMER,
   SET_HASSAVED,
   SET_LOADING,
-  UPDATE_CUSTOMER,
   UPLOAD_CUSTOMER
 } from '@/store/storeconstant';
-import Validations from '@/services/Validations';
-import { ActionContext, ActionTree } from 'vuex';
-import { CustomerState, Customer } from '@/types/Customer';
+import {  ActionTree } from 'vuex';
+import { CustomerState } from '@/types/Customer';
 import { RootState } from '@/store/types'; // ← create this file too
-import { CustomerAPI } from '@/api/CustomerApi';
-
-type Context = ActionContext<CustomerState,  RootState>;
+import { CustomerService } from '@/services/CustomerService';
 
 const actions: ActionTree<CustomerState, RootState> = {
-  async [LOAD_CUSTOMER_DATA]({ commit }: Context): Promise<void> {
+
+  async [CREATE_CUSTOMER] ( { commit, dispatch}, customer) {
+    try {
+      
+      await CustomerService.createOrUpdateCustomer(customer);
+      
+      dispatch(LOAD_CUSTOMER_DATA);
+      commit(SET_HASSAVED, true);
+      setTimeout(() => {
+        commit(SET_HASSAVED, false)
+      }, 2000);
+
+    } catch(error) {
+      console.error('Failed to create customer:', error);
+      throw error;
+    }
+  },
+
+  async [LOAD_CUSTOMER_DATA]({ commit }) {
+
     commit(SET_LOADING, true);
     try {
-
-      const response: AxiosResponse<{ data: Customer[] }> = await CustomerAPI.getAll();
-
-      const data: Customer[] = response.data.data.map((item) => ({
-        ...item,
-        active_flag: item.active_flag === 'Y',
-      }));
-
+      
+      const data = await CustomerService.fetchCustomers();
       commit(SET_DATA_CUSTOMER, data);
     } catch (error) {
-      const axiosError = error as { response?: { data?: { errors?: string[] } } };
-      throw Validations.getErrorMessageFromCodeCustomer(axiosError.response?.data?.errors?.[0]);
+      console.error('Failed to load customers:', error);
+      throw error;
     } finally {
       commit(SET_LOADING, false);
     }
   },
 
-  async [CREATE_CUSTOMER](
-    { dispatch, commit }: Context,
-    customer: Customer
-  ): Promise<void> {
+  async[DEACTIVATE_CUSTOMER]({ commit, dispatch }, id: number) {
+    
+    commit(SET_LOADING, true);
     try {
-
-      const response = await CustomerAPI.create(customer);
-
-      if ([200, 201].includes(response.status)) {
-        dispatch(LOAD_CUSTOMER_DATA);
-        commit(SET_HASSAVED, true);
-        setTimeout(() => {
-          commit(SET_HASSAVED, false);
-        }, 2000);
-      }
-    } catch (error: any) {
-      const axiosError = error as {
-        response?: {
-          data?: {
-            errors?: { [key: string]: string[] };
-            error?: string;
-            message?: string;
-          };
-        };
-      };
-
-      // Bentuk Laravel default (errors)
-      const errors = axiosError.response?.data?.errors;
-      if (errors) {
-        const messages: string[] = [];
-        for (const field in errors) {
-          if (Array.isArray(errors[field])) {
-            const message = errors[field][0];
-            messages.push(
-              Validations.getErrorMessageFromCodeCustomer(message)
-            );
-          }
-        }
-        throw messages;
-      }
-      const singleError =
-        axiosError.response?.data?.error ||
-        axiosError.response?.data?.message ||
-        'Unknown error occurred';
-
-      // lempar agar bisa ditangkap di component
-      throw Validations.getErrorMessageFromCodeCustomer(singleError);
-    }
-  },
-
-
-  async [UPDATE_CUSTOMER] (
-    {dispatch, commit}: 
-      Context,
-      customer: Customer
-  ): Promise<void> {
-    try {
-      const response = await CustomerAPI.update(customer.id, customer);
-
-      if([200].includes(response.status)) {
-        dispatch(LOAD_CUSTOMER_DATA);
-        commit(SET_HASSAVED, true);
-
-        setTimeout(() => {
-          commit(SET_HASSAVED, false);
-        }, 2000);
-      }
-    } catch(error: any) {
-      const axiosError = error as {
-        response?: {
-          data?: {
-            error?: string;
-            errors?: { [key: string]: string[] };
-            message?: string;
-          };
-        };
-      };
-
-      const errors = axiosError.response?.data?.errors;
-
-      if(errors) {
-        const messages: string[] =[];
-        
-        for(const field in errors) {
-          if(Array.isArray(errors[field])) {
-            const message = errors[field][0];
-            messages.push(
-              Validations.getErrorMessageFromCodeCustomer(message)
-            );
-          }
-        }
-        throw messages;
-      }
-
-      const singleError = axiosError.response?.data?.error ||
-                          axiosError.response?.data?.message;
       
-      throw Validations.getErrorMessageFromCodeCustomer(singleError);
+      await CustomerService.deactiveCustomer(id);
+
+      dispatch(LOAD_CUSTOMER_DATA);
+      commit(SET_HASSAVED,true);
+      setTimeout(()=> {
+        commit(SET_HASSAVED, false);
+      }, 2000);
+    } catch(error) {
+      console.error('Failed to deactive the customer:', error);
+      throw error;
+    } finally {
+      commit(SET_LOADING, false);
     }
   },
 
-  // async [CREATE_CUSTOMER](
-  //   { dispatch, commit }: Context,
-  //   customer: Customer
-  // ): Promise<void> {
-  //   try {
-  //     const url = customer.id
-  //       ? `customers/${customer.id}`
-  //       : 'customers';
-
-  //     const method: 'put' | 'post' = customer.id ? 'put' : 'post';
-
-  //     const response = await AxiosInstance[method](url, customer);
-
-  //     if ([200, 201].includes(response.status)) {
-  //       dispatch(LOAD_CUSTOMER_DATA);
-  //       commit(SET_HASSAVED, true);
-  //       setTimeout(() => {
-  //         commit(SET_HASSAVED, false);
-  //       }, 2000);
-  //     }
-  //   } catch (error: any) {
-  //     const axiosError = error as {
-  //       response?: {
-  //         data?: {
-  //           errors?: { [key: string]: string[] };
-  //           error?: string;
-  //           message?: string;
-  //         };
-  //       };
-  //     };
-
-  //     // Bentuk Laravel default (errors)
-  //     const errors = axiosError.response?.data?.errors;
-  //     if (errors) {
-  //       const messages: string[] = [];
-  //       for (const field in errors) {
-  //         if (Array.isArray(errors[field])) {
-  //           const message = errors[field][0];
-  //           messages.push(
-  //             Validations.getErrorMessageFromCodeCustomer(message)
-  //           );
-  //         }
-  //       }
-  //       throw messages;
-  //     }
-
-      // Bentuk custom error (error/message tunggal)
-  //     const singleError =
-  //       axiosError.response?.data?.error ||
-  //       axiosError.response?.data?.message ||
-  //       'Unknown error occurred';
-
-  //     // lempar agar bisa ditangkap di component
-  //     throw Validations.getErrorMessageFromCodeCustomer(singleError);
-  //   }
-  // },
-
-  async [DEACTIVATE_CUSTOMER](
-    { dispatch, commit }: Context, id: number
-  ): Promise<void> {
+  async[UPLOAD_CUSTOMER]({ commit, dispatch }, file: File) {
     try {
-      const url = `customers/inactive/${id}`;
 
-      const response = await AxiosInstance.patch(url, []);
+      await CustomerService.uploadCustomer(file);
 
-      if ([200].includes(response.status)) {
-        dispatch(LOAD_CUSTOMER_DATA);
+      dispatch(LOAD_CUSTOMER_DATA);
+      commit(SET_HASSAVED, true);
+      setTimeout(() => {
         commit(SET_HASSAVED, true);
-        setTimeout(() => {
-          commit(SET_HASSAVED, false);
-        }, 2000);
-      }
-    } catch (error) {
-      const axiosError = error as { response?: { data?: { errors?: { [key: string]: string[] } } } };
-      const errors = axiosError.response?.data?.errors;
-      if (errors) {
-        const messages: string[] = [];
-
-        for (const field in errors) {
-          if (Array.isArray(errors[field])) {
-            const message = errors[field][0];
-            messages.push(
-              Validations.getErrorMessageFromCodeMasterItem(message)
-            );
-          }
-        }
-
-        throw messages;
-      }
+      }, 2000);
+    } catch(error) {
+      console.error('Failed to upload customers: ', error);
+      throw error;
+    } finally {
+      commit(SET_HASSAVED, false);
     }
   },
-
-  async [UPLOAD_CUSTOMER](
-    { dispatch, commit }: ActionContext<CustomerState, RootState>,
-    file: File
-  ): Promise<void> {
-    const formData = new FormData();
-    formData.append('csvFile', file);
-
-    try {
-      const response = await AxiosInstance.post(
-        'customers/import-csv',
-        formData
-      );
-
-      if (response.status === 200) {
-        dispatch(LOAD_CUSTOMER_DATA);
-
-        commit(SET_HASSAVED, true);
-        setTimeout(() => {
-          commit(SET_HASSAVED, false);
-        }, 2000);
-      }
-    } catch (error) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      const errorMessage: string = axiosError.response?.data?.message ?? '';
-
-      if (errorMessage.includes("Duplicate entry")) {
-        const fieldMatch = errorMessage.match(/for key '(.+?)'/);
-        const fieldKey = fieldMatch ? fieldMatch[1] : null;
-
-        const fieldMap: Record<string, string> = {
-          'customer_nik_unique': 'NIK',
-          'customers_email_unique': 'Email',
-        };
-
-        const userFriendlyField = fieldKey ? fieldMap[fieldKey] || 'field' : 'field';
-        throw [`Data duplicate on ${userFriendlyField}.`];
-      } else {
-        throw Validations.getErrorMessageFromCodeCustomer(errorMessage);
-      }
-    }
-  }
 
 };
 

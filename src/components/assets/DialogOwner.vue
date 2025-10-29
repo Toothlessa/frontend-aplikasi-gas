@@ -111,7 +111,7 @@
 
 <script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue';
-import type { Owner, HeaderOwner } from '@/types/asset';
+import type { Owner, HeaderOwner } from '@/types/Asset';
 import DialogDeactivate from '@/components/globalComponent/DialogDeactivate.vue';
 import store from '@/store/store';
 import { DEACTIVE_OWNER, LOAD_OWNER } from '@/store/storeconstant';

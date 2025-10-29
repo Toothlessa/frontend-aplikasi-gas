@@ -38,6 +38,8 @@ export default class Validations {
                 return 'Email already exists';
             case "The customer name field is required.":
               return "Please fill in the customer name";
+             case "The customer type field is required.":
+              return "Please fill in the customer type";
             case "The type field is required.":
                 return 'Please select a customer type';
             case "The csv file failed to upload.":

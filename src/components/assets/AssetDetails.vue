@@ -137,7 +137,7 @@
 import { ref, onMounted, reactive, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
-import { Asset } from '@/types/asset';
+import { Asset } from '@/types/Asset';
 import { LOAD_ASSET_DETAILS_BY_SUMMARY, UPDATE_ASSET, LOAD_OWNER, LOAD_MASTER_ITEM } from '@/store/storeconstant';
 
 const route = useRoute();

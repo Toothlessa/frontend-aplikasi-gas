@@ -191,7 +191,7 @@
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { Asset, headerOwner, Owner } from '@/types/asset';
+import { Asset, headerOwner, Owner } from '@/types/Asset';
 import {
   CREATE_ASSET,
   LOAD_ASSET,

@@ -1,7 +1,9 @@
-import { MasterItemState, CustomerState, AssetState } from '@/types';
+import { MasterItemState, CustomerState, AssetState, GlobalState, StockState } from '@/types';
 
 export interface RootState {
-  masteritem: MasterItemState;
-  customer: CustomerState;
+  global: GlobalState;
   asset: AssetState;
+  customer: CustomerState;
+  masteritem: MasterItemState;
+  stock: StockState;
 }

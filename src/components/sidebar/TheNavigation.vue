@@ -231,9 +231,9 @@ const items = [
 ];
 
 const masters = [
-  ['mdi-package-variant', 'Item', '/masteritem'],
-  ['mdi-account-tie', 'Customer', '/customer'],
   ['mdi-car', 'Asset', '/asset'],
+  ['mdi-account-tie', 'Customer', '/customer'],
+  ['mdi-package-variant', 'Item', '/masteritem'],
 ];
 
 // Load user info from localStorage and set initial theme

@@ -6,7 +6,6 @@ import { GET_USER_TOKEN_GETTER, LOGOUT_ACTION } from "@/store/storeconstant";
 const AxiosInstance = axios.create({
     baseURL: 'http://127.0.0.1:8000/api/',
     headers: {
-        'Content-Type': 'application/json',
         'Accept': 'application/json',
     }
 });
@@ -16,8 +15,13 @@ AxiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const token = store.getters[`auth/${GET_USER_TOKEN_GETTER}`];
     if (token) {
         config.headers = config.headers || {};
-        // config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
         config.headers.Authorization = token;
+    }
+
+    if(config.data instanceof FormData) {
+        delete config.headers['Content-Type'];
+    } else {
+        config.headers['Content-Type'] = 'application/json';
     }
     return config;
 });

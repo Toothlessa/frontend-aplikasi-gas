@@ -18,6 +18,16 @@
           clearable
           class="form-field"
         />
+
+        <v-text-field
+          v-model="localCategory.prefix"
+          label="Prefix"
+          variant="outlined"
+          density="comfortable"
+          prepend-inner-icon="mdi-tag-plus-outline"
+          clearable
+          class="form-field"
+        />
       </v-card-text>
 
       <!-- Buttons -->
@@ -84,7 +94,7 @@
 
         <template #[`item.active_flag`]="{ item }">
           <v-chip
-            :color="item.active_flag ? '#4CAF50' : '#F44336'"
+            :color="item.active_flag ? '#00BCD4' : '#9E9E9E'" 
             class="status-chip"
             label
             size="small"
@@ -262,7 +272,7 @@ const handleSave = () => {
 }
 
 .modern-table-category .status-chip {
-  color: white !important;
+  color: white;
   font-weight: bold;
   border-radius: 6px;
 }
