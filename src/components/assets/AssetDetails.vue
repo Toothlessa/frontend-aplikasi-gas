@@ -12,6 +12,7 @@
           :headers="assetHeaders"
           :items="assetDetails"
           class="modern-table"
+          :loading="loading"
           hover
           density="comfortable"
           item-value="id"
@@ -56,19 +57,19 @@
           Update Asset
         </v-card-title>
         <v-card-text class="pt-6">
-            <v-select
-              v-model="assetToUpdate.asset_name"
-              :items="masterItems"
-              item-title="name"
-              item-value="name"
+            <v-autocomplete
+              v-model="assetToUpdate.item_id"
+              :items="masteritems"
+              item-title="item_name"
+              item-value="id"
               label="Asset Name"
               variant="filled"
               rounded="lg"
               prepend-inner-icon="mdi-cube-outline"
               required
             />
-            <v-select
-              v-model="assetToUpdate.owner_name"
+            <v-autocomplete
+              v-model="assetToUpdate.owner_id"
               :items="owners"
               item-title="name"
               item-value="id"
@@ -85,24 +86,6 @@
               variant="filled"
               rounded="lg"
               prepend-inner-icon="mdi-counter"
-              required
-            />
-            <v-text-field
-              v-model.number="assetToUpdate.cogs"
-              label="Cost of Goods"
-              type="number"
-              variant="filled"
-              rounded="lg"
-              prepend-inner-icon="mdi-cash-multiple"
-              required
-            />
-            <v-text-field
-              v-model.number="assetToUpdate.selling_price"
-              label="Selling Price"
-              type="number"
-              variant="filled"
-              rounded="lg"
-              prepend-inner-icon="mdi-currency-usd"
               required
             />
             <v-textarea
@@ -138,19 +121,21 @@ import { ref, onMounted, reactive, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { Asset } from '@/types/Asset';
-import { LOAD_ASSET_DETAILS_BY_SUMMARY, UPDATE_ASSET, LOAD_OWNER, LOAD_MASTER_ITEM } from '@/store/storeconstant';
+import { LOAD_ASSET_DETAILS_BY_SUMMARY, LOAD_OWNER, LOAD_MASTER_ITEM, CREATE_ASSET } from '@/store/storeconstant';
 
 const route = useRoute();
 const store = useStore();
-const assetDetails = computed(() => store.state.asset.selectedAsset);
+// const assetDetails = computed(() => store.state.asset.selectedAsset);
+const assetDetails = computed(() => store.state.asset.assetDetails);
 const owners = computed(() => store.state.asset.owners);
-const masterItems = computed(() => store.state.masteritem.masteritems);
+const masteritems = computed(() => store.state.masteritem.mItems);
+const loading = computed(() => store.state.asset.loading);
 const isLoading = ref(true);
 
 const ownerId = route.params.ownerId as string;
-const assetName = route.params.assetName as string;
+const itemId = route.params.itemId as string;
 const assetHeaders = computed(() => [
-  { title: 'Asset Name', value: 'asset_name' },
+  { title: 'Asset Name', value: 'item_name' },
   { title: 'Owner Name', value: 'owner_name' },
   { title: 'Quantity', value: 'quantity' },
   { title: 'Cost of Goods', value: 'cogs' },
@@ -162,7 +147,9 @@ const assetHeaders = computed(() => [
 const dialogUpdateAsset = ref(false);
 const defaultAsset: Asset = {
   id: 0,
-  asset_name: '',
+  owner_id: 0,
+  item_id: 0,
+  item_name: '',
   owner_name: '',
   quantity: 0,
   cogs: 0,
@@ -192,16 +179,16 @@ const openEditAssetDialog = (asset: Asset) => {
 };
 
 const updateAsset = async () => {
-  console.log("Attempting to update asset:", assetToUpdate);
   console.log("assetToUpdate.id:", assetToUpdate.id);
+  console.log("detail", assetToUpdate);
   if (!assetToUpdate.id) return;
   try {
     isUpdatingAsset.value = true;
-    await store.dispatch(`asset/${UPDATE_ASSET}`, assetToUpdate);
+    await store.dispatch(`asset/${CREATE_ASSET}`, assetToUpdate);
     showSnackbar('Asset updated successfully!', 'success');
     dialogUpdateAsset.value = false;
     // Reload asset details after update
-    await store.dispatch(`asset/${LOAD_ASSET_DETAILS_BY_SUMMARY}`, { ownerId, assetName });
+    await store.dispatch(`asset/${LOAD_ASSET_DETAILS_BY_SUMMARY}`, { ownerId, itemId });
   } catch (error) {
     showSnackbar('Failed to update asset.', 'error');
     console.error('Update failed:', error);
@@ -211,13 +198,14 @@ const updateAsset = async () => {
 };
 
 onMounted(async () => {
-  if (ownerId && assetName) {
+  if (ownerId && itemId) {
     try {
       isLoading.value = true;
-      await store.dispatch(`asset/${LOAD_ASSET_DETAILS_BY_SUMMARY}`, { ownerId, assetName });
+      await store.dispatch(`asset/${LOAD_ASSET_DETAILS_BY_SUMMARY}`, { ownerId, itemId });
       await store.dispatch(`asset/${LOAD_OWNER}`);
       await store.dispatch(`masteritem/${LOAD_MASTER_ITEM}`);
       console.log("Asset Details from Store:", assetDetails.value);
+      console.log()
     } catch (error) {
       console.error('Failed to load asset details:', error);
     } finally {

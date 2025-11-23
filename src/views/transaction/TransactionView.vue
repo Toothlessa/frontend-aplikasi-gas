@@ -1,18 +1,18 @@
 <template>
-    <Transacation />
+  <Transaction />
 </template>
-  
-  <script>
-  import { defineComponent } from 'vue';
-  
-  // Components
-  import Transacation from '@/components/transactions/Transaction.vue';
-  
-  export default defineComponent({
-    name: 'TransacationView',
-  
-    components: {
-      Transacation,
-    },
-  });
-  </script>
+
+<script>
+import { defineComponent } from 'vue'
+
+// Components
+import Transaction from '@/components/transactions/Transaction.vue'
+
+export default defineComponent({
+  name: 'TransactionView',
+
+  components: {
+    Transaction,
+  },
+})
+</script>

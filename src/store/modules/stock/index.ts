@@ -1,16 +1,17 @@
 import type { Module } from 'vuex';
-import type { RootState } from '@/store/types'; // define this if you haven't
+import type { RootState } from '@/store/types';
+import { StockState } from "@/types";
 
 import actions from './actions';
 import getters from './getters';
 import mutations from './mutations';
-import { StockState } from "@/types";
 
 const state = (): StockState => ({
     stocks: [],
     stockDetails: [],
     stockTableColumn: [],
     stockDetailTableColumn: [],
+    stockDisplay: null,
     createStockPayload: [],
     loading: false,
     loadingDetail: false,

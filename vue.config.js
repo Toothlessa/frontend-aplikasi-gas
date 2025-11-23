@@ -9,7 +9,7 @@ module.exports = {
     config
       .plugin('html')
       .tap(args => {
-        args[0].title = "My Poing of Sales";
+        args[0].title = "Aplikasi Gas";
         return args;
       });
   }

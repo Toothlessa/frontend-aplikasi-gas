@@ -14,8 +14,8 @@
         lines="two"
         class="user-profile-section"
         prepend-icon="mdi-account-circle"
-        :title="result.username"
-        :subtitle="result.email"
+        :title="userData.username"
+        :subtitle="userData.email"
         @click="rail = false"
       />
 
@@ -51,7 +51,7 @@
           </template>
 
           <v-list-item
-            v-for="([icon, title, to], i) in masters"
+            v-for="([icon, title, to], i) in masterPageChild"
             :key="i"
             :prepend-icon="icon"
             :title="title"
@@ -63,12 +63,12 @@
 
         <!-- Other Items -->
         <v-list-item
-          v-for="(item, i) in items"
+          v-for="(item, i) in pages"
           :key="i"
           :to="item.to"
           class="nav-item"
           rounded="xl"
-          @click="actionClickNav(item.action)"
+          
         >
           <template #prepend>
             <v-icon>{{ item.icon }}</v-icon>
@@ -96,7 +96,7 @@
           title="Logout"
           class="nav-item logout-item"
           rounded="xl"
-          @click.prevent="actionClickNav('logout')"
+          @click="DialogLogout = true"
         />
       </template>
     </v-navigation-drawer>
@@ -155,12 +155,12 @@
           <v-list-item title="Profile" prepend-icon="mdi-account-outline" />
           <v-list-item title="Settings" prepend-icon="mdi-cog-outline" />
           <v-divider />
-          <v-list-item title="Logout" prepend-icon="mdi-logout-variant" @click="dialogLogout = true" />
+          <v-list-item title="Logout" prepend-icon="mdi-logout-variant" @click="DialogLogout = true" />
         </v-list>
       </v-menu>
     </v-app-bar>
 
-    <v-dialog v-model="dialogLogout" max-width="450px" persistent transition="dialog-top-transition">
+    <v-dialog v-model="DialogLogout" max-width="450px" persistent transition="dialog-top-transition">
       <v-card class="rounded-xl elevation-12">
         <v-card-title class="bg-red-darken-2 text-white text-h6 font-weight-bold justify-center py-4">
           <v-icon size="32" start class="mr-2">mdi-logout</v-icon>
@@ -175,7 +175,7 @@
           <v-btn
             variant="outlined"
             color="grey-darken-1"
-            @click="dialogLogout = false"
+            @click="DialogLogout = false"
             class="rounded-pill"
           >
             <v-icon start>mdi-cancel</v-icon>
@@ -198,62 +198,37 @@
 </template>
 
 <script setup lang="ts">
-import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
-import { onMounted, reactive, ref, watch, computed } from 'vue';
-import { useTheme } from 'vuetify';
+import { onMounted, watch } from 'vue';
+import { useUser } from '@/composables/useUser';
+import { useNavigation } from '@/composables/useNavigation';
 
-import { LOGOUT_ACTION } from '@/store/storeconstant';
+const {
+  userData,
+  userLoad,
+} = useUser();
 
-// Vuex store and router
-const store = useStore();
-const router = useRouter();
-const theme = useTheme();
+const {
+  DialogLogout,
+    
+  theme,
+  isDarkTheme,
+  
+  pages,
+  masterPageChild,
+  
+  search,
+  drawer,
+  rail,
+  drawerLocation,
 
-// UI state
-const search = ref('');
-const drawer = ref<boolean>(false);
-const dialogLogout = ref<boolean>(false);
-const isDarkTheme = ref<boolean>(theme.global.current.value.dark);
-const drawerLocation = ref<string>(localStorage.getItem('drawerLocation') || 'left'); // Initialize from localStorage
+  appBarStyles,
 
-// User info
-const result = reactive({
-  username: '0',
-  email: '0',
-});
+  toggleDrawerLocation,
+  onLogout,
+} = useNavigation();
 
-// Sidebar items
-const items = [
-  { icon: 'mdi-basket-fill', text: 'Stock', to: '/stock' },
-  { icon: 'mdi-cash', text: 'Debt', to: '/debt' },
-  { icon: 'mdi-account-group', text: 'User', to: '/users' },
-];
-
-const masters = [
-  ['mdi-car', 'Asset', '/asset'],
-  ['mdi-account-tie', 'Customer', '/customer'],
-  ['mdi-package-variant', 'Item', '/masteritem'],
-];
-
-// Load user info from localStorage and set initial theme
 onMounted(() => {
-  const userDataString = localStorage.getItem('userData');
-  if (userDataString) {
-    try {
-      const userData = JSON.parse(userDataString);
-      result.username = userData.username;
-      result.email = userData.email;
-    } catch (error) {
-      // console.warn('Failed to parse user data:', error);
-    }
-  }
-
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme) {
-    isDarkTheme.value = savedTheme === 'dark';
-    theme.global.name.value = savedTheme;
-  }
+  userLoad();
 });
 
 // Watch for theme changes and persist
@@ -262,33 +237,6 @@ watch(isDarkTheme, (newVal) => {
   localStorage.setItem('theme', newVal ? 'dark' : 'light');
 });
 
-// Actions
-function actionClickNav(action: string) {
-  if (action === 'logout') {
-    dialogLogout.value = true;
-  }
-}
-
-async function onLogout() {
-  try {
-    await store.dispatch(`auth/${LOGOUT_ACTION}`);
-    router.push('/login');
-  } catch (error) {
-    // console.error('Logout failed:', error);
-  }
-}
-
-function toggleDrawerLocation() {
-  drawerLocation.value = drawerLocation.value === 'left' ? 'right' : 'left';
-  localStorage.setItem('drawerLocation', drawerLocation.value);
-}
-
-const appBarStyles = computed(() => {
-  return {
-    borderRadius: '24px',
-    top: '12px',
-  };
-});
 </script>
 
 <style scoped>

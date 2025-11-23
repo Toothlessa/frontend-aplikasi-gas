@@ -1,24 +1,33 @@
-import store from "@/store/store";
-import { computed, ref } from "vue";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useTheme } from "vuetify/lib/framework.mjs";
+import { useStore } from "vuex";
 
 export function useGlobal() {
+    
+    const store = useStore();
+    const router = useRouter();
+    const theme = useTheme();
 
-    const search = ref('');
-    const loadingButton = ref(false);
+    const search = ref("");
 
-    const input = ref('');
-    const hasSaved = ref(false);
-
-    const alert = ref(false);
-    const error = ref('');
+/* ----------------------------------------------------
+ * FORMATTERS & UTILITIES
+ * ---------------------------------------------------- */
+    const formatPrice = (value: number) =>
+        new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0
+    }).format(value);
 
     return {
-        search,
-        loadingButton,
-        input,
-        hasSaved,
-        alert,
-        error,
+        store,
+        router,
+        theme,
         
-    };
+        search,
+        /* formatter and ultilities */
+        formatPrice,
+    }
 }

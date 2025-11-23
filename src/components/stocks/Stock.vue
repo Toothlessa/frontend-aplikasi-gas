@@ -83,7 +83,7 @@
                   size="small"
                   variant="text"
                   color="blue-grey"
-                  @click="getStockDetail(item)"
+                  @click="getStockDetail(item.item_id)"
                 />
               </template>
             </v-data-table-virtual>
@@ -93,8 +93,8 @@
     </v-row>
 
     <!-- Stock Details Dialog -->
-    <v-dialog v-model="DialogDetails" max-width="900px" rounded="xl">
-      <v-card class="stock-dialog-card">
+    <v-dialog v-model="DialogDetails" max-width="900px" rounded="xl" persistent>
+      <v-card class="stock-card" rounded="xl" elevation="6">
         <v-card-title class="stock-card-header">
           <v-icon start>mdi-format-list-bulleted</v-icon>
           <span class="text-h6 font-weight-bold">Stock Details</span>
@@ -130,8 +130,8 @@
     </v-dialog>
 
     <!-- Stock Update Dialog -->
-    <v-dialog v-model="DialogUpdate" max-width="600px" rounded="xl">
-      <v-card class="stock-dialog-card">
+    <v-dialog v-model="DialogUpdate" max-width="600px" rounded="xl" persistent>
+      <v-card class="stock-card" rounded="xl" elevation="6">
         <v-card-title class="stock-card-header">
           <v-icon start>mdi-update</v-icon>
           <span class="text-h6 font-weight-bold">Update Stock</span>
@@ -184,7 +184,6 @@
     <!-- Snackbar for notifications -->
     <v-snackbar
       v-model="hasSaved"
-      :timeout="2000"
       location="top right"
       color="success"
       rounded="xl"
@@ -198,24 +197,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import AxiosInstance from '@/services/AxiosInstance';
-import Validations from '@/services/Validations';
 import store from '@/store/store';
-import { CREATE_STOCK, GET_USER_TOKEN_GETTER, LOAD_DETAIL_STOCK } from '@/store/storeconstant';
+import { CREATE_STOCK, LOAD_DETAIL_STOCK, UPDATE_STOCK } from '@/store/storeconstant';
 import { useMasterItem } from '@/composables/useMasterItem';
 import { useStock } from '@/composables/useStock';
-import { useGlobal } from '@/composables/useGlobal';
-import { Stock, StockDetail } from '@/types';
-import stock from '@/store/modules/stock';
+import { StockDetail } from '@/types';
 
-const {
-  search,
-  loadingButton,
-  input,
-  hasSaved,
-  alert,
-  error,
-} = useGlobal();
 
 const {
   DialogDetails,
@@ -224,14 +211,24 @@ const {
   headersStock,
   detailHeaders,
 
+  search,
+  input,
   selectedItem,
   stocks,
   stockDetails,
   editedStock,
 
+  loadingButton,
   loading,
   loadingDetail,
+  hasSaved,
+
+  alert,
+  error,
+
   loadCurrentStock,
+  resetEditedStock,
+  handleError,
 } = useStock();
 
 const {
@@ -254,65 +251,34 @@ const editStock = (item: StockDetail) => {
 async function create() {
   try {
     await store.dispatch(`stock/${CREATE_STOCK}`, { itemId: selectedItem.value, stock: { stock: input.value} });
+    resetEditedStock();
   } catch(error) {
-    alert.value = true;
+     handleError(error);
   }
 }
 
-async function getStockDetail(item: Stock) {
-  Object.assign(editedStock, item);
+async function getStockDetail(itemId: number) {
   try {
-    await store.dispatch(`stock/${LOAD_DETAIL_STOCK}`, item.item_id);
     DialogDetails.value = true;
+    await store.dispatch(`stock/${LOAD_DETAIL_STOCK}`, itemId);
   } catch(error) {
-    console.error('Failed to load stock details:', error);
-    alert.value = true;
+    handleError(error);
   } 
 }
 
-// const detailsStock = async (item: Stock) => {
-//   Object.assign(editedStock, item);
-//   try {
-//     const response = await AxiosInstance.get<{ data: StockDetail[] }>(`http://127.0.0.1:8000/api/stockitems/detailstock/${editedStock.item_id}`, {
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Accept': 'application/json',
-//         'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-//       },
-//     });
-//     if (response.status === 200) {
-//       detailStock.value = response.data.data;
-//     }
-//   } catch (err) {
-//     const axiosError = err as { response?: { data?: { errors?: string[] } } };
-//     error.value = Validations.getErrorMessageFromCode(axiosError.response?.data?.errors?.[0]);
-//     alert.value = true;
-//   }
-//   DialogDetails.value = true;
-// };
-
-const updateStock = async () => {
+async function updateStock() {
   const postData = editedStock;
   try {
-    const response = await AxiosInstance.put(`http://127.0.0.1:8000/api/stockitems/${editedStock.id}`, postData, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    });
-    if (response.status === 200) {
-      await getStockDetail(postData as Stock);
-      await loadCurrentStock();
-      hasSaved.value = true;
-    }
-  } catch (err) {
-    const axiosError = err as { response?: { data?: { errors?: string[] } } };
-    error.value = Validations.getErrorMessageFromCode(axiosError.response?.data?.errors?.[0]);
-    alert.value = true;
+    await store.dispatch(`stock/${UPDATE_STOCK}`, { id: postData.id, stock: postData});
+    DialogUpdate.value = false;
+    await getStockDetail(postData.item_id);
+    await loadCurrentStock();
+
+  } catch(error) {
+    handleError(error);
   }
-  DialogUpdate.value = false;
-};
+}
+
 </script>
 
 <style scoped>

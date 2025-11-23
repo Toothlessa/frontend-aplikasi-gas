@@ -2,7 +2,9 @@ import {
   CREATE_CUSTOMER,
   DEACTIVATE_CUSTOMER,
   LOAD_CUSTOMER_DATA,
+  LOAD_TOP_CUSTOMER_TRANSACTION,
   SET_DATA_CUSTOMER,
+  SET_DATA_TOP_CUSTOMER,
   SET_HASSAVED,
   SET_LOADING,
   UPLOAD_CUSTOMER
@@ -81,6 +83,19 @@ const actions: ActionTree<CustomerState, RootState> = {
       throw error;
     } finally {
       commit(SET_HASSAVED, false);
+    }
+  },
+
+  async[LOAD_TOP_CUSTOMER_TRANSACTION]({ commit }) {
+    commit(SET_LOADING, true);
+    try{
+      const data = await CustomerService.fetchDataTopCustomer();
+      commit(SET_DATA_TOP_CUSTOMER, data);
+    }catch(error){
+      console.error('Failed to load data top customer transaction');
+      throw error;
+    }finally{
+      commit(SET_LOADING, false);
     }
   },
 

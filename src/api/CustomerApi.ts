@@ -11,4 +11,6 @@ export const CustomerAPI = {
         formData.append('csvFile', file);
         return AxiosInstance.post('/customers/import-csv', formData);
     },
+    //
+    fetchDataTop10Customer: () => AxiosInstance.get(`transactions/topcustomer`),
 };

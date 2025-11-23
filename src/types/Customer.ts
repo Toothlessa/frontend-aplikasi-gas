@@ -1,5 +1,6 @@
 export interface CustomerState {
   customers: Customer[];
+  topCustomerTransaction: TopCustomerTransaction[];
   headerCustomer: HeaderCustomer[];
   loading: boolean;
   hasSaved: boolean;
@@ -25,6 +26,11 @@ export interface Customer {
   address: string;
   phone: string;
   active_flag: boolean | string;
+}
+
+export interface TopCustomerTransaction {
+  customer_name: string;
+  total: number;
 }
 
 export interface HeaderCustomer {

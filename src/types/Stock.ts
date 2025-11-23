@@ -3,6 +3,7 @@ export interface StockState {
     stockDetails: StockDetail[];
     stockTableColumn: StockTableColumn[];
     stockDetailTableColumn: StockDetailTableColumn[];
+    stockDisplay: StockDisplay | null;
 
     createStockPayload: CreateStockPayload[];
     loading: boolean;
@@ -20,7 +21,6 @@ export interface StockField {
     label: string;
     items?: string[];
     itemTitle?: string;
-    itemValue?: string;
     onEnterSubmit?: boolean;
 }
 
@@ -45,20 +45,25 @@ export interface StockDetail {
     created_at: Date;
 }
 
+export interface StockDisplay {
+    running_stock: number;
+    yesterday_stock: number;
+    empty_gas: number;
+    gas_owned: number;
+}
+
 export interface StockTableColumn {
     title: string;
     key: keyof Stock | 'actions';
-    value?: string | ((item: Stock) => string | boolean);
     align?: 'start' | 'center' | 'end';
     sortable?: boolean;
 }
 
 export interface StockDetailTableColumn {
-    title: string;
-    key: keyof StockDetail | 'actions';
-    value?: string | ((item: StockDetail) => string | boolean);
-    align?: 'start' | 'center' | 'end';
-    sortable?: boolean;
+  title: string;
+  key: string;
+  align?: 'start' | 'center' | 'end';
+  sortable?: boolean;
 }
 
 export const stockTableColumn: StockTableColumn[] = [

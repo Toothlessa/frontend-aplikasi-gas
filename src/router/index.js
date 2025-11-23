@@ -1,119 +1,117 @@
-import {
-    createRouter,
-    createWebHistory
-} from 'vue-router'
-const Login = () => import( /* webpackChunkName: "Login" */ '@/views/auth/LoginView.vue');
-const Dashboard = () => import('@/views/dashboard');
-const User = () => import('@/views/users/UserView.vue');
-const MasterItem = () => import('@/views/masteritem/MasterItemView.vue')
-const Customer = () => import('@/views/customers/CustomerView.vue')
-const Transaction = () => import('@/views/transaction/TransactionView.vue')
-const Stock = () => import('@/views/stocks/StockView.vue')
-const Debt = () => import('@/views/debts/DebtView.vue')
-const Asset = () => import('@/views/assets/AssetView.vue')
-const AssetDetails = () => import('@/components/assets/AssetDetails.vue')
+import { createRouter, createWebHistory } from "vue-router";
+import store from "@/store/store";
+import { IS_USER_AUTHENTICATE_GETTER } from "@/store/storeconstant";
 
-import store from '@/store/store'
-import {
-    IS_USER_AUTHENTICATE_GETTER
-} from '@/store/storeconstant'
+// Lazy-loaded views
+const Login = () =>
+  import(/* webpackChunkName: "Login" */ "@/views/auth/LoginView.vue");
+const Dashboard = () => import("@/views/dashboard");
+const User = () => import("@/views/users/UserView.vue");
+const MasterItem = () => import("@/views/masteritem/MasterItemView.vue");
+const Customer = () => import("@/views/customers/CustomerView.vue");
+const Transaction = () => import("@/views/transaction/TransactionView.vue");
+const Stock = () => import("@/views/stocks/StockView.vue");
+const Debt = () => import("@/views/debts/DebtView.vue");
+const Asset = () => import("@/views/assets/AssetView.vue");
+const AssetDetails = () =>
+  import("@/components/assets/AssetDetails.vue");
 
-const routes = [{
-        path: '/',
-        component: Dashboard,
-        meta: {
-            auth: true,
-        }
+// -----------------------------------------------
+// Route Configuration
+// -----------------------------------------------
+const routes = [
+  {
+    path: "/",
+    name: "Dashboard",
+    component: Dashboard,
+    meta: { auth: true },
+  },
+  {
+    path: "/login",
+    name: "Login",
+    component: Login,
+    meta: {
+      auth: false,
+      hideTheNavigation: true,
     },
-    {
-        path: '/login',
-        component: Login,
-        name: Login,
-        meta: {
-            auth: false,
-            hideTheNavigation: true,
-        }
-    },
-    {
-        path: '/users',
-        component: User,
-        meta: {
-            auth: true
-        }
-    },
-    {
-        path: '/masteritem',
-        component: MasterItem,
-        meta: {
-            auth: true
-        }
-    },
-    {
-        path: '/customer',
-        component: Customer,
-        meta: {
-            auth: true
-        }
-    },
-    {
-        path: '/transaction',
-        component: Transaction,
-        meta: {
-            auth: true
-        }
-    },
-    {
-        path: '/stock',
-        component: Stock,
-        meta: {
-            auth: true
-        }
-    },
-    {
-        path: '/debt',
-        component: Debt,
-        meta: {
-            auth: true
-        }
-    },
-    {
-        path: '/asset',
-        component: Asset,
-        meta: {
-            auth: true
-        }
-    },
-    {
-        path: '/asset/:ownerId/:assetName',
-        name: 'AssetDetails',
-        component: AssetDetails,
-        meta: {
-            auth: true
-        }
-    },
-]
+  },
+  {
+    path: "/users",
+    name: "Users",
+    component: User,
+    meta: { auth: true },
+  },
+  {
+    path: "/masteritem",
+    name: "MasterItem",
+    component: MasterItem,
+    meta: { auth: true },
+  },
+  {
+    path: "/customer",
+    name: "Customer",
+    component: Customer,
+    meta: { auth: true },
+  },
+  {
+    path: "/transaction",
+    name: "Transaction",
+    component: Transaction,
+    meta: { auth: true },
+  },
+  {
+    path: "/stock",
+    name: "Stock",
+    component: Stock,
+    meta: { auth: true },
+  },
+  {
+    path: "/debt",
+    name: "Debt",
+    component: Debt,
+    meta: { auth: true },
+  },
+  {
+    path: "/asset",
+    name: "Asset",
+    component: Asset,
+    meta: { auth: true },
+  },
+  {
+    path: "/asset/:ownerId/:itemId",
+    name: "AssetDetails",
+    component: AssetDetails,
+    props: true,
+    meta: { auth: true },
+  },
+];
 
+// -----------------------------------------------
+// Create Router
+// -----------------------------------------------
 const router = createRouter({
-    history: createWebHistory(),
-    routes,
+  history: createWebHistory(),
+  routes,
 });
 
-router.beforeEach((to, from, next) => {
-    if (
-        'auth' in to.meta &&
-        to.meta.auth &&
-        !store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`]
-    ) {
-        next('/login');
-    } else if (
-        'auth' in to.meta &&
-        !to.meta.auth &&
-        store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`]
-    ) {
-        next('/login'); //default /
-    } else {
-        next();
-    }
+// -----------------------------------------------
+// Navigation Guard
+// -----------------------------------------------
+router.beforeEach((to, _, next) => {
+  const isAuthenticated =
+    store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`];
+
+  // Protected routes → but user not logged in
+  if (to.meta.auth && !isAuthenticated) {
+    return next("/login");
+  }
+
+  // Login page → user already logged in
+  if (to.name === "Login" && isAuthenticated) {
+    return next("/");
+  }
+
+  return next();
 });
 
-export default router
+export default router;

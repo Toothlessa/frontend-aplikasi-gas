@@ -1,5 +1,5 @@
 import { CustomerAPI } from "@/api/CustomerApi";
-import type { Customer  } from "@/types";
+import type { Customer, TopCustomerTransaction  } from "@/types";
 import { errorHandler } from "@/utils/ErrorHandler";
 
 export const CustomerService = {
@@ -40,6 +40,15 @@ export const CustomerService = {
             await CustomerAPI.deactivate(id);
 
         } catch (error: any) {
+            throw errorHandler.parseAxiosError(error);
+        }
+    },
+
+    async fetchDataTopCustomer(): Promise<TopCustomerTransaction[]> {
+        try{
+            const response = await CustomerAPI.fetchDataTop10Customer();
+            return response.data.data;
+        }catch(error){
             throw errorHandler.parseAxiosError(error);
         }
     },

@@ -9,6 +9,7 @@ import mutations from "./mutations";
 
 const state = (): CustomerState => ({
   customers: [],
+  topCustomerTransaction: [],
   loading: false,
   hasSaved: false,
   headerCustomer: [],

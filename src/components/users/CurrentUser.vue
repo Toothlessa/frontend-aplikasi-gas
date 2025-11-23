@@ -39,7 +39,7 @@
       <v-card-text class="pa-6">
         <div class="text-subtitle-1 text-medium-emphasis mb-2">Username</div>
         <v-text-field
-          v-model="result.username"
+          v-model="userData.username"
           variant="outlined"
           :disabled="!isEditing"
           color="blue"
@@ -48,7 +48,7 @@
         </v-text-field>
         <div class="text-subtitle-1 text-medium-emphasis mb-2">Email</div>
         <v-text-field
-          v-model="result.email"
+          v-model="userData.email"
           variant="outlined"
           :disabled="!isEditing"
           color="blue"
@@ -62,7 +62,7 @@
           color="blue-darken-1"
           variant="elevated"
           :disabled="!isEditing"
-          @click="save()"
+          :loading="loadingButtonUpdate"
           @click.prevent="onUpdate()"
           class="text-white"
         >
@@ -72,8 +72,7 @@
       </v-card-actions>
       <v-snackbar
         v-model="hasSaved"
-        :timeout="2000"
-        location="top center"
+        location="top right"
         attach
         color="success"
       >
@@ -84,81 +83,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
-import AxiosInstance from '@/services/AxiosInstance';
-import Validations from '@/services/Validations';
-import store from '@/store/store';
-import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
+import { onMounted } from 'vue';
+import { useUser } from '@/composables/useUser';
 
-interface User {
-  username: string;
-  email: string;
-}
+const {
+  // State
+  hasSaved,
+  loadingButtonUpdate,
+  alert,
+  isEditing,
+  userData,
 
-const hasSaved = ref(false);
-const alert = ref(false);
-const isEditing = ref(false);
-const result = reactive<User>({
-  username: '',
-  email: '',
-});
-const error = ref('');
+  // Error Handling
+  error,
 
-const userLoad = async () => {
-  try {
-    const response = await AxiosInstance.get<{ data: User }>('http://127.0.0.1:8000/api/users/current', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    });
-    result.username = response.data.data.username;
-    result.email = response.data.data.email;
-  } catch (err) {
-    const axiosError = err as { response?: { data?: { errors?: string[] } } };
-    error.value = Validations.getErrorMessageFromCode(axiosError.response?.data?.errors?.[0]);
-    alert.value = true;
-  }
-};
+  // Computed
+  user,
 
-const onUpdate = async () => {
-  const postData = {
-    username: result.username,
-    email: result.email,
-  };
-
-  const userDataString = localStorage.getItem('userData');
-  const userData = userDataString ? JSON.parse(userDataString) : {};
-
-  if (postData.username === userData.username && postData.email === userData.email) {
-    error.value = 'No update for this user';
-    hasSaved.value = false;
-    alert.value = true;
-  } else {
-    try {
-      await AxiosInstance.patch('http://127.0.0.1:8000/api/users/current', postData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-        },
-      });
-      userLoad();
-      hasSaved.value = true;
-      alert.value = false; // Clear any previous error alerts
-    } catch (err) {
-      const axiosError = err as { response?: { data?: { errors?: string[] } } };
-      error.value = Validations.getErrorMessageFromCode(axiosError.response?.data?.errors?.[0]);
-      alert.value = true;
-      hasSaved.value = false;
-    }
-  }
-};
-
-const save = () => {
-  isEditing.value = !isEditing.value;
-};
+  // Actions
+  userLoad,
+  onUpdate,
+} = useUser();
 
 onMounted(() => {
   userLoad();

@@ -2,7 +2,8 @@ import {
   SET_LOADING,
   SET_HASSAVED,
   SET_DATA_ASSET,
-  SET_DATA_OWNER
+  SET_DATA_OWNER,
+  SET_DATA_ASSET_DETAIL
 } from '@/store/storeconstant';
 
 import type { MutationTree } from 'vuex';
@@ -12,6 +13,9 @@ const mutations: MutationTree<AssetState> = {
   [SET_DATA_ASSET](state, payload: Asset[]) {
     state.assets = payload;
   },
+  [SET_DATA_ASSET_DETAIL](state, payload: Asset[]) {
+    state.assetDetails = payload;
+  },
   [SET_DATA_OWNER](state, payload: Owner[]) {
     state.owners = payload;
   },
@@ -20,10 +24,6 @@ const mutations: MutationTree<AssetState> = {
   },
   [SET_HASSAVED](state, value: boolean) {
     state.hasSaved = value;
-  },
-  SET_SELECTED_ASSET(state, payload: Asset[] | null) {
-    console.log("Mutation Payload:", payload);
-    state.selectedAsset = payload;
   },
 };
 

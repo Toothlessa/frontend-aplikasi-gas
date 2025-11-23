@@ -36,9 +36,10 @@
             <v-row>
               <v-col cols="12" md="6">
                 <v-select
-                  v-model="newAsset.asset_name"
+                  v-model="assetData.item_id"
                   :items="mItems"
                   item-title="item_name"
+                  item-value="id"
                   label="Asset Name"
                   variant="filled"
                   rounded="lg"
@@ -49,7 +50,7 @@
               <v-col cols="12" md="6">
                 <div class="d-flex align-center">
                   <v-select
-                    v-model="newAsset.owner_id"
+                    v-model="assetData.owner_id"
                     :items="assetOwners"
                     item-title="name"
                     item-value="id"
@@ -77,7 +78,7 @@
             <v-row>
               <v-col cols="12" md="4">
                 <v-text-field
-                  v-model.number="newAsset.quantity"
+                  v-model.number="assetData.quantity"
                   label="Quantity"
                   type="number"
                   variant="filled"
@@ -88,7 +89,7 @@
               </v-col>
               <v-col cols="12" md="4">
                 <v-text-field
-                  v-model.number="newAsset.cogs"
+                  v-model.number="assetData.cogs"
                   label="Cost of Goods"
                   type="number"
                   variant="filled"
@@ -99,7 +100,7 @@
               </v-col>
               <v-col cols="12" md="4">
                 <v-text-field
-                  v-model.number="newAsset.selling_price"
+                  v-model.number="assetData.selling_price"
                   label="Selling Price"
                   type="number"
                   variant="filled"
@@ -110,7 +111,7 @@
               </v-col>
             </v-row>
             <v-textarea
-              v-model="newAsset.description"
+              v-model="assetData.description"
               label="Description"
               variant="filled"
               rounded="lg"
@@ -142,7 +143,7 @@
         <v-divider />
         <v-card-text>
           <v-data-table
-            :headers="assetHeaders"
+            :headers="assetHeader"
             :items="assets"
             :loading="loading"
             class="modern-table"
@@ -153,7 +154,7 @@
               <div class="action-buttons">
                 <v-tooltip text="Details" location="top">
                   <template #activator="{ props }">
-                    <v-btn v-bind="props" icon variant="text" @click="goToAssetDetails(item.owner_id, item.asset_name)">
+                    <v-btn v-bind="props" icon variant="text" @click="goToAssetDetails(item.owner_id, item.item_id)">
                       <v-icon size="22">mdi-information-outline</v-icon>
                     </v-btn>
                   </template>
@@ -173,7 +174,7 @@
         :search="searchQuery"
         :loading="loading"
         @close="openDialogOwner = false"
-        @submit="handleCreateOwner"
+        @submit="createOwner"
         @update:search="searchQuery = $event"
         @updateOwner="onUpdateOwner"
       />
@@ -188,67 +189,48 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue';
-import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
-import { Asset, headerOwner, Owner } from '@/types/Asset';
-import {
-  CREATE_ASSET,
-  LOAD_ASSET,
-  CREATE_OWNER,
-  LOAD_OWNER,
-  LOAD_MASTER_ITEM,
-} from '@/store/storeconstant';
+import { onMounted, computed } from 'vue';
+import { headerOwner, Owner } from '@/types/Asset';
 import DialogOwner from './DialogOwner.vue';
-import { MasterItem } from '@/types';
+import { useAsset } from '@/composables/useAsset';
+import { useMasterItem } from '@/composables/useMasterItem';
 
-// --- Refs and Reactive State ---
-const store = useStore();
-const router = useRouter();
-const newAsset = reactive<Omit<Asset, 'id'>>({
-  asset_name: '',
-  owner_id: '',
-  quantity: 0,
-  cogs: 0,
-  selling_price: 0,
-  description: '',
-});
+const {
+  openDialogOwner,
 
-const newOwnerData = ref<Partial<Owner>>({});
-const isEdit = ref(false);
+  searchQuery,
+  isCreatingAsset,
 
-const openDialogOwner = ref(false);
+  //table
+  assetHeader,
 
-const isCreatingAsset = ref(false);
-const isUpdatingAsset = ref(false);
-const isLoadingOwners = ref(false);
-const searchQuery = ref('');
+  assetData,
+  newOwnerData,
+  isEdit,
 
-const snackbar = reactive({
-  show: false,
-  message: '',
-  color: '',
-});
+  snackbar,
 
-// --- Computed Properties ---
-const mItems = computed<MasterItem[]>(() => store.state.masteritem.mItems);
-const assetOwners = computed<Owner[]>(() => store.state.asset.owners);
-const assets = computed<Asset[]>(() => store.state.asset.assets);
+  //computed properties
+  assetOwners,
+  assets,
+  loadAssets,
+  loadOwners,
+  loading,
 
-// --- Data Table Headers ---
-const assetHeaders = [
-  { title: 'Name', value: 'asset_name', sortable: true, class: 'text-subtitle-1' },
-  { title: 'Owner', value: 'owner_name', sortable: true, class: 'text-subtitle-1' },
-  { title: 'Quantity', value: 'quantity', sortable: true, class: 'text-subtitle-1' },
-  { title: 'Cost', value: 'cogs', sortable: true, class: 'text-subtitle-1' },
-  { title: 'Price', value: 'selling_price', sortable: true, class: 'text-subtitle-1' },
-  { title: 'Actions', value: 'actions', sortable: false, align: 'center', class: 'text-subtitle-1' },
-];
+  //call vuex
+  createAsset,
+  createOwner,
+  
+  goToAssetDetails,
+  onUpdateOwner,
 
-const loadMasterItem = () => store.dispatch(`masteritem/${LOAD_MASTER_ITEM}`);
-const loadAssets = () => store.dispatch(`asset/${LOAD_ASSET}`);
-const loadOwners = () => store.dispatch(`asset/${LOAD_OWNER}`);
-const loading = computed(() => store.state.asset.loading);
+} = useAsset();
+
+const {
+  mItems,
+  loadMasterItem,
+} = useMasterItem();
+
 // --- Lifecycle Hooks ---
 onMounted(() => {
   loadMasterItem();
@@ -256,73 +238,6 @@ onMounted(() => {
   loadOwners();
 });
 
-const createAsset = async () => {
-  try {
-    isCreatingAsset.value = true;
-    await store.dispatch(`asset/${CREATE_ASSET}`, newAsset);
-    showSnackbar('Asset created successfully!', 'success');
-    resetAssetForm();
-  } catch (error) {
-    showSnackbar('Failed to create asset.', 'error');
-  } finally {
-    isCreatingAsset.value = false;
-  }
-};
-
-// const openUpdateAssetDialog = (asset: Asset) => {
-//   assetToUpdate.value = { ...asset };
-//   dialogUpdateAsset.value = true;
-// };
-
-const goToAssetDetails = (ownerId: string, assetName: string) => {
-  router.push({ name: 'AssetDetails', params: { ownerId, assetName } });
-};
-
-const onUpdateOwner = (item: Owner) => {
-  newOwnerData.value = { ...item }; // Set item to pass to the dialog
-};
-
-const handleCreateOwner = async (ownerData: Partial<Owner>) => {
-  try {
-    // await store.dispatch(CREATE_OWNER, ownerData);
-    await store.dispatch(`asset/${CREATE_OWNER}`, ownerData);
-    showSnackbar('Owner created successfully!', 'success');
-    openDialogOwner.value = false;
-  } catch (error) {
-    showSnackbar('Failed to create owner.', 'error');
-  }
-};
-
-
-const resetAssetForm = () => {
-  Object.assign(newAsset, {
-    asset_name: '',
-    owner_id: '',
-    quantity: 0,
-    cogs: 0,
-    selling_price: 0,
-    description: '',
-  });
-};
-
-const updateAsset = async () => {
-  // Placeholder for update logic
-  try {
-    isUpdatingAsset.value = true;
-    // await store.dispatch(`asset/${UPDATE_ASSET}`, assetToUpdate.value);
-    showSnackbar('Asset updated successfully!', 'success');
-  } catch (error) {
-    showSnackbar('Failed to update asset.', 'error');
-  } finally {
-    isUpdatingAsset.value = false;
-  }
-};
-
-const showSnackbar = (message: string, color: string) => {
-  snackbar.message = message;
-  snackbar.color = color;
-  snackbar.show = true;
-};
 </script>
 
 <style scoped>

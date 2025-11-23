@@ -10,6 +10,7 @@ import { AssetState } from '@/types';
 const state = (): AssetState => ({
   assets: [],
   owners: [],
+  assetDetails: [],
   loading: false,
   hasSaved: false,
   headerAsset: [],

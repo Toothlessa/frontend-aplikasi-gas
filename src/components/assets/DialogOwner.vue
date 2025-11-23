@@ -3,9 +3,9 @@
     <v-card class="dialog-card" rounded="xl">
       <!-- Header -->
       <v-card-title class="dialog-header">
-        <v-icon size="26" class="mr-3">{{ isEdit ? 'mdi-account-edit-outline' : 'mdi-account-plus-outline' }}</v-icon>
+        <v-icon size="26" class="mr-3">{{ 'mdi-account-plus-outline' }}</v-icon>
         <span class="text-h6 font-weight-medium">
-          {{ isEdit ? 'Edit Owner' : 'Add New Owner' }}
+             Add New Owner
         </span>
       </v-card-title>
 
@@ -37,7 +37,7 @@
           @click="handleSave"
           rounded="pill"
         >
-          {{ isEdit ? 'Save Changes' : 'Save' }}
+          Save        
         </v-btn>
       </v-card-actions>
 
@@ -110,15 +110,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive, computed } from 'vue';
+import { watch, computed } from 'vue';
 import type { Owner, HeaderOwner } from '@/types/Asset';
 import DialogDeactivate from '@/components/globalComponent/DialogDeactivate.vue';
-import store from '@/store/store';
-import { DEACTIVE_OWNER, LOAD_OWNER } from '@/store/storeconstant';
+import { useOwner } from '@/composables/useOwner';
 
 const props = defineProps<{
   dialog: boolean;
-  isEdit: boolean;
   newOwner: Partial<Owner>;
   search: string;
   owners: Owner[];
@@ -134,16 +132,20 @@ const emit = defineEmits<{
   (e: 'update:search', search: string): void;
 }>();
 
-const localDialog = ref(props.dialog);
-const localOwner = reactive<Partial<Owner>>({});
-const dialogDeactivate = ref(false);
-const selectedItem = ref<Owner | null>(null);
-const defaultOwner: Partial<Owner> = {
-  id: '',
-  name: '',
-  active_flag: true,
-  inactive_date: '',
-};
+const {
+  localDialog,
+  dialogDeactivate,
+
+  localOwner,
+  defaultOwner,
+
+  handleClose,
+  handleSave,
+
+  openDeactivateDialog,
+  onDeactivateConfirm,
+        
+} = useOwner(props, emit);
 
 // Sync localDialog with parent
 watch(() => props.dialog, (val) => {
@@ -165,7 +167,7 @@ watch(
   { immediate: true }
 );
 
-// Filtered category list
+  // Filtered category list
 const filteredItems = computed(() => {
   if (!props.search) return props.owners;
 
@@ -174,37 +176,6 @@ const filteredItems = computed(() => {
     item.name?.toLowerCase().includes(keyword)
   );
 });
-
-const handleClose = () => {
-  emit('close');
-  Object.assign(localOwner, defaultOwner);
-};
-
-const handleSave = () => {
-  emit('submit', localOwner);
-  handleClose();
-};
-
-const openDeactivateDialog = (item: Owner) => {
-  selectedItem.value = item;
-  dialogDeactivate.value = true;
-  console.log(selectedItem.value);
-};
-
-const onDeactivateConfirm = async () => {
-  console.log('Start onDeactivate Confirm');
-  if (selectedItem.value) {
-    
-    try {
-       console.log('execute');
-      await store.dispatch(`asset/${DEACTIVE_OWNER}`, selectedItem.value.id);
-      dialogDeactivate.value = false;
-    } catch (e) {
-      // Handle error, e.g., show a snackbar
-      console.error('Deactivation failed:', e);
-    }
-  }
-};
 
 </script>
 

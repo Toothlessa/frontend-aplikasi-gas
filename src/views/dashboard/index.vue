@@ -7,15 +7,31 @@
 
     <v-row class="mb-6">
       <v-col cols="12" sm="6" md="3" v-for="(list, index) in lists" :key="index">
-        <v-card :class="theme.global.current.value.dark ? 'dashboard-metric-card-dark rounded-xl' : 'dashboard-metric-card rounded-xl'">
-          <v-card-text class="d-flex align-center justify-space-between">
-            <div>
-              <div :class="theme.global.current.value.dark ? 'text-subtitle-1 text-teal' : 'text-subtitle-1 text-grey-darken-1'">{{ list.title }}</div>
-              <div :class="theme.global.current.value.dark ? 'text-h4 font-weight-bold text-teal mt-1' : 'text-h4 font-weight-bold text-teal-darken-1 mt-1'">{{ list.count }}</div>
-            </div>
-            <v-icon :color="theme.global.current.value.dark ? 'teal' : 'teal-lighten-1'" size="48">{{ list.icon }}</v-icon>
-          </v-card-text>
-        </v-card>
+
+        <!-- LOADING -->
+        <template v-if="loading">
+          <v-card class="rounded-xl pa-4">
+            <v-skeleton-loader type="heading, text" />
+          </v-card>
+        </template>
+
+        <!-- NORMAL CARD -->
+        <template v-else>
+          <v-card :class="theme.global.current.value.dark ? 'dashboard-metric-card-dark rounded-xl' : 'dashboard-metric-card rounded-xl'">
+            <v-card-text class="d-flex align-center justify-space-between">
+              <div>
+                <div :class="theme.global.current.value.dark ? 'text-subtitle-1 text-teal' : 'text-subtitle-1 text-grey-darken-1'">{{ list.title }}</div>
+                <div :class="theme.global.current.value.dark ? 'text-h4 font-weight-bold text-teal mt-1' : 'text-h4 font-weight-bold text-teal-darken-1 mt-1'">
+                  {{ list.count }}
+                </div>
+              </div>
+              <v-icon :color="theme.global.current.value.dark ? 'teal' : 'teal-lighten-1'" size="48">
+                {{ list.icon }}
+              </v-icon>
+            </v-card-text>
+          </v-card>
+        </template>
+
       </v-col>
     </v-row>
 
@@ -48,69 +64,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import SalesData from "@/components/chart/SalesData";
+import { onMounted } from 'vue';
+import SalesData from "@/components/chart/SalesData.vue";
 import TableDebt from "@/components/chart/TableDebt.vue";
 import TableOutstandingTrx from "@/components/chart/TableOutstandingTrx.vue";
-import TopBuyer from "@/components/chart/TopBuyer";
-import AxiosInstance from "@/services/AxiosInstance";
+import TopBuyer from "@/components/chart/TopBuyer.vue";
+import { useStock } from '@/composables/useStock';
+import { useGlobal } from '@/composables/useGlobal';
+import { useDashboard } from '@/composables/useDashboard';
 
-import { useTheme } from 'vuetify';
-import store from '@/store/store';
-import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
-
-interface StockDisplay {
-  running_stock: string;
-  yesterday_stock: string;
-  empty_gas: string;
-  empty_gas_owned: string;
-}
-
-const theme = useTheme();
-
-const lists = ref([
-  {
-    icon: "mdi-gas-cylinder",
-    title: "Running Stock",
-    count: '',
-  },
-  {
-    icon: "mdi-calendar-check",
-    title: "Yesterday Stock",
-    count: '',
-  },
-  {
-    icon: "mdi-gas-station-off",
-    title: "Empty Gas",
-    count: '',
-  },
-  {
-    icon: "mdi-account-hard-hat",
-    title: "Owned Gas",
-    count: '',
-  },
-]);
-
-const getDisplayStock = async () => {
-  try {
-    console.log('call display stock');
-    const response = await AxiosInstance.get<StockDisplay>('/stockitems/displaystock/1/2');
-    console.log('output stock : ', response);
-    if (response.status === 200) {
-      lists.value[0].count = response.data.data.running_stock;//response.data.running_stock;
-      lists.value[1].count = response.data.data.yesterday_stock;
-      lists.value[2].count = response.data.data.empty_gas;
-      lists.value[3].count = response.data.data.gas_owned;
-    }
-  } catch (error: any) {
-    console.error("Error fetching stock data:", error?.response?.data || error.message);
-  }
-};
-
-onMounted(() => {
-  getDisplayStock();
- 
+onMounted(async () => {
+  await loadDisplayStock();  // 1️⃣ Ambil data dulu
+  fetchDataDisplayStock();         // 2️⃣ Baru isi UI
 });
+
+const {
+  theme,
+} = useGlobal();
+
+const{
+  loading,
+  loadDisplayStock,
+} = useStock();
+
+const {
+    lists,
+    fetchDataDisplayStock,
+} = useDashboard();
+
 </script>
 
 <style scoped>

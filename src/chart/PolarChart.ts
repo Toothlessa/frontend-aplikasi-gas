@@ -1,11 +1,20 @@
+import { useCustomer } from "@/composables/useCustomer";
 import AxiosInstance from "@/services/AxiosInstance";
 import store from "@/store/store";
-import { GET_USER_TOKEN_GETTER } from "@/store/storeconstant";
+import { GET_USER_TOKEN_GETTER, LOAD_TOP_CUSTOMER_TRANSACTION } from "@/store/storeconstant";
+import { computed, onMounted } from "vue";
 
 interface CustomerSalesData {
   customer_name: string;
   total: number;
 }
+
+const {
+  topCustomerTransaction,
+  loadTopCustomerTransaction,
+  labels,
+  totals,
+} = useCustomer();
 
 interface ChartDataset {
   label: string;
@@ -45,30 +54,61 @@ try {
   response = { data: [] }; // Provide a fallback
 }
 
-const customers: string[] = [];
-const totals: number[] = [];
 
-if (response.data && response.data.length > 0) {
-  for (let i = 0; i < response.data.length; i++) {
-    customers.push(response.data[i].customer_name);
-    totals.push(response.data[i].total);
-  }
+// const response = async () => {
+//   try{
+//     await store.dispatch(`customer/${LOAD_TOP_CUSTOMER_TRANSACTION}`);
+//   }catch(error){
+//     handleError(error);
+//   }
+// };
+
+onMounted(() => {
+  loadTopCustomerTransaction();
+  console.log('top customer : ', topCustomerTransaction);
+});
+
+// const customers: string[] = [];
+// const totals: number[] = [];
+
+// if (response.data && response.data.length > 0) {
+//   for (let i = 0; i < response.data.length; i++) {
+//     customers.push(response.data[i].customer_name);
+//     totals.push(response.data[i].total);
+//   }
+// }
+
+// export const data: ChartData = {
+//   labels: customers,
+//   datasets: [
+//     {
+//       label: 'Total Penjualan',
+//       backgroundColor: 'rgba(46,191,175,0.2)',
+//       pointBackgroundColor: '#2EBFAF',
+//       pointBorderColor: '#2EBFAF',
+//       pointHoverBackgroundColor: '#2EBFAF',
+//       pointHoverBorderColor: '#2EBFAF',
+//       data: totals,
+//     },
+//   ],
+// };
+
+export function createPolarChartData(labels: string[], totals: number[]): ChartData {
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Total Penjualan',
+        backgroundColor: 'rgba(46,191,175,0.2)',
+        pointBackgroundColor: '#2EBFAF',
+        pointBorderColor: '#2EBFAF',
+        pointHoverBackgroundColor: '#2EBFAF',
+        pointHoverBorderColor: '#2EBFAF',
+        data: totals,
+      },
+    ],
+  };
 }
-
-export const data: ChartData = {
-  labels: customers,
-  datasets: [
-    {
-      label: 'Total Penjualan',
-      backgroundColor: 'rgba(46,191,175,0.2)',
-      pointBackgroundColor: '#2EBFAF',
-      pointBorderColor: '#2EBFAF',
-      pointHoverBackgroundColor: '#2EBFAF',
-      pointHoverBorderColor: '#2EBFAF',
-      data: totals,
-    },
-  ],
-};
 
 export const options: ChartOptions = {
   responsive: true,

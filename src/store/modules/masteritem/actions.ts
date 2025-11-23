@@ -9,6 +9,8 @@ import {
   SET_DATA_CATEGORY,
   DEACTIVATE_ITEM,
   DEACTIVATE_ITEM_CATEGORY,
+  LOAD_MASTER_ITEM_BY_TYPE,
+  SET_DATA_MITEM_BY_TYPE,
 } from '@/store/storeconstant';
 import { ActionTree } from 'vuex';
 import { MasterItemState } from '@/types/MasterItem';
@@ -48,6 +50,16 @@ const actions: ActionTree<MasterItemState, RootState> = {
       throw error;
     } finally {
       commit(SET_LOADING, false);
+    }
+  },
+
+  async [LOAD_MASTER_ITEM_BY_TYPE]({ commit}, itemType: string) {
+    try {
+      const data = await MasterItemService.fetchItemByType(itemType);
+      commit(SET_DATA_MITEM_BY_TYPE, data);
+    }catch(error){
+      console.error('failed to load data masteritem by item type');
+      throw error;
     }
   },
 

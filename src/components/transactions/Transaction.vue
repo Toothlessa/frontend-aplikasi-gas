@@ -47,7 +47,7 @@
 
               <v-autocomplete
                 label="Customer"
-                v-model="selectedCustomer"
+                v-model="transactionData.customer_id"
                 variant="outlined"
                 rounded="lg"
                 :items="customers"
@@ -68,7 +68,7 @@
 
               <v-number-input
                 label="Quantity"
-                v-model="editedItem.quantity"
+                v-model="transactionData.quantity"
                 :disabled="!fieldDisabled"
                 variant="outlined"
                 rounded="lg"
@@ -80,7 +80,7 @@
 
               <v-textarea
                 label="Description"
-                v-model="editedItem.description"
+                v-model="transactionData.description"
                 variant="outlined"
                 rounded="lg"
                 rows="2"
@@ -91,10 +91,10 @@
               />
 
               <v-autocomplete
-                v-model="editedItem.amount"
+                v-model="transactionData.amount"
                 variant="outlined"
                 rounded="lg"
-                :items="harga"
+                :items="price"
                 item-title="name"
                 item-value="value"
                 :label="`Price`"
@@ -130,7 +130,7 @@
                 rounded="xl"
                 color="cyan-darken-1"
                 :disabled="isSaveDisabled"
-                :loading="loadingButton"
+                :loading="loadingButtonSave"
                 @click="save"
               >
                 <v-icon left>mdi-content-save</v-icon>
@@ -146,7 +146,7 @@
             </v-card-title>
             <v-card-text class="pa-5">
               <v-autocomplete
-                v-model="selectedItem"
+                v-model="transactionData.item_id"
                 :items="mItems"
                 item-title="item_name"
                 item-value="id"
@@ -179,7 +179,7 @@
               Transaction History
               <v-spacer />
               <div class="d-flex align-center">
-                <v-btn color="white" variant="tonal" @click="dialog = true" class="mr-3">
+                <v-btn color="white" variant="tonal" @click="DialogDate = true" class="mr-3">
                   <v-icon start>mdi-calendar</v-icon>
                   {{ dateTitle }}
                 </v-btn>
@@ -201,9 +201,9 @@
             <v-data-table-virtual
               class="modern-table"
               v-model:search="search"
-              :headers="headers"
+              :headers="headersLocal"
               :items="transactions"
-              :loading="loadingData"
+              :loading="loading"
               loading-text="Loading data..."
               hover
             >
@@ -213,15 +213,20 @@
                 </v-chip>
               </template>
               <template v-slot:[`item.actions`]="{ item }">
-                <v-btn icon="mdi-pencil-outline" variant="text" color="blue-grey" @click="editItem(item)" />
+                <v-btn icon="mdi-pencil-outline" variant="text" color="blue-grey" @click="editTransaction(item)" />
+              </template>
+              <template v-slot:[`item.amount`]="{ item }">
+                {{ formatPrice(item.amount) }}
+              </template>
+              <template v-slot:[`item.total`]="{ item }">
+                {{ formatPrice(item.total) }}
               </template>
             </v-data-table-virtual>
           </v-card>
         </v-col>
       </v-row>
-
-      Dialogs
-      <v-dialog v-model="dialogUpdate" max-width="600px" persistent>
+      
+      <v-dialog v-model="DialogUpdate" max-width="600px" persistent>
         <v-card rounded="xl">
           <v-card-title :class="theme.global.current.value.dark ? 'dialog-header-dark' : 'dialog-header-light'">
             <v-icon start>mdi-update</v-icon>
@@ -230,7 +235,7 @@
           <v-card-text class="pa-5">
              <v-autocomplete
                 label="Customer"
-                v-model="updateTrx.customer_id"
+                v-model="transactionUpdate.customer_id"
                 variant="filled"
                 rounded="lg"
                 :items="customers"
@@ -250,7 +255,7 @@
 
               <v-number-input
                 label="Quantity"
-                v-model="updateTrx.quantity"
+                v-model="transactionUpdate.quantity"
                 variant="filled"
                 rounded="lg"
                 controlVariant="split"
@@ -260,7 +265,7 @@
 
               <v-textarea
                 label="Description"
-                v-model="updateTrx.description"
+                v-model="transactionUpdate.description"
                 variant="filled"
                 rounded="lg"
                 rows="2"
@@ -269,10 +274,10 @@
               />
 
               <v-autocomplete
-                v-model="updateTrx.amount"
+                v-model="transactionUpdate.amount"
                 variant="filled"
                 rounded="lg"
-                :items="harga"
+                :items="price"
                 item-title="name"
                 item-value="value"
                 label="Price"
@@ -297,7 +302,7 @@
               color="cyan-darken-1"
               class="text-white"
               :disabled="isUpdateDisabled"
-              :loading="loadingButton"
+              :loading="loadingButtonUpdate"
               @click="save"
               rounded="lg"
             >
@@ -308,7 +313,7 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="dialog" max-width="400px" persistent>
+      <v-dialog v-model="DialogDate" max-width="400px" persistent>
         <v-card rounded="xl">
           <v-card-title :class="theme.global.current.value.dark ? 'dialog-header-dark' : 'dialog-header-light'">
             <v-icon start>mdi-calendar-search</v-icon>
@@ -318,7 +323,7 @@
             <v-date-picker
               v-model="pickDate"
               color="cyan-darken-2"
-              @update:model-value="getTransactionByDate(); dialog = false"
+              @update:model-value="getTransactionByDate(); DialogDate = false"
               show-adjacent-months
               width="400"
             />
@@ -341,253 +346,87 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive } from 'vue';
-import AxiosInstance from '@/services/AxiosInstance';
-import store from '@/store/store';
-import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
+import {  onMounted } from 'vue';
 import { VNumberInput } from 'vuetify/lib/labs/components.mjs';
-import { useTheme } from 'vuetify';
+import { useTransaction } from '@/composables/useTransaction';
+import { useCustomer } from '@/composables/useCustomer';
+import { useMasterItem } from '@/composables/useMasterItem';
+import { useGlobal } from '@/composables/useGlobal';
 
-interface Transaction {
-  customer_name: string;
-  description: string | null;
-  quantity: number | null;
-  amount: number;
-  total: number;
-  created_at: string;
-  id: number;
-  stock_id: number;
-  customer_id: number | null;
-}
+const {
+  formatPrice,
+} = useGlobal();
 
-const theme = useTheme();
+const {
+  // theme
+    theme,
 
-const editedIndex = ref(-1);
+    // state
+    search,
+    transactionData,
+    transactionUpdate,
+    DialogDate,
+    DialogUpdate,
+    isEditAmt,
+    isEditing,
+    isSend,
+    hasSaved,
+    loadingButtonSave,
+    loadingButtonUpdate,
+    fieldDisabled,
+    alert,
 
-const search = ref('');
-const headers = [
-  { title: 'Customer', align: 'start', key: 'customer_name', class: 'text-subtitle-1' },
-  { title: 'Description', align: 'center', key: 'description', class: 'text-subtitle-1' },
-  { title: 'Qty', align: 'center', key: 'quantity', class: 'text-subtitle-1' },
-  { title: 'Price', align: 'start', key: 'amount', value: (item: Transaction) => formatPrice(item.amount), class: 'text-subtitle-1' },
-  { title: 'Total', align: 'start', key: 'total', value: (item: Transaction) => formatPrice(item.total), class: 'text-subtitle-1' },
-  { title: 'Created', align: 'start', key: 'created_at', class: 'text-subtitle-1' },
-  { title: 'Actions', align: 'center', key: 'actions', sortable: false, class: 'text-subtitle-1' },
-];
+    // headers
+    headersLocal,
 
-const transactions = ref<Transaction[]>([]);
-const customers = ref<{id: number, customer_name: string, nik: string}[]>([]);
-const mItems = ref<{id: number, item_name: string}[]>([]);
-const pickDate = ref(new Date());
-const dateTitle = ref('');
-const fieldDisabled = ref(true);
-const dialogUpdate = ref(false);
-const dialog = ref(false);
-const selectedCustomer = ref<number | null>(1);
-const selectedItem = ref(1);
-const isEditAmt = ref(false);
-const isEditing = ref(false);
-const isSend = ref(false);
-const hasSaved = ref(false);
-const loadingButton = ref(false);
-const loadingData = ref(true);
-const alert = ref(false);
-const error = ref('');
+    // error
+    error,
 
-const updateTrx = reactive({
-  customer_id: null,
-  quantity: null,
-  description: null,
-  amount: 0,
-  total: 0,
-  stock_id: null,
-  id: null,
-});
+    // date filter
+    dateTitle,
+    pickDate,
 
-const editedItem = reactive({
-  customer_id: null,
-  customer_name: null,
-  nik: null,
-  description: null,
-  quantity: null,
-  amount: 19000,
-  total: 0,
-  created_at: '',
-});
+    // static
+    price,
 
-const harga = [
-  { name: "Rp 16.000", value: 16000 },
-  { name: "Rp 17.000", value: 17000 },
-  { name: "Rp 18.000", value: 18000 },
-  { name: "Rp 19.000", value: 19000 },
-  { name: "Rp 20.000", value: 20000 },
-];
+    // computed
+    transactions,
+    loading,
+    isSaveDisabled,
+    isUpdateDisabled,
 
-const isSaveDisabled = computed(() => !(selectedCustomer.value && editedItem.quantity));
-const isUpdateDisabled = computed(() => !(updateTrx.customer_id && updateTrx.quantity));
+    // utility functions
+    getColorByDescription,
 
-const formatPrice = (value: number) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(value);
-};
+    // actions
+    save,
+    editTransaction,
+    close,
+    checkIsSend,
+    getTransactionByDate
+} = useTransaction();
 
-const getColorByDescription = (description: string | null) => {
-  if (description == null) return 'grey';
-  const lowerDesc = description.toLowerCase();
-  if (lowerDesc.startsWith("kirim")) return 'cyan';
-  else if (lowerDesc.startsWith("titip")) return 'orange';
-  else if (lowerDesc.startsWith("pisah")) return 'deep-purple';
-  else if (lowerDesc.startsWith("uang")) return 'amber';
-  else return 'green';
-};
+const {
+  //computed
+  customers,
+  //function
+  loadCustomerData,
+  labels,
+  totals,
+  loadTopCustomerTransaction,
+} = useCustomer();
 
-const getDateOptions = (dateConv: Date) => {
-  const date = new Date(dateConv);
-  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-  return date.toISOString().split('T')[0];
-};
-
-const getCustomer = async () => {
-  try {
-    const response = await AxiosInstance.get<{data: {id: number, customer_name: string, nik: string}[]}>(`customers/all`, {
-      headers: {
-        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    });
-    customers.value = response.data.data;
-  } catch (err) {
-    error.value = "Failed to load customers.";
-    alert.value = true;
-  }
-};
-
-const getMasterItem = async () => {
-  try {
-    const response = await AxiosInstance.get<{data: {id: number, item_name: string}[]}>(`masteritems/itemtype/ITEM`, {
-       headers: {
-        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    });
-    mItems.value = response.data.data;
-  } catch (err) {
-    error.value = "Failed to load items.";
-    alert.value = true;
-  }
-};
-
-const getTransactionByDate = async () => {
-  loadingData.value = true;
-  try {
-    const formattedDate = getDateOptions(pickDate.value);
-    const response = await AxiosInstance.get<{data: Transaction[]}>(`transactions/date/${formattedDate}`, {
-       headers: {
-        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    });
-    transactions.value = response.data.data;
-    
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    dateTitle.value = pickDate.value.toLocaleDateString('id-ID', options);
-
-    fieldDisabled.value = getDateOptions(new Date()) === formattedDate;
-
-  } catch (err) {
-    error.value = "Failed to load transactions.";
-    alert.value = true;
-  } finally {
-    loadingData.value = false;
-  }
-};
-
-const save = async () => {
-  loadingButton.value = true;
-  try {
-    let response;
-    if (editedIndex.value > -1) {
-      // Update logic
-      const postData = {
-        stock_id: updateTrx.stock_id,
-        stock: -(updateTrx.quantity || 0),
-        customer_id: updateTrx.customer_id,
-        quantity: updateTrx.quantity,
-        description: updateTrx.description,
-        amount: updateTrx.amount,
-        total: (updateTrx.amount || 0) * (updateTrx.quantity || 0),
-      };
-      response = await AxiosInstance.patch(`transactions/${updateTrx.id}`, postData, {
-         headers: {
-          'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-        },
-      });
-    } else {
-      // Create logic
-      const postData = {
-        stock: -(editedItem.quantity || 1),
-        customer_id: selectedCustomer.value || 1,
-        item_id: selectedItem.value,
-        quantity: editedItem.quantity || 1,
-        description: editedItem.description,
-        amount: editedItem.amount,
-        total: (editedItem.amount || 0) * (editedItem.quantity || 1),
-      };
-      response = await AxiosInstance.post('/transactions', postData, {
-         headers: {
-          'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-        },
-      });
-    }
-
-    if (response.status === 200 || response.status === 201) {
-      await getTransactionByDate();
-      hasSaved.value = true;
-      close();
-      resetForm();
-    }
-  } catch (err) {
-    error.value = "An error occurred while saving.";
-    alert.value = true;
-  } finally {
-    loadingButton.value = false;
-  }
-};
-
-const editItem = (item: Transaction) => {
-  editedIndex.value = transactions.value.findIndex(t => t.id === item.id);
-  Object.assign(updateTrx, item);
-  dialogUpdate.value = true;
-};
-
-const close = () => {
-  dialogUpdate.value = false;
-  setTimeout(() => {
-    editedIndex.value = -1;
-    Object.assign(updateTrx, { customer_id: null, quantity: null, description: null, amount: 0, total: 0, stock_id: null, id: null });
-  }, 300);
-};
-
-const resetForm = () => {
-    selectedCustomer.value = null;
-    editedItem.quantity = null;
-    editedItem.description = null;
-    editedItem.amount = 19000;
-    isSend.value = false;
-}
-
-const checkIsSend = () => {
-  if (isSend.value) {
-    editedItem.amount = 19000;
-  } else {
-    editedItem.amount = 20000;
-  }
-};
+const {
+  mItems,
+  loadMasterItemByType,
+} = useMasterItem();
 
 onMounted(() => {
-  getCustomer();
+  loadCustomerData();
+  loadMasterItemByType('ITEM');
   getTransactionByDate();
-  getMasterItem();
+  loadTopCustomerTransaction();
+  console.log('cek : ', totals, labels);
 });
 </script>
 

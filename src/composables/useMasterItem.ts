@@ -1,4 +1,4 @@
-import { LOAD_CATEGORY_ITEM, LOAD_MASTER_ITEM, SET_HASSAVED } from "@/store/storeconstant";
+import { LOAD_CATEGORY_ITEM, LOAD_MASTER_ITEM, LOAD_MASTER_ITEM_BY_TYPE, SET_HASSAVED } from "@/store/storeconstant";
 import { CategoryItem, Field, headers, MasterItem } from "@/types";
 import { computed, reactive, ref } from "vue";
 import { useStore } from "vuex";
@@ -38,15 +38,17 @@ export function useMasterItem() {
         { model: 'selling_price', label: 'Selling Price',  onEnterSubmit: true },
     ]);
 
+    // computed properties
     const mItems = computed<MasterItem[]>(() => store.state.masteritem.mItems);
     const loading = computed<boolean>(() => store.state.masteritem.loading);
+    const loadMasterItem = () => store.dispatch(`masteritem/${LOAD_MASTER_ITEM}`);
+    const loadMasterItemByType = (itemType: string) => store.dispatch(`masteritem/${LOAD_MASTER_ITEM_BY_TYPE}`, itemType);
+    const loadCategories = () => store.dispatch(`masteritem/${LOAD_CATEGORY_ITEM}`);
+
     const hasSaved = computed({
         get: () => store.state.masteritem.hasSaved,
         set: (val: boolean) => { store.commit(`masteritem/${SET_HASSAVED}`, val); },
     });
-
-    const loadMasterItem = () => store.dispatch(`masteritem/${LOAD_MASTER_ITEM}`);
-    const loadCategories = () => store.dispatch(`masteritem/${LOAD_CATEGORY_ITEM}`);
 
     const selectedCategory = ref<Partial<CategoryItem>>({});
     const onUpdateCategory = (item: CategoryItem) => {
@@ -74,6 +76,7 @@ export function useMasterItem() {
 
         mItems,
         loadMasterItem,
+        loadMasterItemByType,
         loadCategories,
         onUpdateCategory,
 

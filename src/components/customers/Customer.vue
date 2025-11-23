@@ -58,15 +58,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
-import store from '@/store/store';
-import { 
-  CREATE_CUSTOMER, 
-  DEACTIVATE_CUSTOMER, 
-  UPDATE_CUSTOMER, 
-  UPLOAD_CUSTOMER 
-} from '@/store/storeconstant';
-import { Customer, CustomerField, headerCustomer } from '@/types/Customer';
+import { onMounted } from 'vue';
+import { Customer } from '@/types/Customer';
 import { SnackbarError, SnackbarSuccess, ToolbarSimple } from '@/components/globalComponent';
 import TableCustomer from './TableCustomer.vue';
 import DialogCustomerForm from './DialogCustomerForm.vue';
@@ -76,16 +69,21 @@ import { useCustomer } from '@/composables/useCustomer';
 
 
 const {
+  DialogOpenCreate,
+    DialogOpenDeactive,
+    DialogOpenUploadCustomer,
+    DialogCreateCustomer,
+    DialogClose,
+
     search,
-    
-    editedIndex,
+
     editedItem,
-    
+
     csvFile,
     uploading,
 
     headersLocal,
-    
+
     allFields,
     customers,
     loading,
@@ -93,100 +91,20 @@ const {
     isEditMode,
 
     loadCustomerData,
-    resetEditedItem,
-    handleError,
 
-    error,
+    editItem,
+    onSubmit,
+    onUpdate,
+    deactivateCustomer,
+    onDeactivated,
+    onUploadCustomer,
     showError,
     errorMessages,
 } = useCustomer();
 
-// Dialogs
-const DialogOpenCreate = ref(false);
-const DialogOpenDeactive = ref(false);
-const DialogOpenUploadCustomer = ref(false);
-const DialogCreateCustomer = () => {
-  resetEditedItem();
-  error.value = '';
-  DialogOpenCreate.value = true;
-};
-const DialogClose = () => {
-  DialogOpenCreate.value = false;
-  DialogOpenDeactive.value = false;
-  DialogOpenUploadCustomer.value = false;
-};
-
 //mounted
 onMounted(loadCustomerData);
 
-//const methods
-const editItem = (item: Customer) => {
-  editedIndex.value = customers.value.indexOf(item);
-  Object.assign(editedItem, item);
-  error.value = '';
-  DialogOpenCreate.value = true;
-};
-
-const onSubmit = (item: Partial<Customer>) => {
-  Object.assign(editedItem, item);
-  onCreateItem();
-};
-
-const onUpdate = (item: Partial<Customer>) => {
-  Object.assign(editedItem, item);
-  onUpdateCustomer();
-}
-
-const deactivateCustomer = (item: Customer) => {
-  Object.assign(editedItem, item);
-  DialogOpenDeactive.value = true;
-};
-
-async function onCreateItem() {
-  error.value = '';
-  try {
-    await store.dispatch(`customer/${CREATE_CUSTOMER}`, editedItem);
-    DialogClose();
-  } catch (e) {
-    handleError(e);
-  }
-}
-
-async function onUpdateCustomer() {
-  try {
-    await store.dispatch(`customer/${UPDATE_CUSTOMER}`,editedItem);
-    DialogClose();
-  } catch (e) {
-    handleError(e);
-  }
-}
-
-async function onDeactivated() {
-  try {
-    error.value = '';
-    await store.dispatch(`customer/${DEACTIVATE_CUSTOMER}`, editedItem.id);
-    DialogClose();
-  } catch (e) {
-    handleError(e);
-  }
-}
-
-async function onUploadCustomer() {
-  if (!csvFile.value) {
-    handleError('Please select a CSV file to upload.');
-    return;
-  }
-  uploading.value = true;
-  try {
-    await store.dispatch(`customer/${UPLOAD_CUSTOMER}`, csvFile.value);
-    DialogClose();
-    csvFile.value = null;
-  } catch (e) {
-    handleError(e);
-  } finally {
-    uploading.value = false;
-  }
-}
 </script>
 
 <style scoped>

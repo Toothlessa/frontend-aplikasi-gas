@@ -21,7 +21,7 @@
             </v-alert>
             <v-autocomplete
               label="Customer Name"
-              v-model="selectedCustomer"
+              v-model="debtData.customer_id"
               :items="customers"
               item-title="customer_name"
               item-value="id"
@@ -39,7 +39,7 @@
               </template>
             </v-autocomplete>
             <v-text-field
-              v-model.number="editedDebt.amount"
+              v-model.number="debtData.amount_pay"
               label="Total Debt"
               type="number"
               variant="filled"
@@ -48,7 +48,7 @@
               class="mb-3"
             />
             <v-textarea
-              v-model="editedDebt.description"
+              v-model="debtData.description"
               label="Description"
               variant="filled"
               rounded="lg"
@@ -63,20 +63,19 @@
               hide-details
               class="mt-n2 mb-3"
             />
-            <v-btn
+            <v-btn 
               block
               class="debt-action-btn text-white"
-              variant="elevated"
+              variant="elevated" 
               size="large"
               rounded="lg"
-              color="teal-darken-1"
               :disabled="isSaveDisabled"
-              :loading="loadingButton"
+              :loading="loadingButtonCreate"
               @click="saveDebt"
             >
               <v-icon start>mdi-content-save</v-icon>
               Save Debt
-            </v-btn>
+            </v-btn> 
           </v-card-text>
         </v-card>
       </v-col>
@@ -90,8 +89,8 @@
           </v-card-title>
           <v-card-text class="pa-4">
             <v-data-table-virtual
-              :headers="headers"
-              :items="debts"
+              :headers="localHeaderSummaryDebt"
+              :items="summaryDebtData"
               :search="search"
               :loading="loadingData"
               loading-text="Loading debt data..."
@@ -109,6 +108,12 @@
                   @click="detailDebt(item)"
                 />
               </template>
+              <template v-slot:[`item.total_debt`]="{ item }">
+                {{ formatPrice(item.total_debt) }}
+              </template>
+              <template v-slot:[`item.total_pay`]="{ item }">
+                {{ formatPrice(item.total_pay) }}
+              </template>
             </v-data-table-virtual>
           </v-card-text>
         </v-card>
@@ -116,16 +121,17 @@
     </v-row>
 
     <!-- Debt Details Dialog -->
-    <v-dialog v-model="dialogDetails" max-width="900px" rounded="xl">
-      <v-card class="debt-dialog-card">
+    <v-dialog v-model="DialogDetail" max-width="900px" rounded="xl" persistent>
+      <v-card class="debt-dialog-card" rounded="xl">
         <v-card-title class="debt-card-header">
           <v-icon start>mdi-text-box-multiple-outline</v-icon>
           <span class="text-h6 font-weight-bold">Debt Details</span>
         </v-card-title>
         <v-card-text class="pa-4">
           <v-data-table-virtual
-            :headers="detailHeaders"
-            :items="customerDetail"
+            :headers="localHeaderDetailDebt"
+            :items="debts"
+            :loading="loadingDataDetail"
             class="modern-data-table"
             fixed-header
             height="300px"
@@ -140,10 +146,16 @@
                 @click="editDebt(item)"
               />
             </template>
+            <template v-slot:[`item.amount_pay`]="{ item }">
+              {{ formatPrice(item.amount_pay) }}
+            </template>
+            <template v-slot:[`item.total`]="{ item }">
+              {{ formatPrice(item.total) }}
+            </template>
           </v-data-table-virtual>
         </v-card-text>
         <v-card-actions class="justify-end pa-4">
-          <v-btn color="grey-darken-1" variant="text" @click="dialogDetails = false" rounded="lg">
+          <v-btn color="grey-darken-1" variant="text" @click="DialogDetail = false" rounded="lg">
             Close
           </v-btn>
         </v-card-actions>
@@ -151,8 +163,8 @@
     </v-dialog>
 
     <!-- Debt Update Dialog -->
-    <v-dialog v-model="dialogUpdate" max-width="600px" rounded="xl">
-      <v-card class="debt-dialog-card">
+    <v-dialog v-model="DialogUpdate" max-width="600px" rounded="xl" persistent>
+      <v-card class="debt-dialog-card" rounded="xl">
         <v-card-title class="debt-card-header">
           <v-icon start>mdi-update</v-icon>
           <span class="text-h6 font-weight-bold">Update Debt</span>
@@ -170,7 +182,7 @@
           </v-alert>
           <v-autocomplete
             label="Customer Name"
-            v-model="updateCustomer"
+            v-model="debtUpdateData.customer_id"
             :items="customers"
             item-title="customer_name"
             item-value="id"
@@ -181,7 +193,7 @@
           />
           <v-text-field
             label="Pay Amount"
-            v-model.number="updatedDebt.amount_pay"
+            v-model.number="debtUpdateData.amount_pay"
             type="number"
             variant="filled"
             rounded="lg"
@@ -190,7 +202,7 @@
             class="mb-3"
           />
           <v-text-field
-            v-model.number="updatedDebt.total"
+            v-model.number="debtUpdateData.total"
             label="Total Debt"
             type="number"
             variant="filled"
@@ -200,7 +212,7 @@
             class="mb-3"
           />
           <v-textarea
-            v-model="updatedDebt.description"
+            v-model="debtUpdateData.description"
             label="Description"
             variant="filled"
             rounded="lg"
@@ -210,10 +222,16 @@
           />
         </v-card-text>
         <v-card-actions class="justify-end pa-4">
-          <v-btn color="grey-darken-1" variant="text" @click="dialogUpdate = false" rounded="lg">
+          <v-btn color="grey-darken-1" variant="text" @click="DialogUpdate = false" rounded="lg">
             Cancel
           </v-btn>
-          <v-btn color="teal-darken-1" variant="elevated" @click="updateDebt" rounded="lg">
+          <v-btn 
+            class="debt-action-btn text-white"
+            variant="elevated" 
+            @click="updateDebt" 
+            rounded="lg"
+            :loading="loadingButtonUpdate"
+          >
             <v-icon start>mdi-content-save</v-icon>
             Update Debt
           </v-btn>
@@ -237,229 +255,60 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
-import AxiosInstance from '@/services/AxiosInstance';
-import Validations from '@/services/Validations';
-import store from '@/store/store';
-import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
+import { onMounted } from 'vue';
+import { useDebt } from '@/composables/useDebt';
+import { useCustomer } from '@/composables/useCustomer';
+import { useGlobal } from '@/composables/useGlobal';
 
-const search = ref('');
-const headers = [
-  { align: 'start', key: 'customer_name', title: 'Customer Name' },
-  { key: 'total_debt', title: 'Total Debt', align: 'end' },
-  { key: 'total_pay', title: 'Total Pay', align: 'end' },
-  { key: 'debt_left', title: 'Debt Left', align: 'end' },
-  { key: 'actions', title: 'Details', align: 'center', sortable: false },
-];
+const{
+  search,
+  formatPrice,
+} = useGlobal();
 
-const detailHeaders = [
-  { title: 'Customer Name', key: 'customer_name' },
-  { title: 'Description', key: 'description' },
-  { title: 'Paid Amount', key: 'amount_pay', align: 'end' },
-  { title: 'Total Debt', key: 'total', align: 'end' },
-  { title: 'Created Date', key: 'created_at' },
-  { title: 'Actions', key: 'actions', sortable: false },
-];
+const {
+    localHeaderDetailDebt,
+    localHeaderSummaryDebt,
+    debtData,
+    debtUpdateData,
+    debts,
+    summaryDebtData,
 
-const editedDebt = reactive({
-  customer_id: null,
-  customer_name: null,
-  amount: null,
-  description: null,
-});
+    // UI Flags
+    DialogDetail,
+    DialogUpdate,
+    hasSaved,
+    loadingData,
+    loadingDataDetail,
+    loadingButtonCreate,
+    loadingButtonUpdate,
+    isPay,
+    disableAmountPay,
+    disableTotal,
 
-const updatedDebt = reactive({
-  id: null,
-  amount_pay: 0,
-  total: 0,
-  description: null,
-});
+    // Error Handling
+    alert,
+    error,
 
-const updateCustomer = ref(null);
-const selectedCustomer = ref(null);
-const debts = ref([]);
-const customers = ref([]);
-const customerDetail = ref([]);
-const dialogDetails = ref(false);
-const dialogUpdate = ref(false);
-const hasSaved = ref(false);
-const loadingData = ref(true);
-const loadingButton = ref(false);
-const isPay = ref(false);
-const disableAmountPay = ref(false);
-const disableTotal = ref(false);
-const alert = ref(false);
-const error = ref('');
+    // Computed & Utils
+    isSaveDisabled,
 
-const isSaveDisabled = computed(() => !(selectedCustomer.value && editedDebt.amount && editedDebt.description));
+    // API & Actions
+    debtSummaryLoad,
+    detailDebt,
+    saveDebt,
+    editDebt,
+    updateDebt,
+} = useDebt();
 
-const formatPrice = (value: number) => {
-  if (isNaN(value) || value === null || value === undefined) {
-    return 'Rp0';
-  }
-  return `Rp${parseFloat(String(value)).toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&.')}`;
-};
-
-const customerLoad = async () => {
-  try {
-    const response = await AxiosInstance.get(`http://127.0.0.1:8000/api/customers/all`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    });
-    if (response.status === 200) {
-      customers.value = response.data.data;
-    }
-  } catch (err: any) {
-    error.value = Validations.getErrorMessageFromCode(err.response.data.errors[0]);
-    alert.value = true;
-  }
-};
-
-const debtSummaryLoad = async () => {
-  try {
-    const response = await AxiosInstance.get(`http://127.0.0.1:8000/api/debts/summary`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    });
-    if (response.status === 200) {
-      debts.value = response.data.data;
-      loadingData.value = false;
-    }
-  } catch (err: any) {
-    error.value = Validations.getErrorMessageFromCode(err.response.data.errors[0]);
-    alert.value = true;
-  }
-};
-
-const detailDebt = async (item: any) => {
-  Object.assign(editedDebt, item);
-  try {
-    const response = await AxiosInstance.get(`http://127.0.0.1:8000/api/debts/customer/${editedDebt.customer_id}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    });
-    if (response.status === 200) {
-      customerDetail.value = response.data.data.map((detail: any) => ({
-        ...detail,
-        customer_name: item.customer_name, // Add customer_name from the summary item
-        amount_pay: formatPrice(detail.amount_pay),
-        total: formatPrice(detail.total),
-      }));
-    }
-  } catch (err: any) {
-    error.value = Validations.getErrorMessageFromCode(err.response.data.errors[0]);
-    alert.value = true;
-  }
-  dialogDetails.value = true;
-};
-
-const saveDebt = async () => {
-  loadingButton.value = true;
-  let postData: any = {};
-  if (isPay.value) {
-    postData = {
-      description: editedDebt.description,
-      amount_pay: editedDebt.amount,
-    };
-  } else {
-    postData = {
-      description: editedDebt.description,
-      total: editedDebt.amount,
-    };
-  }
-
-  try {
-    const response = await AxiosInstance.post(`http://127.0.0.1:8000/api/debts/${selectedCustomer.value}`, postData, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    });
-
-    if (response.status === 201) {
-      isPay.value = false;
-      selectedCustomer.value = null;
-      editedDebt.description = null;
-      editedDebt.amount = null;
-      hasSaved.value = true;
-      await debtSummaryLoad(); // Reload summary after saving
-    }
-  } catch (err: any) {
-    error.value = Validations.getErrorMessageFromCode(err.response.data.errors[0]);
-    alert.value = true;
-  } finally {
-    loadingButton.value = false;
-  }
-};
-
-const editDebt = (item: any) => {
-  Object.assign(updatedDebt, item);
-  updateCustomer.value = item.customer_id;
-
-  // Convert formatted prices back to numbers for editing
-  const parsedAmountPay = parseFloat(String(item.amount_pay).replace(/[^0-9,-]+/g, "").replace(',', '.'));
-  const parsedTotal = parseFloat(String(item.total).replace(/[^0-9,-]+/g, "").replace(',', '.'));
-
-  updatedDebt.amount_pay = isNaN(parsedAmountPay) ? 0 : parsedAmountPay;
-  updatedDebt.total = isNaN(parsedTotal) ? 0 : parsedTotal;
-
-  if (updatedDebt.amount_pay) {
-    disableAmountPay.value = true;
-  } else {
-    disableAmountPay.value = false;
-  }
-
-  if (updatedDebt.total) {
-    disableTotal.value = true;
-  } else {
-    disableTotal.value = false;
-  }
-
-  dialogUpdate.value = true;
-};
-
-const updateDebt = async () => {
-  const postData = {
-    customer_id: updateCustomer.value,
-    description: updatedDebt.description,
-    amount_pay: updatedDebt.amount_pay,
-    total: updatedDebt.total,
-  };
-  try {
-    const response = await AxiosInstance.patch(`http://127.0.0.1:8000/api/debts/${updatedDebt.id}`, postData, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    });
-
-    if (response.status === 200) {
-      await detailDebt(postData); // Reload details after update
-      await debtSummaryLoad(); // Reload summary after update
-      updatedDebt.description = null;
-      dialogUpdate.value = false;
-      hasSaved.value = true;
-    }
-  } catch (err: any) {
-    error.value = Validations.getErrorMessageFromCode(err.response.data.errors[0]);
-    alert.value = true;
-  }
-};
+const {
+  customers,
+  loadCustomerData,
+} = useCustomer();
 
 onMounted(() => {
   debtSummaryLoad();
-  customerLoad();
+  // customerLoad();
+  loadCustomerData();
 });
 </script>
 
