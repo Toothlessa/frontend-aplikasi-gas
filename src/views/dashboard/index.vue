@@ -1,7 +1,10 @@
 <template>
-  <v-container fluid :class="theme.global.current.value.dark ? 'pa-4 dashboard-container-dark' : 'pa-4 dashboard-container-light'">
+  <v-container fluid
+    :class="theme.global.current.value.dark ? 'pa-4 dashboard-container-dark' : 'pa-4 dashboard-container-light'">
     <v-toolbar flat color="transparent" class="mt-n2 mb-4">
-      <v-toolbar-title :class="theme.global.current.value.dark ? 'text-h5 font-weight-bold text-white' : 'text-h5 font-weight-bold text-grey-darken-4'">Dashboard Overview</v-toolbar-title>
+      <v-toolbar-title
+        :class="theme.global.current.value.dark ? 'text-h5 font-weight-bold text-white' : 'text-h5 font-weight-bold text-grey-darken-4'">Dashboard
+        Overview</v-toolbar-title>
       <v-spacer></v-spacer>
     </v-toolbar>
 
@@ -17,11 +20,15 @@
 
         <!-- NORMAL CARD -->
         <template v-else>
-          <v-card :class="theme.global.current.value.dark ? 'dashboard-metric-card-dark rounded-xl' : 'dashboard-metric-card rounded-xl'">
+          <v-card
+            :class="theme.global.current.value.dark ? 'dashboard-metric-card-dark rounded-xl' : 'dashboard-metric-card rounded-xl'">
             <v-card-text class="d-flex align-center justify-space-between">
               <div>
-                <div :class="theme.global.current.value.dark ? 'text-subtitle-1 text-teal' : 'text-subtitle-1 text-grey-darken-1'">{{ list.title }}</div>
-                <div :class="theme.global.current.value.dark ? 'text-h4 font-weight-bold text-teal mt-1' : 'text-h4 font-weight-bold text-teal-darken-1 mt-1'">
+                <div
+                  :class="theme.global.current.value.dark ? 'text-subtitle-1 text-teal' : 'text-subtitle-1 text-grey-darken-1'">
+                  {{ list.title }}</div>
+                <div
+                  :class="theme.global.current.value.dark ? 'text-h4 font-weight-bold text-teal mt-1' : 'text-h4 font-weight-bold text-teal-darken-1 mt-1'">
                   {{ list.count }}
                 </div>
               </div>
@@ -36,12 +43,13 @@
     </v-row>
 
     <v-row>
-      <v-col cols="12" sm="7">
+      <v-col cols="12" sm="8">
         <v-card class="dashboard-card rounded-xl pa-4">
           <SalesData />
         </v-card>
       </v-col>
-      <v-col cols="12" sm="5">
+
+      <v-col cols="12" sm="4">
         <v-card class="dashboard-card rounded-xl pa-4 transparent-dashboard-card">
           <TopBuyer />
         </v-card>
@@ -82,14 +90,14 @@ const {
   theme,
 } = useGlobal();
 
-const{
+const {
   loading,
   loadDisplayStock,
 } = useStock();
 
 const {
-    lists,
-    fetchDataDisplayStock,
+  lists,
+  fetchDataDisplayStock,
 } = useDashboard();
 
 </script>
@@ -160,6 +168,7 @@ const {
 }
 
 .transparent-dashboard-card {
-  background-color: rgba(255, 255, 255, 0.8) !important; /* White with 80% opacity */
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  /* White with 80% opacity */
 }
 </style>

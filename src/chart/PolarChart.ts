@@ -1,21 +1,3 @@
-import { useCustomer } from "@/composables/useCustomer";
-import AxiosInstance from "@/services/AxiosInstance";
-import store from "@/store/store";
-import { GET_USER_TOKEN_GETTER, LOAD_TOP_CUSTOMER_TRANSACTION } from "@/store/storeconstant";
-import { computed, onMounted } from "vue";
-
-interface CustomerSalesData {
-  customer_name: string;
-  total: number;
-}
-
-const {
-  topCustomerTransaction,
-  loadTopCustomerTransaction,
-  labels,
-  totals,
-} = useCustomer();
-
 interface ChartDataset {
   label: string;
   backgroundColor: string;
@@ -36,62 +18,11 @@ interface ChartOptions {
   maintainAspectRatio: boolean;
 }
 
-let response: any; // Will be typed more specifically after fetching
-try {
-  response = await AxiosInstance.get<CustomerSalesData[]>(
-    `http://127.0.0.1:8000/api/transactions/topcustomer`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-      },
-    }
-  );
-} catch (error) {
-  console.error("Error fetching customer sales data:", error);
-  // Handle error appropriately, e.g., return empty data or throw
-  response = { data: [] }; // Provide a fallback
-}
 
-
-// const response = async () => {
-//   try{
-//     await store.dispatch(`customer/${LOAD_TOP_CUSTOMER_TRANSACTION}`);
-//   }catch(error){
-//     handleError(error);
-//   }
-// };
-
-onMounted(() => {
-  loadTopCustomerTransaction();
-  console.log('top customer : ', topCustomerTransaction);
-});
-
-// const customers: string[] = [];
-// const totals: number[] = [];
-
-// if (response.data && response.data.length > 0) {
-//   for (let i = 0; i < response.data.length; i++) {
-//     customers.push(response.data[i].customer_name);
-//     totals.push(response.data[i].total);
-//   }
-// }
-
-// export const data: ChartData = {
-//   labels: customers,
-//   datasets: [
-//     {
-//       label: 'Total Penjualan',
-//       backgroundColor: 'rgba(46,191,175,0.2)',
-//       pointBackgroundColor: '#2EBFAF',
-//       pointBorderColor: '#2EBFAF',
-//       pointHoverBackgroundColor: '#2EBFAF',
-//       pointHoverBorderColor: '#2EBFAF',
-//       data: totals,
-//     },
-//   ],
-// };
+export const options: ChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+};
 
 export function createPolarChartData(labels: string[], totals: number[]): ChartData {
   return {
@@ -110,7 +41,3 @@ export function createPolarChartData(labels: string[], totals: number[]): ChartD
   };
 }
 
-export const options: ChartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-};
