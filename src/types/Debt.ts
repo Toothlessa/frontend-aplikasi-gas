@@ -1,6 +1,7 @@
 export interface DebtState {
     debts: Debt[];
     summaryDebts: SummaryDebt[];
+    outstandingDebts: SummaryDebt[];
 
     headerDetailDebt: HeaderDetailDebt[];
     headerSummaryDebt: HeaderSummaryDebt[];
@@ -26,6 +27,7 @@ export interface SummaryDebt {
     customer_name: string,
     total_debt: number,
     total_pay: number,
+    debt_left: number,
 }
 
 export interface HeaderDetailDebt {

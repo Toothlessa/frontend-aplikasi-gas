@@ -3,8 +3,12 @@
 
 export interface TransactionState {
   transactions: Transaction[];
+  outstandingTransaction: Transaction[];
+  dailySaleTransaction: DailySale[];
   headerTransaction: HeaderTransaction[];
+  headerOutstanding: HeaderTransaction[];
   loading: boolean;
+  loadingData: boolean;
   loadingButtonCreate: boolean;
   loadingButtonUpdate: boolean
   hasSaved: boolean;
@@ -22,6 +26,12 @@ export interface Transaction {
   customer_id: number | null;
   createdBy: string;
   createdDate: Date;
+}
+
+export interface DailySale {
+  month: string;
+  day: string;
+  total: number;
 }
 
 export interface HeaderTransaction {
@@ -42,3 +52,11 @@ export const headerTransaction: HeaderTransaction[] = [
   { title: "Created", align: "start", key: "created_at", class: "text-subtitle-1" },
   { title: "Actions", align: "center", key: "actions", class: "text-subtitle-1", sortable: false },
 ];
+
+
+// Dashboard header → hanya ambil kolom tertentu
+export const headerOutstanding = headerTransaction.filter((h) =>
+  [
+    "customer_name",  "description", "quantity", "total", "created_at", "actions"
+  ].includes(h.key)
+);

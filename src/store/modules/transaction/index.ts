@@ -8,8 +8,12 @@ import mutations from './mutations';
 
 const state = (): TransactionState => ({
     transactions: [],
+    outstandingTransaction: [],
+    dailySaleTransaction: [],
     headerTransaction: [],
+    headerOutstanding: [],
     loading: false,
+    loadingData: false,
     loadingButtonCreate: false,
     loadingButtonUpdate: false,
     hasSaved: false,

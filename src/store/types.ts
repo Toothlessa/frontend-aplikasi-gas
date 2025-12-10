@@ -1,4 +1,5 @@
 import { MasterItemState, CustomerState, AssetState, GlobalState, StockState, DebtState, UserState } from '@/types';
+import { AuthState } from '@/types/Auth';
 import { TransactionState } from '@/types/Transaction';
 
 export interface RootState {
@@ -10,4 +11,5 @@ export interface RootState {
   transaction: TransactionState;
   debt: DebtState;
   user: UserState;
+  auth: AuthState;
 }

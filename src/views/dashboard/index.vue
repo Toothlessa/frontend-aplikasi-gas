@@ -45,13 +45,22 @@
     <v-row>
       <v-col cols="12" sm="8">
         <v-card class="dashboard-card rounded-xl pa-4">
-          <SalesData />
+          <template v-if="loading">
+            <v-skeleton-loader type="heading, text" />
+          </template>
+          <template v-else>
+            <SalesData />
+          </template>
         </v-card>
       </v-col>
-
       <v-col cols="12" sm="4">
         <v-card class="dashboard-card rounded-xl pa-4 transparent-dashboard-card">
-          <TopBuyer />
+          <template v-if="loading">
+            <v-skeleton-loader type="heading, text" />
+          </template>
+          <template v-else>
+            <TopBuyer />
+          </template>
         </v-card>
       </v-col>
     </v-row>
@@ -59,12 +68,22 @@
     <v-row class="mt-4">
       <v-col cols="12" sm="7">
         <v-card class="dashboard-card rounded-xl pa-4">
-          <TableOutstandingTrx />
+          <template v-if="loading">
+            <v-skeleton-loader type="heading, text" />
+          </template>
+          <template v-else>
+            <TableOutstandingTrx />
+          </template>
         </v-card>
       </v-col>
       <v-col cols="12" sm="5">
         <v-card class="dashboard-card rounded-xl pa-4">
-          <TableDebt />
+          <template v-if="loading">
+            <v-skeleton-loader type="heading, text" />
+          </template>
+          <template v-else>
+            <TableDebt />
+          </template>
         </v-card>
       </v-col>
     </v-row>
@@ -80,15 +99,18 @@ import TopBuyer from "@/components/chart/TopBuyer.vue";
 import { useStock } from '@/composables/useStock';
 import { useGlobal } from '@/composables/useGlobal';
 import { useDashboard } from '@/composables/useDashboard';
+import { useTheme } from 'vuetify/lib/framework.mjs';
 
 onMounted(async () => {
   await loadDisplayStock();  // 1️⃣ Ambil data dulu
   fetchDataDisplayStock();         // 2️⃣ Baru isi UI
 });
 
-const {
-  theme,
-} = useGlobal();
+const theme = useTheme();
+
+// const {
+//   theme,
+// } = useGlobal();
 
 const {
   loading,

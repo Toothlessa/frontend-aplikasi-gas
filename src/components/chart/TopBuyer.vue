@@ -4,36 +4,28 @@ import {
   RadialLinearScale,
   ArcElement,
   Tooltip,
-  Legend
-} from 'chart.js'
-import { PolarArea } from 'vue-chartjs'
-import { createPolarChartData } from '@/chart/PolarChart'
-import { useCustomer } from '@/composables/useCustomer'
-import { computed, onMounted } from 'vue'
-import { useStore } from 'vuex'
+  Legend,
+} from "chart.js";
+import { PolarArea } from "vue-chartjs";
+ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend);
+import { onMounted, computed } from "vue";
+import { useCustomer } from "@/composables/useCustomer";
+import { usePolarChart } from "@/composables/chart/usePolarChart";
 
-ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend)
+const { labels, totals, loadTopCustomerTransaction } = useCustomer();
+const { defaultPolarOptions, createPolarChartData, } = usePolarChart();
 
-const store = useStore()
-const {
-  labels,
-  totals,
-  loadTopCustomerTransaction,
-
-} = useCustomer()
-
-// Load data from vuex when component mounted
+/* ===========================================================
+   Mounted 
+=========================================================== */
 onMounted(() => {
   loadTopCustomerTransaction();
-})
+});
 
 const data = computed(() =>
   createPolarChartData(labels.value, totals.value)
-)
+);
 
-const options = {
-  responsive: true,
-}
 </script>
 
 <template>
@@ -43,11 +35,12 @@ const options = {
         Top 10 Customer Transaction
       </v-toolbar-title>
     </v-toolbar>
+
     <v-divider></v-divider>
 
     <v-card rounded="xl" elevation="4" class="mt-n5">
       <div class="chart-container">
-        <PolarArea :data="data" :options="options" />
+        <PolarArea :data="data" :options="defaultPolarOptions" />
       </div>
     </v-card>
   </div>
@@ -56,11 +49,8 @@ const options = {
 <style scoped>
 .chart-container {
   width: 350px;
-  /* ukuran chart fix */
   height: 350px;
-  /* polar charts idealnya square */
   margin: 0 auto;
-  /* center */
   padding: 20px 0;
   display: flex;
   justify-content: center;

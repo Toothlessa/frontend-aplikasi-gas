@@ -9,6 +9,7 @@ import { DebtState } from "@/types";
 const state = (): DebtState => ({
     debts: [],
     summaryDebts: [],
+    outstandingDebts: [],
     headerDetailDebt: [],
     headerSummaryDebt: [],
     loading: false,

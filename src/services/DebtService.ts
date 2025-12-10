@@ -37,4 +37,13 @@ export const DebtService = {
             throw errorHandler.parseAxiosError(error);
         }
     },
+
+    async fetchOustandingDebt(): Promise<SummaryDebt[]>{
+        try{
+            const response = await DebtApi.fetchOutstandingDebt();
+            return response.data.data;
+        }catch(error){
+            throw errorHandler.parseAxiosError(error);
+        }
+    }
 }

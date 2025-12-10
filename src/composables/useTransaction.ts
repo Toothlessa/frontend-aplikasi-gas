@@ -1,6 +1,15 @@
 import store from "@/store/store";
-import { CREATE_TRANSACTION, LOAD_TRANSACTION_BY_DATE } from "@/store/storeconstant";
-import { headerTransaction, Transaction } from "@/types/Transaction";
+import {
+  CREATE_TRANSACTION,
+  LOAD_LAST_30_DAYS_TRANSACTION,
+  LOAD_OUTSTANDING_TRANSACTION,
+  LOAD_TRANSACTION_BY_DATE
+} from "@/store/storeconstant";
+import {
+  headerOutstanding,
+  headerTransaction,
+  Transaction
+} from "@/types/Transaction";
 import { computed, reactive, ref } from "vue";
 import { useTheme } from "vuetify/lib/framework.mjs";
 
@@ -19,6 +28,7 @@ export function useTransaction() {
   // Dialogs
   const DialogDate = ref(false);
   const DialogUpdate = ref(false);
+  const DialogUpdateDescription = ref(false);
 
   // UI State
   const isEditAmt = ref(false);
@@ -37,8 +47,9 @@ export function useTransaction() {
 
   // Table Headers
   const headersLocal = headerTransaction;
+  const headersOutsandingLocal = headerOutstanding;
 
-  // Static Price Options
+  // Price Options
   const price = [
     { name: "Rp 16.000", value: 16000 },
     { name: "Rp 17.000", value: 17000 },
@@ -50,28 +61,32 @@ export function useTransaction() {
   /* ----------------------------------------------------
    * REACTIVE OBJECTS
    * ---------------------------------------------------- */
-  const transactionData = reactive<Partial<Transaction>>({
-    amount: 19000,
-    item_id: 61,
-  });
-  const transactionUpdate = reactive<Partial<Transaction>>({});
-
   const defaultItem: Partial<Transaction> = {
     id: null,
     quantity: null,
     stock: 0,
     amount: 19000,
     total: 0,
-    description: '',
+    description: "",
     item_id: 61,
     stockId: 0,
-    customer_id: null,
+    customer_id: null
   };
+
+  const transactionData = reactive<Partial<Transaction>>({
+    amount: 19000,
+    item_id: 61
+  });
+
+  const transactionUpdate = reactive<Partial<Transaction>>({});
+  const transactionUpdateDescription = reactive<Partial<Transaction>>({});
+
   const resetTransactionData = () => {
     Object.assign(transactionData, defaultItem);
     editedIndex.value = -1;
     isSend.value = false;
   };
+
   const resetTransactionUpdate = () => {
     Object.assign(transactionUpdate, defaultItem);
     editedIndex.value = -1;
@@ -79,19 +94,17 @@ export function useTransaction() {
   };
 
   /* ----------------------------------------------------
-   * FORMATTERS & UTILITIES
+   * UTILITIES
    * ---------------------------------------------------- */
   const getColorByDescription = (description: string | null) => {
     if (!description) return "grey";
 
     const text = description.toLowerCase();
-
     if (text.startsWith("kirim")) return "cyan";
     if (text.startsWith("titip")) return "orange";
     if (text.startsWith("pisah")) return "deep-purple";
     if (text.startsWith("uang")) return "amber";
     if (text.startsWith("done")) return "green";
-
     return "yellow";
   };
 
@@ -104,11 +117,37 @@ export function useTransaction() {
   /* ----------------------------------------------------
    * COMPUTED
    * ---------------------------------------------------- */
-  const transactions = computed<Transaction[]>(() => store.getters["transaction/transactions"] as Transaction[]);
-  const loading = computed(() => store.getters[`transaction/loading`]);
-  const loadingButtonSave = computed(() => store.getters[`transaction/loadingButtonCreate`]);
-  const loadingButtonUpdate = computed(() =>store.getters[`transaction/loadingButtonUpdate`]);
-  const hasSaved = computed(() =>store.getters[`transaction/hasSaved`]);
+  const transactions = computed<Transaction[]>(
+    () => store.getters["transaction/transactions"]
+  );
+
+  const outstandingTransaction = computed(
+    () => store.state.transaction.outstandingTransaction
+  );
+
+  const last30DaysTransaction = computed(
+    () => store.state.transaction.dailySaleTransaction
+  );
+
+  const loading = computed(
+    () => store.getters["transaction/loading"]
+  );
+
+  const loadingData = computed(
+    () => store.state.transaction.loadingData
+  );
+
+  const loadingButtonSave = computed(
+    () => store.getters["transaction/loadingButtonCreate"]
+  );
+
+  const loadingButtonUpdate = computed(
+    () => store.getters["transaction/loadingButtonUpdate"]
+  );
+
+  const hasSaved = computed(
+    () => store.getters["transaction/hasSaved"]
+  );
 
   const isSaveDisabled = computed(
     () => !(transactionData.customer_id && transactionData.quantity)
@@ -119,69 +158,92 @@ export function useTransaction() {
   );
 
   /* ----------------------------------------------------
-   * ACTION FUNCTIONS
-   * ---------------------------------------------------- */  
+   * ACTIONS
+   * ---------------------------------------------------- */
+
   const save = async () => {
-  try {
-    error.value = '';
-
-    let postData;
-
-    if (editedIndex.value > -1) {
-      // UPDATE
-      transactionUpdate.stock =  -(transactionUpdate.quantity || 1);
-      transactionUpdate.total = (transactionUpdate.amount || 0) * (transactionUpdate.quantity || 1);
-      postData = JSON.parse(JSON.stringify(transactionUpdate));
-    } else {
-      // CREATE
-      transactionData.quantity = transactionData.quantity || 1;
-      transactionData.stock = -(transactionData.quantity || 1);
-      transactionData.total = (transactionData.amount || 0) * (transactionData.quantity || 1);
-      postData = JSON.parse(JSON.stringify(transactionData));
-    }
-
-    console.log('Sending to backend:', postData);
-
-    await store.dispatch(`transaction/${CREATE_TRANSACTION}`, postData);
-    // getTransactionByDate();
-
-    resetTransactionData();
-    DialogUpdate.value = false;
-  } catch (e) {
-    handleError(e);
-  }
-};
-
-const getTransactionByDate = async () => {
     try {
-      const formattedDate = getDateOptions(pickDate.value);
+      error.value = "";
+      const isUpdate = editedIndex.value > -1;
 
-      store.dispatch(`transaction/${LOAD_TRANSACTION_BY_DATE}`, formattedDate);
+      const postData = JSON.parse(
+        JSON.stringify(isUpdate ? transactionUpdate : transactionData)
+      );
 
-      const options: Intl.DateTimeFormatOptions = {
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      };
+      await store.dispatch(`transaction/${CREATE_TRANSACTION}`, postData);
+      await getTransactionByDate();
 
-      dateTitle.value = pickDate.value.toLocaleDateString("id-ID", options);
-      fieldDisabled.value = getDateOptions(new Date()) === formattedDate;
+      resetTransactionData();
+      DialogUpdate.value = false;
     } catch (e) {
       handleError(e);
     }
   };
 
-const editTransaction = (item: Transaction) => {
-  editedIndex.value = transactions.value.findIndex(t => t.id === item.id);
-  Object.assign(transactionUpdate, item);
-  DialogUpdate.value = true;
-};
+  const updateDescriptionTransaction = async () => {
+    try {
+      error.value = "";
+      await store.dispatch(
+        `transaction/${CREATE_TRANSACTION}`,
+        transactionUpdateDescription
+      );
+      await getTransactionByDate();
+    } catch (e) {
+      handleError(e);
+    }
+  };
+
+  const getTransactionByDate = async () => {
+    try {
+      const formattedDate = getDateOptions(pickDate.value ?? new Date());
+      await store.dispatch(`transaction/${LOAD_TRANSACTION_BY_DATE}`, formattedDate);
+
+      // Set readable title
+      dateTitle.value = pickDate.value.toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+
+      // Disable fields if selected date is today
+      fieldDisabled.value =
+        getDateOptions(new Date()) === formattedDate;
+
+    } catch (e) {
+      handleError(e);
+    }
+  };
+
+  const fetchOustandingTransaction = async () => {
+    try {
+      await store.dispatch(`transaction/${LOAD_OUTSTANDING_TRANSACTION}`);
+    } catch (e) {
+      handleError(e);
+    }
+  };
+
+  const fetchLast30DaysSale = async () => {
+    try {
+      await store.dispatch(`transaction/${LOAD_LAST_30_DAYS_TRANSACTION}`);
+    } catch (e) {
+      handleError(e);
+    }
+  };
+
+  /* ----------------------------------------------------
+   * UI HANDLERS
+   * ---------------------------------------------------- */
+  const editTransaction = (item: Transaction) => {
+    editedIndex.value = transactions.value.findIndex(t => t.id === item.id);
+    Object.assign(transactionUpdate, item);
+    DialogUpdate.value = true;
+  };
 
   const close = () => {
     DialogUpdate.value = false;
     setTimeout(() => {
-      resetTransactionData;
-      resetTransactionUpdate;
+      resetTransactionData();
+      resetTransactionUpdate();
       editedIndex.value = -1;
     }, 300);
   };
@@ -205,13 +267,17 @@ const editTransaction = (item: Transaction) => {
     // theme
     theme,
 
+    // dialogs
+    DialogDate,
+    DialogUpdate,
+    DialogUpdateDescription,
+
     // state
     search,
     editedIndex,
     transactionData,
     transactionUpdate,
-    DialogDate,
-    DialogUpdate,
+    transactionUpdateDescription,
     isEditAmt,
     isEditing,
     isSend,
@@ -221,37 +287,42 @@ const editTransaction = (item: Transaction) => {
     fieldDisabled,
     alert,
 
-    // headers
+    // headers & static
     headersLocal,
+    headersOutsandingLocal,
+    price,
 
     // error
     showError,
     error,
 
-    // date filter
+    // date
     dateTitle,
     pickDate,
 
-    // static
-    price,
-
     // computed
     transactions,
+    outstandingTransaction,
+    last30DaysTransaction,
     loading,
+    loadingData,
     isSaveDisabled,
     isUpdateDisabled,
 
-    // utility functions
+    // utilities
     getColorByDescription,
     getDateOptions,
 
     // actions
     save,
+    updateDescriptionTransaction,
     editTransaction,
     close,
     resetTransactionData,
     checkIsSend,
     handleError,
-    getTransactionByDate
+    getTransactionByDate,
+    fetchOustandingTransaction,
+    fetchLast30DaysSale
   };
 }

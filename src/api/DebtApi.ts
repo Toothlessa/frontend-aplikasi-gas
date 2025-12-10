@@ -6,4 +6,5 @@ export const DebtApi = {
     updateDebt: (id: number, data: Debt) => AxiosInstance.patch(`/debts/${id}`, data),
     fetchDetailDebt: (customerId: number) => AxiosInstance.get(`debts/customer/${customerId}`),
     fetchSummaryDebt: () => AxiosInstance.get(`debts/summary`),
+    fetchOutstandingDebt: () => AxiosInstance.get(`debts/outstanding`),
 }

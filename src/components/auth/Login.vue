@@ -165,11 +165,10 @@ const handleLogin = async () => {
   loading.value = true;
   error.value = '';
   try {
-    await store.dispatch(`auth/${LOGIN_ACTION}`, {
-      email: loginForm.email,
-      password: loginForm.password,
-    });
+    console.log('cek login : ', loginForm)
+    await store.dispatch(`auth/${LOGIN_ACTION}`, loginForm);
     router.push('/');
+    console.log('do / : ' )
   } catch (err: any) {
     error.value = err.message || 'An unknown error occurred.';
   } finally {

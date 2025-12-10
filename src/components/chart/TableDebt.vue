@@ -6,8 +6,9 @@
       <v-divider></v-divider>
       <v-card rounded="xl" elevation="4" class="mt-n5">
         <v-data-table-virtual
-          :headers="debtsTable"
-          :items="outsDebts"
+          :headers="localHeaderSummaryDebt"
+          :items="outstandingDebtData"
+          :loading="loadingData"
           class="modern-table text-black mt-n2"
         > 
         </v-data-table-virtual>
@@ -15,55 +16,24 @@
     </div>
   </template>
   
-  <script>
-import AxiosInstance from '@/services/AxiosInstance';
-import Validations from '@/services/Validations';
-import store from '@/store/store';
-import { GET_USER_TOKEN_GETTER } from '@/store/storeconstant';
+<script setup lang="ts">
+import { useDebt } from '@/composables/useDebt';
+import { onMounted } from 'vue';
 
-  export default {
-  data : () => ({
-    debtsTable: [
-      { title: 'Name', align: 'center', key: 'customer_name' },
-      { title: 'Total Pay', align: 'center', key: 'total_pay'},
-      { title: 'Total', align: 'center', key: 'total_debt' },
-      { title: 'Debt Left', align: 'start', key: 'debt_left'},
-    ],
-    outsDebts: [],
-    alert: false,
-  }),
 
-  created() {
+const {
+  outstandingDebtData,
+  loadingData,
+  localHeaderSummaryDebt,
 
-    this.getOutstandingDebt();
-  },
+  fetchOutstandingDebt
+} = useDebt();
 
-  methods: {
+onMounted(() => {
+  fetchOutstandingDebt();
+});
 
-    async getOutstandingDebt() {
-
-      try {
-        await AxiosInstance
-          .get('http://127.0.0.1:8000/api/debts/outstanding', 
-          {
-            headers: {
-              'Content-Type': 'application/json', 
-              'Accept': 'application/json',
-              'Authorization': store.getters[`auth/${GET_USER_TOKEN_GETTER}`],
-            },
-          }).then((response) => {
-              this.outsDebts = response.data.data;
-              console.log(this.outsDebts);
-          })
-      } catch(error) {
-        this.error = Validations.getErrorMessageFromCode(error.response.data.errors[0], );
-        this.alert = true;
-      }
-    },
-  },
-
-  }
-  </script>
+</script>
   
   <style scoped>
 .modern-table {

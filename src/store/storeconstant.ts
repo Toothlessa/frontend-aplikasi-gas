@@ -78,17 +78,23 @@ export const SET_DATA_DISPLAY_STOCK =   '[mutations] set data for displaying sto
 /* TRANSACTION */ /* actions */
 export const CREATE_TRANSACTION             = '[actions] create data transaction'
 export const LOAD_TRANSACTION_BY_DATE       = '[actions] load data transaction with parameter date'
+export const LOAD_OUTSTANDING_TRANSACTION   = '[actions] load outstanding transaction data'
+export const LOAD_LAST_30_DAYS_TRANSACTION  = '[actions] load 30 days transaction data'
 /* mutations */
 export const SET_DATA_TRANSACTION           = '[mutations] set all data transactions'
+export const SET_DATA_OUTSTANDING_TRANSACTION = '[mutations] set data outstanding transaction'
+export const SET_DATA_LAST_30_DAYS_TRANSACTION = '[mutations] set data last 30 days transaction'
 
 /* DEBT */ /* actions */
 export const CREATE_DEBT                    = '[actions] create data debt'
 export const UPDATE_DEBT                    = '[actions] update data debt'
 export const LOAD_DATA_DEBT                 = '[actions] load data detail debt by customer'
 export const LOAD_DATA_SUMMARY_DEBT         = '[actions] load data summary debt group by customer'
+export const LOAD_DATA_OUTSTANDING_DEBT     = '[actions] load data outstanding debt'
 /* mutations */
 export const SET_DATA_DEBT                  = '[mutations] set all data debt'
 export const SET_DATA_SUMMARY_DEBT          = '[mutations] set all data summary debt'
+export const SET_DATA_OUTSTANDING_DEBT      = '[mutations] set all data outstanding debt'
 
 /* USER */ /* actions */
 export const LOAD_CURRENT_USER              = '[actions] load current user'

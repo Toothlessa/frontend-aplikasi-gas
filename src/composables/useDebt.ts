@@ -1,6 +1,6 @@
 import { ref, reactive, computed } from "vue";
 import store from "@/store/store";
-import { CREATE_DEBT,  LOAD_DATA_DEBT, LOAD_DATA_SUMMARY_DEBT, UPDATE_DEBT } from "@/store/storeconstant";
+import { CREATE_DEBT,  LOAD_DATA_DEBT, LOAD_DATA_OUTSTANDING_DEBT, LOAD_DATA_SUMMARY_DEBT, LOAD_OUTSTANDING_TRANSACTION, UPDATE_DEBT } from "@/store/storeconstant";
 import { Debt, headerDetailDebt, headerSummaryDebt, SummaryDebt } from "@/types";
 
 export function useDebt() {
@@ -46,6 +46,7 @@ export function useDebt() {
 
   const debts = computed<Debt[]>(() => store.state.debt.debts);
   const summaryDebtData = computed<SummaryDebt[]>(() => store.state.debt.summaryDebts);
+  const outstandingDebtData = computed<SummaryDebt[]>(() => store.state.debt.outstandingDebts);
   const loadingDataDetail = computed(() => store.state.debt.loading);
   const loadingData = computed(() => store.state.debt.loadingOne);
   const loadingButtonCreate = computed(() => store.state.debt.loadingButtonCreate);
@@ -95,7 +96,16 @@ export function useDebt() {
   const debtSummaryLoad = async () => {
     try{
       await store.dispatch(`debt/${LOAD_DATA_SUMMARY_DEBT}`);
-      console.log('Debt Summary: ', debts);
+    }catch(error){
+      handleError(error);
+      alert.value = true;
+    }
+  };
+
+  const fetchOutstandingDebt = async () => {
+    try{
+      await store.dispatch(`debt/${LOAD_DATA_OUTSTANDING_DEBT}`);
+
     }catch(error){
       handleError(error);
       alert.value = true;
@@ -167,6 +177,7 @@ export function useDebt() {
     debtUpdateData,
     debts,
     summaryDebtData,
+    outstandingDebtData,
 
     // UI Flags
     DialogDetail,
@@ -193,5 +204,6 @@ export function useDebt() {
     saveDebt,
     editDebt,
     updateDebt,
+    fetchOutstandingDebt,
   };
 }
