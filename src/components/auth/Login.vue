@@ -168,7 +168,6 @@ const handleLogin = async () => {
     console.log('cek login : ', loginForm)
     await store.dispatch(`auth/${LOGIN_ACTION}`, loginForm);
     router.push('/');
-    console.log('do / : ' )
   } catch (err: any) {
     error.value = err.message || 'An unknown error occurred.';
   } finally {
@@ -185,12 +184,9 @@ const handleSignup = async () => {
   loading.value = true;
   error.value = '';
   try {
-    await store.dispatch(`auth/${SIGNUP_ACTION}`, {
-      username: signupForm.username,
-      email: signupForm.email,
-      password: signupForm.password,
-    });
-    step.value = 1;
+    await store.dispatch(`auth/${SIGNUP_ACTION}`, signupForm);
+    router.push('/');
+    // step.value = 1;
   } catch (err: any) {
     error.value = err.message || 'An unknown error occurred.';
   } finally {

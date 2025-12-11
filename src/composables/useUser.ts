@@ -45,7 +45,6 @@ export function useUser() {
 
   const userLoad = async () => {
     
-      console.log('User Data: ', user.value?.username);
     try {
       await store.dispatch(`user/${LOAD_CURRENT_USER}`);
 

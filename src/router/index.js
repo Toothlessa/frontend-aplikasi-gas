@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import store from "@/store/store";
 import { IS_USER_AUTHENTICATE_GETTER } from "@/store/storeconstant";
+import { UserApi } from "@/api/UserApi";
 
-// Lazy-loaded views
 const Login = () =>
   import(/* webpackChunkName: "Login" */ "@/views/auth/LoginView.vue");
 const Dashboard = () => import("@/views/dashboard");
@@ -16,9 +16,9 @@ const Asset = () => import("@/views/assets/AssetView.vue");
 const AssetDetails = () =>
   import("@/components/assets/AssetDetails.vue");
 
-// -----------------------------------------------
-// Route Configuration
-// -----------------------------------------------
+  /* ----------------------------------------------------
+   * Router Configuration
+   * ---------------------------------------------------- */
 const routes = [
   {
     path: "/",
@@ -86,32 +86,39 @@ const routes = [
   },
 ];
 
-// -----------------------------------------------
-// Create Router
-// -----------------------------------------------
+  /* ----------------------------------------------------
+   * router
+   * ---------------------------------------------------- */
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 
-// -----------------------------------------------
-// Navigation Guard
-// -----------------------------------------------
-router.beforeEach((to, _, next) => {
-  const isAuthenticated =
-    store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`];
-
-  // Protected routes → but user not logged in
+  /* ----------------------------------------------------
+   * Navigation Guard
+   * ---------------------------------------------------- */
+router.beforeEach(async (to, _, next) => {
+  
+  const isAuthenticated = store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`];
   if (to.meta.auth && !isAuthenticated) {
-    return next("/login");
-  }
+    return next("/login"); 
+  } 
 
-  // Login page → user already logged in
-  if (to.name === "Login" && isAuthenticated) {
-    return next("/");
+  if (to.meta.auth) {
+    try {
+      await UserApi.fetchCurrentUser(); // jika token invalid, akan masuk catch
+    } catch (error) {
+      if (error.response?.status === 401) {
+        console.log("AUTO LOGOUT: ", error.response.status);
+        localStorage.removeItem("userData");
+        return next("/login")
+      }
+    }
   }
 
   return next();
 });
+
+
 
 export default router;

@@ -426,7 +426,6 @@ onMounted(() => {
   loadMasterItemByType('ITEM');
   getTransactionByDate();
   loadTopCustomerTransaction();
-  console.log('cek : ', totals, labels);
 });
 </script>
 

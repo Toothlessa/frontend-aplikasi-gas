@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
 import store from '../store/store';
-import router from '@/router'; // Make sure this path matches your router file
+import router from '@/router';
 import { GET_USER_TOKEN_GETTER, LOGOUT_ACTION } from "@/store/storeconstant";
 
 const AxiosInstance = axios.create({
@@ -28,16 +28,13 @@ AxiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 // ✅ Response interceptor — logout on token mismatch
 AxiosInstance.interceptors.response.use(
-    (response) => response, // Let successful responses pass through
+    (response) => response,
     async (error) => {
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
             console.warn("Token invalid or expired. Logging out...");
-            
-            // 🔁 Dispatch logout action
-            await store.dispatch(`auth/${LOGOUT_ACTION}`);
 
-            // 🚪 Redirect to login page
-            router.push({ name: 'login' }); // change 'login' to your actual login route name
+            localStorage.removeItem('userData');
+            //router.push({ name: 'login' }); 
         }
 
         // Always reject so components can also catch the error
