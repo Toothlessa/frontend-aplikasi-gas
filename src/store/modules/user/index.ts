@@ -7,20 +7,22 @@ import mutations from './mutations';
 import { UserState } from "@/types/User";
 
 const state = (): UserState => ({
-    currentUser: null,
-    loading: false,
-    loadingOne: false,
-    loadingButtonCreate: false,
-    loadingButtonUpdate: false,
-    hasSaved: false,
+  currentUser: null,
+  initialLoginForm: null,
+  initialSignupForm: null,
+  loading: false,
+  loadingOne: false,
+  loadingButtonCreate: false,
+  loadingButtonUpdate: false,
+  hasSaved: false,
 });
 
 const user: Module<UserState, RootState> = {
-    namespaced: true,
-    state,
-    mutations,
-    getters,
-    actions,
+  namespaced: true,
+  state,
+  mutations,
+  getters,
+  actions,
 };
 
 export default user;

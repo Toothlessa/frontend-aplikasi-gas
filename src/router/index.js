@@ -16,9 +16,9 @@ const Asset = () => import("@/views/assets/AssetView.vue");
 const AssetDetails = () =>
   import("@/components/assets/AssetDetails.vue");
 
-  /* ----------------------------------------------------
-   * Router Configuration
-   * ---------------------------------------------------- */
+/* ----------------------------------------------------
+ * Router Configuration
+ * ---------------------------------------------------- */
 const routes = [
   {
     path: "/",
@@ -86,38 +86,53 @@ const routes = [
   },
 ];
 
-  /* ----------------------------------------------------
-   * router
-   * ---------------------------------------------------- */
+/* ----------------------------------------------------
+ * router
+ * ---------------------------------------------------- */
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 
-  /* ----------------------------------------------------
-   * Navigation Guard
-   * ---------------------------------------------------- */
+/* ----------------------------------------------------
+ * Navigation Guard
+ * ---------------------------------------------------- */
 router.beforeEach(async (to, _, next) => {
-  
   const isAuthenticated = store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`];
-  if (to.meta.auth && !isAuthenticated) {
-    return next("/login"); 
-  } 
 
+  // 1. Halaman yang butuh auth
+  if (to.meta.auth && !isAuthenticated) {
+    return next("/login");
+  }
+
+  // 2. Validasi token ketika masuk halaman yang membutuhkan auth
   if (to.meta.auth) {
     try {
-      await UserApi.fetchCurrentUser(); // jika token invalid, akan masuk catch
+      await UserApi.fetchCurrentUser();
     } catch (error) {
       if (error.response?.status === 401) {
         console.log("AUTO LOGOUT: ", error.response.status);
         localStorage.removeItem("userData");
-        return next("/login")
+        return next("/login");
+      }
+    }
+  }
+
+  // 3. Cegah user yang sudah login masuk ke halaman login
+  if (to.path === "/login" && isAuthenticated) {
+    try {
+      await UserApi.fetchCurrentUser(); // cek token valid
+      return next("/"); // redirect jika token valid
+    } catch (error) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem("userData");
       }
     }
   }
 
   return next();
 });
+
 
 
 

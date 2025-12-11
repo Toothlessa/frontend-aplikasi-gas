@@ -13,18 +13,12 @@
     "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": true,
     "sourceMap": true,
-    // "baseUrl": ".",
-    "baseUrl": "src", // ✅ Needed
+    "baseUrl": "src",
     "types": [
       "webpack-env"
     ],
-    // "paths": {
-    //   "@/*": [
-    //     "src/*"
-    //   ]
-    // },
      "paths": {
-      "@/*": ["*"]     // ✅ Enables `@/types/...` etc.
+      "@/*": ["*"]
     },
     "lib": [
       "esnext",
@@ -39,7 +33,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-, "src/router/index.js"  ],
+, "src/router/index1.js"  ],
   "exclude": [
     "node_modules"
   ]
