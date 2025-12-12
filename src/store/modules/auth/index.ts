@@ -29,6 +29,9 @@ import { AuthState } from "@/types/Auth";
 
 const state = (): AuthState => ({
   authUser: null,    
+  initialLoginForm: null,
+  initialSignupForm: null,
+  
   autoLogout: false,
   loading: false,
   loadingButtonCreate: false,

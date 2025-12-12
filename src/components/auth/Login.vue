@@ -32,7 +32,7 @@
                     {{ error }}
                   </v-alert>
 
-                  <v-form @submit.prevent="handleLogin">
+                  <v-form @submit.prevent="login">
                     <label class="form-label">Email address</label>
                     <v-text-field
                       v-model="loginForm.email"
@@ -83,7 +83,7 @@
                     {{ error }}
                   </v-alert>
 
-                  <v-form @submit.prevent="handleSignup">
+                  <v-form @submit.prevent="signUp">
                     <label class="form-label">Username</label>
                     <v-text-field
                       v-model="signupForm.username"
@@ -139,67 +139,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
-import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
-import { LOGIN_ACTION, SIGNUP_ACTION } from '@/store/storeconstant';
 import PasswordInput from './PasswordInput.vue';
+import { useAuth } from '@/composables/useAuth';
 
-// --- Setup ---
-const store = useStore();
-const router = useRouter();
+const {
+  // state
+    step,
+    error,
 
-// --- State ---
-const step = ref(1);
-const loading = ref(false);
-const error = ref('');
+    // computed
+    loading,
 
-const initialLoginForm = { email: '', password: '' };
-const initialSignupForm = { username: '', email: '', password: '', confirmPassword: '' };
+    // forms
+    loginForm,
+    signupForm,
 
-const loginForm = reactive({ ...initialLoginForm });
-const signupForm = reactive({ ...initialSignupForm });
+    // methods
+    login,
+    signUp,
+} = useAuth();
 
-// --- Logic ---
-const handleLogin = async () => {
-  loading.value = true;
-  error.value = '';
-  try {
-    console.log('cek login : ', loginForm)
-    await store.dispatch(`auth/${LOGIN_ACTION}`, loginForm);
-    router.push('/');
-  } catch (err: any) {
-    error.value = err.message || 'An unknown error occurred.';
-  } finally {
-    loading.value = false;
-  }
-};
-
-const handleSignup = async () => {
-  if (signupForm.password !== signupForm.confirmPassword) {
-    error.value = 'Passwords do not match.';
-    return;
-  }
-
-  loading.value = true;
-  error.value = '';
-  try {
-    await store.dispatch(`auth/${SIGNUP_ACTION}`, signupForm);
-    router.push('/');
-    // step.value = 1;
-  } catch (err: any) {
-    error.value = err.message || 'An unknown error occurred.';
-  } finally {
-    loading.value = false;
-  }
-};
-
-// --- Watchers ---
-watch(step, () => {
-  Object.assign(loginForm, initialLoginForm);
-  Object.assign(signupForm, initialSignupForm);
-  error.value = '';
-});
 </script>
 
 <style scoped>

@@ -8,8 +8,7 @@ import { UserState } from "@/types/User";
 
 const state = (): UserState => ({
   currentUser: null,
-  initialLoginForm: null,
-  initialSignupForm: null,
+  
   loading: false,
   loadingOne: false,
   loadingButtonCreate: false,

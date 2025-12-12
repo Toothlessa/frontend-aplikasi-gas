@@ -5,6 +5,7 @@ import { errorHandler } from "@/utils/ErrorHandler";
 export const AuthService = {
 
     async login(authUser: AuthUser): Promise<void> {
+
         try{
             const auth = await AuthApi.login(authUser);
             return auth.data.data;

@@ -1,11 +1,14 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import store from "@/store/store";
 import { IS_USER_AUTHENTICATE_GETTER } from "@/store/storeconstant";
 import { UserApi } from "@/api/UserApi";
+import type { NavigationGuardNext, RouteLocationNormalized } from "vue-router";
 
-const Login = () =>
-  import(/* webpackChunkName: "Login" */ "@/views/auth/LoginView.vue");
-const Dashboard = () => import("@/views/dashboard");
+/* ----------------------------------------------------
+ * Lazy Loaded Components
+ * ---------------------------------------------------- */
+const Login = () => import("@/views/auth/LoginView.vue");
+const Dashboard = () => import("@/views/dashboard/index.vue");
 const User = () => import("@/views/users/UserView.vue");
 const MasterItem = () => import("@/views/masteritem/MasterItemView.vue");
 const Customer = () => import("@/views/customers/CustomerView.vue");
@@ -13,13 +16,12 @@ const Transaction = () => import("@/views/transaction/TransactionView.vue");
 const Stock = () => import("@/views/stocks/StockView.vue");
 const Debt = () => import("@/views/debts/DebtView.vue");
 const Asset = () => import("@/views/assets/AssetView.vue");
-const AssetDetails = () =>
-  import("@/components/assets/AssetDetails.vue");
+const AssetDetails = () => import("@/components/assets/AssetDetails.vue");
 
 /* ----------------------------------------------------
- * Router Configuration
+ * Routes Configuration
  * ---------------------------------------------------- */
-const routes = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "Dashboard",
@@ -30,10 +32,7 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
-    meta: {
-      auth: false,
-      hideTheNavigation: true,
-    },
+    meta: { auth: false, hideTheNavigation: true },
   },
   {
     path: "/users",
@@ -87,7 +86,7 @@ const routes = [
 ];
 
 /* ----------------------------------------------------
- * router
+ * Router Instance
  * ---------------------------------------------------- */
 const router = createRouter({
   history: createWebHistory(),
@@ -97,43 +96,46 @@ const router = createRouter({
 /* ----------------------------------------------------
  * Navigation Guard
  * ---------------------------------------------------- */
-router.beforeEach(async (to, _, next) => {
-  const isAuthenticated = store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`];
+router.beforeEach(
+  async (
+    to: RouteLocationNormalized,
+    _,
+    next: NavigationGuardNext
+  ) => {
+    const isAuthenticated = store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`];
 
-  // 1. Halaman yang butuh auth
-  if (to.meta.auth && !isAuthenticated) {
-    return next("/login");
-  }
+    // 1. Jika halaman butuh auth tapi belum login
+    if (to.meta.auth && !isAuthenticated) {
+      return next("/login");
+    }
 
-  // 2. Validasi token ketika masuk halaman yang membutuhkan auth
-  if (to.meta.auth) {
-    try {
-      await UserApi.fetchCurrentUser();
-    } catch (error) {
-      if (error.response?.status === 401) {
-        console.log("AUTO LOGOUT: ", error.response.status);
-        localStorage.removeItem("userData");
-        return next("/login");
+    // 2. Validasi token ke server jika halaman butuh auth
+    if (to.meta.auth) {
+      try {
+        await UserApi.fetchCurrentUser();
+      } catch (error: any) {
+        if (error?.response?.status === 401) {
+          console.log("AUTO LOGOUT: ", error.response.status);
+          localStorage.removeItem("userData");
+          return next("/login");
+        }
       }
     }
-  }
 
-  // 3. Cegah user yang sudah login masuk ke halaman login
-  if (to.path === "/login" && isAuthenticated) {
-    try {
-      await UserApi.fetchCurrentUser(); // cek token valid
-      return next("/"); // redirect jika token valid
-    } catch (error) {
-      if (error.response?.status === 401) {
-        localStorage.removeItem("userData");
+    // 3. Cegah user yang sudah login masuk ke halaman login
+    if (to.path === "/login" && isAuthenticated) {
+      try {
+        await UserApi.fetchCurrentUser();
+        return next("/");
+      } catch (error: any) {
+        if (error?.response?.status === 401) {
+          localStorage.removeItem("userData");
+        }
       }
     }
+
+    return next();
   }
-
-  return next();
-});
-
-
-
+);
 
 export default router;

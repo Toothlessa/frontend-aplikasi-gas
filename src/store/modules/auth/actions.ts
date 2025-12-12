@@ -21,10 +21,28 @@ const actions: ActionTree<AuthState, RootState> = {
     },
 
     [AUTO_LOGIN_ACTION](context) {
-        const userData = localStorage.getItem('userData');
-        if (userData) {
-        context.commit(SET_USER_TOKEN_DATA_MUTATION, JSON.parse(userData));
+        const userData = localStorage.getItem("userData");
+        if (!userData) return;
+
+        const parsed = JSON.parse(userData);
+
+        const expirationDate = Number(localStorage.getItem("expirationDate"));
+        const now = new Date().getTime();
+
+        const remainingTime = expirationDate - now;
+
+        //console.log("remainingTime:", remainingTime);
+        //console.log("userData:", parsed);
+
+        if (remainingTime < 1000) {
+            context.dispatch(AUTO_LOGOUT_ACTION);
+            return;
         }
+
+        context.commit(SET_USER_TOKEN_DATA_MUTATION, {
+            ...parsed,
+            expirationDate
+        });
     },
 
   async [LOGOUT_ACTION]({ commit, dispatch }) {
@@ -48,24 +66,39 @@ const actions: ActionTree<AuthState, RootState> = {
   },
 
    async [AUTO_LOGOUT_ACTION](context) {
-          //await context.dispatch(LOGOUT_ACTION);
           localStorage.removeItem('userData');
           context.commit(SET_AUTO_LOGOUT_MUTATION);
     },
 
-  async [AUTH_ACTION]({ commit }, { service}){
-    commit(SET_LOADING, true);
-    try{
-        const response = await service;
-        localStorage.setItem('userData', JSON.stringify(response));
-        commit(SET_USER_TOKEN_DATA_MUTATION, response);
-    }catch(error){
-        console.error('Fail authentication')
-        throw error;
-    }finally{
-        commit(SET_LOADING, false);
-    }
-  },
+    async [AUTH_ACTION]({ commit }, { service }) {
+        commit(SET_LOADING, true);
+
+        try {
+            const response = await service;
+
+            // Hitung expiry timestamp
+            //const expiresInMs = response.expiresIn * 1000; // 2 jam
+            //const expiresInMs = response.expiresIn; // 10 detik
+            const expiresInMs = response.expiresIn * 24 * 60 * 60 * 1000; // 10 hari
+            const expirationDate = new Date().getTime() + expiresInMs;
+
+            // Simpan ke localStorage
+            localStorage.setItem('userData', JSON.stringify(response));
+            localStorage.setItem('expirationDate', expirationDate.toString());
+
+            // Commit ke Vuex
+            commit(SET_USER_TOKEN_DATA_MUTATION, {
+            ...response,
+            expirationDate
+            });
+
+        } catch (error) {
+            console.error('Fail authentication');
+            throw error;
+        } finally {
+            commit(SET_LOADING, false);
+        }
+    },
 
 }
 
