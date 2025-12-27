@@ -41,6 +41,7 @@
         <v-btn
           variant="elevated"
           class="save-btn"
+          :loading="props.loadingButtonCreate"
           @click="$emit('submit', localItem)"
         >
           {{ isEdit ? 'Save Changes' : 'Create Customer' }}
@@ -51,43 +52,80 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import type { Customer, CustomerField } from '@/types/Customer';
 
+/* =========================================================
+ * Props
+ * Data yang diterima dari Parent (READ-ONLY)
+ * ========================================================= */
 const props = defineProps<{
-  dialog: boolean;
-  isEdit: boolean;
-  editedItem: Partial<Customer>;
-  allFields: CustomerField[];
+  dialog: boolean;                 // kontrol buka/tutup dialog
+  isEdit: boolean;                 // mode edit / create
+  editedItem: Partial<Customer>;   // data customer yang diedit
+  allFields: CustomerField[];      // konfigurasi field form
+  loadingButtonCreate: boolean;    // kontrol loading button create
 }>();
 
+/* =========================================================
+ * Emits
+ * Event yang dikirim ke Parent
+ * ========================================================= */
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'submit', item: Partial<Customer>): void;
   (e: 'update:dialog', val: boolean): void;
 }>();
 
-const localDialog = ref(props.dialog);
+/* =========================================================
+ * Local State
+ * State internal component (boleh dimodifikasi)
+ * ========================================================= */
+const localDialog = ref<boolean>(props.dialog);
 const localItem = reactive<Partial<Customer>>({});
 
+/* =========================================================
+ * Watchers
+ * ========================================================= */
+
+/**
+ * Sinkronisasi data edit dari Parent ke form lokal
+ * - Trigger saat dialog dibuka
+ * - Trigger saat editedItem berubah
+ */
 watch(
   () => [props.dialog, props.editedItem],
-  ([dialog, newVal]) => {
-    if (dialog && newVal) {
-      Object.assign(localItem, newVal);
+  ([dialog, editedItem]) => {
+    if (dialog && editedItem) {
+      Object.assign(localItem, editedItem);
     }
   },
   { immediate: true }
 );
 
-watch(() => props.dialog, (val) => {
-  localDialog.value = val;
-});
+/**
+ * Sinkronisasi dialog dari Parent → Child
+ * Jika parent mengubah dialog, localDialog ikut berubah
+ */
+watch(
+  () => props.dialog,
+  (val) => {
+    localDialog.value = val;
+  }
+);
 
-watch(localDialog, (val) => {
-  emit('update:dialog', val);
-});
+/**
+ * Sinkronisasi dialog dari Child → Parent
+ * Mendukung v-model:dialog
+ */
+watch(
+  localDialog,
+  (val) => {
+    emit('update:dialog', val);
+  }
+);
 </script>
+
 
 <style scoped>
 .dialog-card {

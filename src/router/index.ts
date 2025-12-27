@@ -77,7 +77,7 @@ const routes: Array<RouteRecordRaw> = [
     meta: { auth: true },
   },
   {
-    path: "/asset/:ownerId/:itemId",
+    path: "/asset/:owner_id/:item_id",
     name: "AssetDetails",
     component: AssetDetails,
     props: true,

@@ -1,33 +1,3 @@
-<script setup lang="ts">
-import {
-  Chart as ChartJS,
-  RadialLinearScale,
-  ArcElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { PolarArea } from "vue-chartjs";
-ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend);
-import { onMounted, computed } from "vue";
-import { useCustomer } from "@/composables/useCustomer";
-import { usePolarChart } from "@/composables/chart/usePolarChart";
-
-const { labels, totals, loadTopCustomerTransaction } = useCustomer();
-const { defaultPolarOptions, createPolarChartData, } = usePolarChart();
-
-/* ===========================================================
-   Mounted 
-=========================================================== */
-onMounted(() => {
-  loadTopCustomerTransaction();
-});
-
-const data = computed(() =>
-  createPolarChartData(labels.value, totals.value)
-);
-
-</script>
-
 <template>
   <div>
     <v-toolbar color="transparent" class="mt-n5" rounded-t-xl>
@@ -45,6 +15,53 @@ const data = computed(() =>
     </v-card>
   </div>
 </template>
+
+<script setup lang="ts">
+import {
+  Chart as ChartJS,
+  RadialLinearScale,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { PolarArea } from "vue-chartjs";
+ChartJS.register(RadialLinearScale, ArcElement, Tooltip, Legend);
+import { onMounted, computed } from "vue";
+import { useCustomer } from "@/composables/useCustomer";
+import { usePolarChart } from "@/composables/chart/usePolarChart";
+import { useGlobal } from "@/composables/useGlobal";
+
+ /* ------------------------------------------------------*
+   * COMPOSABLES                                            *
+   * ---------------------------------------------------- */
+const { handleError } = useGlobal();
+const { labels, totals, loadTopCustomerTransaction } = useCustomer();
+const { defaultPolarOptions, createPolarChartData, } = usePolarChart();
+
+ /* ------------------------------------------------------*
+   * LIFECYCLE                                            *
+   * ---------------------------------------------------- */
+onMounted(() => {
+  onloadTopCustomerTransaction();
+});
+
+ /* ------------------------------------------------------*
+   * FUNCTIONS                                            *
+   * ---------------------------------------------------- */
+
+const data = computed(() =>
+  createPolarChartData(labels.value, totals.value)
+);
+
+const onloadTopCustomerTransaction = async () => {
+  try{
+    await loadTopCustomerTransaction();
+  }catch(e){
+    handleError(e);
+  }
+};
+
+</script>
 
 <style scoped>
 .chart-container {

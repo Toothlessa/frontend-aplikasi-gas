@@ -37,7 +37,7 @@
               variant="outlined"
               rounded="lg"
               prepend-inner-icon="mdi-numeric"
-              @keyup.enter="create"
+              @keyup.enter="onCreateStock"
               class="mb-3"
             />
             <v-btn
@@ -49,7 +49,7 @@
               color="teal-darken-1"
               :disabled="isSaveDisabled"
               :loading="loadingButton"
-              @click="create"
+              @click="onCreateStock"
             >
               <v-icon start>mdi-plus</v-icon>
               Add Stock
@@ -198,11 +198,20 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import store from '@/store/store';
-import { CREATE_STOCK, LOAD_DETAIL_STOCK, UPDATE_STOCK } from '@/store/storeconstant';
+import { LOAD_DETAIL_STOCK, UPDATE_STOCK } from '@/store/storeconstant';
 import { useMasterItem } from '@/composables/useMasterItem';
 import { useStock } from '@/composables/useStock';
 import { StockDetail } from '@/types';
+import { useGlobal } from '@/composables/useGlobal';
 
+ /* ======================================================*
+  * COMPOSABLES                                           *
+  * ======================================================*/
+const {
+  formatPrice,
+
+  handleError,
+} = useGlobal();
 
 const {
   DialogDetails,
@@ -226,9 +235,10 @@ const {
   alert,
   error,
 
+  createStock,
   loadCurrentStock,
   resetEditedStock,
-  handleError,
+  // handleError,
 } = useStock();
 
 const {
@@ -236,24 +246,40 @@ const {
   loadMasterItem,
 } = useMasterItem();
 
+const isSaveDisabled = computed(() => !(selectedItem.value && input.value));
+
+ /* ======================================================*
+  * HOOKS                                                 *
+  * ======================================================*/
 onMounted(() => {
   loadCurrentStock();
   loadMasterItem();
 });
 
-const isSaveDisabled = computed(() => !(selectedItem.value && input.value));
+ /* ======================================================*
+  * METHODS                                               *
+  * ======================================================*/
 
 const editStock = (item: StockDetail) => {
   Object.assign(editedStock, item);
   DialogUpdate.value = true;
 };
 
-async function create() {
+// async function create() {
+//   try {
+//     await store.dispatch(`stock/${CREATE_STOCK}`, { itemId: selectedItem.value, stock: { stock: input.value} });
+//     resetEditedStock();
+//   } catch(error) {
+//      handleError(error);
+//   }
+// }
+
+const onCreateStock = async() => {
   try {
-    await store.dispatch(`stock/${CREATE_STOCK}`, { itemId: selectedItem.value, stock: { stock: input.value} });
+    await createStock();
     resetEditedStock();
   } catch(error) {
-     handleError(error);
+    handleError(error);
   }
 }
 

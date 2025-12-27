@@ -76,14 +76,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 
+/* -----------------------------------------------------*
+ * PROPS                                                *
+ * Data yang diterima dari Parent (READ-ONLY)           *
+ * ---------------------------------------------------- */
 const props = defineProps<{
-  dialog: boolean;
-  csvFile: File | null;
-  loading: boolean;
+  dialog: boolean;        // kontrol buka / tutup dialog
+  csvFile: File | null;   // file CSV terpilih
+  loading: boolean;       // status loading dari parent
 }>();
 
+/* -----------------------------------------------------*
+ * EMITS                                                *
+ * Event yang dikirim ke Parent                          *
+ * ---------------------------------------------------- */
 const emit = defineEmits<{
   (e: 'confirm'): void;
   (e: 'close'): void;
@@ -91,27 +99,63 @@ const emit = defineEmits<{
   (e: 'update:csvFile', val: File | null): void;
 }>();
 
-const localDialog = ref(props.dialog);
-const uploading = computed(() => props.loading);
+/* -----------------------------------------------------*
+ * LOCAL STATE                                          *
+ * State internal component                              *
+ * ---------------------------------------------------- */
+const localDialog = ref<boolean>(props.dialog);
 
-// Sync local dialog state with parent
-watch(() => props.dialog, (val) => {
-  localDialog.value = val;
-});
+/* -----------------------------------------------------*
+ * COMPUTED                                             *
+ * Derived state dari props                              *
+ * ---------------------------------------------------- */
+const uploading = computed<boolean>(() => props.loading);
 
-// Emit dialog updates to parent
-watch(localDialog, (val) => {
-  if (val !== props.dialog) {
-    emit('update:dialog', val);
+/* -----------------------------------------------------*
+ * WATCHERS                                             *
+ * Sinkronisasi state Parent ↔ Child                     *
+ * ---------------------------------------------------- */
+
+/**
+ * Parent → Child
+ * Sinkronisasi perubahan dialog dari parent
+ */
+watch(
+  () => props.dialog,
+  (val) => {
+    localDialog.value = val;
   }
-});
+);
 
-// Handle file selection
+/**
+ * Child → Parent
+ * Emit perubahan dialog untuk mendukung v-model:dialog
+ */
+watch(
+  localDialog,
+  (val) => {
+    if (val !== props.dialog) {
+      emit('update:dialog', val);
+    }
+  }
+);
+
+/* -----------------------------------------------------*
+ * METHODS                                              *
+ * Handler & helper functions                            *
+ * ---------------------------------------------------- */
+
+/**
+ * Handle perubahan file CSV dari input
+ * - Ambil file pertama jika array
+ * - Emit ke parent sebagai single File | null
+ */
 const handleFileUpdate = (file: File | File[] | null) => {
   const selected = Array.isArray(file) ? file[0] : file;
   emit('update:csvFile', selected ?? null);
 };
 </script>
+
 
 <style scoped>
 .bg-gradient-to-r {

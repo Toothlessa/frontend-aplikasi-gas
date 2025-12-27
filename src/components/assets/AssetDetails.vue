@@ -7,50 +7,60 @@
       </v-card-title>
       <v-divider class="my-4 border-opacity-100" color="teal-lighten-3" />
 
-      <v-card-text v-if="assetDetails && assetDetails.length > 0">
-        <v-data-table-virtual
-          :headers="assetHeaders"
-          :items="assetDetails"
-          class="modern-table"
-          :loading="loading"
-          hover
-          density="comfortable"
-          item-value="id"
-        >
-          <template v-slot:[`item.actions`]="{ item }">
-            <v-btn
-              icon="mdi-pencil"
-              size="small"
-              variant="text"
-              color="blue-grey"
-              @click="openEditAssetDialog(item)"
-            />
-          </template>
-        </v-data-table-virtual>
-        <v-row class="mt-6">
-          <v-col cols="12">
-            <v-btn color="teal-darken-2" @click="$router.back()" class="back-btn" rounded="lg">
-              <v-icon start>mdi-arrow-left</v-icon>
-              Back to Asset List
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-card-text>
+      <!-- LOADING -->
+      <template v-if="loading">
+        <v-card class="rounded-xl pa-4">
+          <v-skeleton-loader type="heading, text" />
+        </v-card>
+      </template>
 
-      <v-card-text v-else-if="isLoading">
-        <v-overlay :model-value="isLoading" class="align-center justify-center">
-          <v-progress-circular indeterminate color="teal" size="64"></v-progress-circular>
-          <p class="text-h6 text-teal mt-4">Loading asset details...</p>
-        </v-overlay>
-      </v-card-text>
+      <template v-else>
+        <v-card-text>
+          <v-data-table-virtual
+            :headers="headerAssetDetail"
+            :items="assetDetails"
+            :loading="loadingButtonCreate"
+            item-value="id"
+          >
+            <template v-slot:[`item.actions`]="{ item }">
+              <v-btn
+                icon="mdi-pencil"
+                size="small"
+                variant="text"
+                color="blue-grey"
+                @click="openEditAssetDialog(item)"
+              />
+            </template>
 
-      <v-card-text v-else>
-        <p class="text-h6 text-red-darken-2 text-center">Asset not found or an error occurred.</p>
-      </v-card-text>
+            <template v-slot:[`item.selling_price`]="{ value }">
+              {{ formatPrice(value) }}
+            </template>
+
+            <template v-slot:[`item.cogs`]="{ value }">
+              {{ formatPrice(value) }}
+            </template>
+          </v-data-table-virtual>
+          <v-row class="mt-6">
+            <v-col cols="12">
+              <v-btn
+                color="teal-darken-2"
+                @click="goBack"
+                class="back-btn"
+                rounded="lg"
+                :loading="isNavigatingBack"
+              >
+                <v-icon start>mdi-arrow-left</v-icon>
+                Back to Asset List
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </template>
+
     </v-card>
 
     <!-- Update Asset Dialog -->
-    <v-dialog v-model="dialogUpdateAsset" max-width="600px" persistent>
+    <v-dialog v-model="dialogUpdateAssetDetail" max-width="600px" persistent>
       <v-card rounded="xl">
         <v-card-title class="dialog-header bg-teal text-white">
           <v-icon start>mdi-pencil-box-outline</v-icon>
@@ -59,7 +69,7 @@
         <v-card-text class="pt-6">
             <v-autocomplete
               v-model="assetToUpdate.item_id"
-              :items="masteritems"
+              :items="mItems"
               item-title="item_name"
               item-value="id"
               label="Asset Name"
@@ -70,7 +80,7 @@
             />
             <v-autocomplete
               v-model="assetToUpdate.owner_id"
-              :items="owners"
+              :items="assetOwners"
               item-title="name"
               item-value="id"
               label="Owner Name"
@@ -99,8 +109,8 @@
         </v-card-text>
         <v-card-actions class="pa-4">
           <v-spacer />
-          <v-btn text @click="dialogUpdateAsset = false" rounded="lg">Cancel</v-btn>
-          <v-btn color="teal" class="text-white" @click="updateAsset" :loading="isUpdatingAsset" rounded="lg">
+          <v-btn @click="dialogUpdateAssetDetail = false" rounded="lg">Cancel</v-btn>
+          <v-btn color="teal" class="text-white" @click="updateAsset" :loading="loadingButtonCreate" rounded="lg">
             <v-icon left>mdi-content-save</v-icon>
             Update
           </v-btn>
@@ -109,112 +119,101 @@
     </v-dialog>
 
     <!-- Snackbar for notifications -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="top right" rounded="xl" elevation="12">
-      <v-icon start>{{ snackbar.color === 'success' ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}</v-icon>
-      {{ snackbar.message }}
+    <v-snackbar
+      v-model="hasSaved"
+      color="success"
+      location="top right"
+      rounded="xl"
+      elevation="12"
+    >
+      <v-icon start>mdi-check-circle-outline</v-icon>
+      Data has been saved successfully.
     </v-snackbar>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
+import { ref, onMounted } from 'vue';
 import { Asset } from '@/types/Asset';
-import { LOAD_ASSET_DETAILS_BY_SUMMARY, LOAD_OWNER, LOAD_MASTER_ITEM, CREATE_ASSET } from '@/store/storeconstant';
+import { useAsset } from '@/composables/useAsset';
+import { useGlobal } from '@/composables/useGlobal';
+import { useMasterItem } from '@/composables/useMasterItem';
+import { useRoute } from 'vue-router';
+
+  /* -----------------------------------------------------*
+   * COMPOSABLES                                          *
+   * ---------------------------------------------------- */
+const {
+
+  formatPrice,
+} = useGlobal();
+
+const {
+  mItems,
+
+  loadMasterItem,
+} = useMasterItem();
+
+const {
+  headerAssetDetail,
+  
+  loading,
+  assetToUpdate,
+
+  //vuex
+  createAsset,
+  loadAssetDetail,
+  loadOwners,
+
+  isNavigatingBack,
+  goBack,
+
+  hasSaved,
+  loadingButtonCreate,
+
+  assetOwners,
+  assetDetails,
+} = useAsset();
+
+  /* -----------------------------------------------------*
+   * CONSTANT                                             *
+   * ---------------------------------------------------- */
 
 const route = useRoute();
-const store = useStore();
-// const assetDetails = computed(() => store.state.asset.selectedAsset);
-const assetDetails = computed(() => store.state.asset.assetDetails);
-const owners = computed(() => store.state.asset.owners);
-const masteritems = computed(() => store.state.masteritem.mItems);
-const loading = computed(() => store.state.asset.loading);
-const isLoading = ref(true);
+const dialogUpdateAssetDetail = ref(false);
+const owner_id = Number(route.params.owner_id);
+const item_id  = Number(route.params.item_id);
 
-const ownerId = route.params.ownerId as string;
-const itemId = route.params.itemId as string;
-const assetHeaders = computed(() => [
-  { title: 'Asset Name', value: 'item_name' },
-  { title: 'Owner Name', value: 'owner_name' },
-  { title: 'Quantity', value: 'quantity' },
-  { title: 'Cost of Goods', value: 'cogs' },
-  { title: 'Selling Price', value: 'selling_price' },
-  { title: 'Description', value: 'description' },
-  { title: 'Actions', value: 'actions', sortable: false },
-]);
+  /* -----------------------------------------------------*
+   * LIFECYCLE HOOKS                                      *
+   * ---------------------------------------------------- */
 
-const dialogUpdateAsset = ref(false);
-const defaultAsset: Asset = {
-  id: 0,
-  owner_id: 0,
-  item_id: 0,
-  item_name: '',
-  owner_name: '',
-  quantity: 0,
-  cogs: 0,
-  selling_price: 0,
-  description: '',
-  created_by: '',
-};
-const assetToUpdate = reactive<Asset>(defaultAsset);
-const isUpdatingAsset = ref(false);
-
-const snackbar = reactive({
-  show: false,
-  message: '',
-  color: '',
+onMounted(() => {
+  loadAssetDetail(owner_id, item_id);
+  loadOwners();
+  loadMasterItem();
 });
 
-const showSnackbar = (message: string, color: string) => {
-  snackbar.message = message;
-  snackbar.color = color;
-  snackbar.show = true;
-};
+ /* ------------------------------------------------------*
+   * FUNCTIONS                                            *
+   * ---------------------------------------------------- */
 
 const openEditAssetDialog = (asset: Asset) => {
-  console.log("Opening edit dialog for asset:", asset);
+  dialogUpdateAssetDetail.value = true;
   Object.assign(assetToUpdate, asset);
-  dialogUpdateAsset.value = true;
 };
 
 const updateAsset = async () => {
-  console.log("assetToUpdate.id:", assetToUpdate.id);
-  console.log("detail", assetToUpdate);
-  if (!assetToUpdate.id) return;
   try {
-    isUpdatingAsset.value = true;
-    await store.dispatch(`asset/${CREATE_ASSET}`, assetToUpdate);
-    showSnackbar('Asset updated successfully!', 'success');
-    dialogUpdateAsset.value = false;
-    // Reload asset details after update
-    await store.dispatch(`asset/${LOAD_ASSET_DETAILS_BY_SUMMARY}`, { ownerId, itemId });
+    await createAsset(assetToUpdate);
+    await loadAssetDetail(assetToUpdate.owner_id, assetToUpdate.item_id);
+    dialogUpdateAssetDetail.value = false;
+    
   } catch (error) {
-    showSnackbar('Failed to update asset.', 'error');
     console.error('Update failed:', error);
-  } finally {
-    isUpdatingAsset.value = false;
-  }
+  } 
 };
 
-onMounted(async () => {
-  if (ownerId && itemId) {
-    try {
-      isLoading.value = true;
-      await store.dispatch(`asset/${LOAD_ASSET_DETAILS_BY_SUMMARY}`, { ownerId, itemId });
-      await store.dispatch(`asset/${LOAD_OWNER}`);
-      await store.dispatch(`masteritem/${LOAD_MASTER_ITEM}`);
-      console.log("Asset Details from Store:", assetDetails.value);
-      console.log()
-    } catch (error) {
-      console.error('Failed to load asset details:', error);
-    } finally {
-      isLoading.value = false;
-    }
-  } else {
-    isLoading.value = false;
-  }
-});
 </script>
 
 <style scoped>

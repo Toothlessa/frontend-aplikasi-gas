@@ -26,6 +26,7 @@
           variant="elevated"
           class="text-white px-4"
           @click="$emit('confirm')"
+          :loading="loading"
         >
           <v-icon class="mr-1">mdi-check-decagram</v-icon>
           Confirm
@@ -36,30 +37,62 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits } from 'vue';
+/* -----------------------------------------------------*
+ * IMPORTS                                              *
+ * ---------------------------------------------------- */
+import { ref, watch } from 'vue';
 
+/* -----------------------------------------------------*
+ * PROPS                                                *
+ * Data yang diterima dari Parent (READ-ONLY)           *
+ * ---------------------------------------------------- */
 const props = defineProps<{
-  dialog: boolean;
-  title?: string;
-  message?: string;
+  dialog: boolean;   // kontrol buka / tutup dialog
+  title?: string;   // judul dialog (optional)
+  message?: string; // pesan dialog (optional)
+  loading: boolean; // kontrol loading dialog (optional)
 }>();
 
+/* -----------------------------------------------------*
+ * EMITS                                                *
+ * Event yang dikirim ke Parent                          *
+ * ---------------------------------------------------- */
 const emit = defineEmits<{
   (e: 'confirm'): void;
   (e: 'cancel'): void;
   (e: 'update:dialog', val: boolean): void;
 }>();
 
-const localDialog = ref(props.dialog);
+/* -----------------------------------------------------*
+ * LOCAL STATE                                          *
+ * State internal component                              *
+ * ---------------------------------------------------- */
+const localDialog = ref<boolean>(props.dialog);
 
-// Watch for changes from parent
-watch(() => props.dialog, (val) => {
-  localDialog.value = val;
-});
+/* -----------------------------------------------------*
+ * WATCHERS                                             *
+ * Sinkronisasi state Parent ↔ Child                     *
+ * ---------------------------------------------------- */
 
-// Emit changes to parent when closed
-watch(localDialog, (val) => {
-  emit('update:dialog', val);
-});
+/**
+ * Parent → Child
+ * Jika parent mengubah dialog, localDialog ikut berubah
+ */
+watch(
+  () => props.dialog,
+  (val) => {
+    localDialog.value = val;
+  }
+);
 
+/**
+ * Child → Parent
+ * Emit update untuk mendukung v-model:dialog
+ */
+watch(
+  localDialog,
+  (val) => {
+    emit('update:dialog', val);
+  }
+);
 </script>

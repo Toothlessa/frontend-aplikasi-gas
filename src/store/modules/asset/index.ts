@@ -12,8 +12,11 @@ const state = (): AssetState => ({
   owners: [],
   assetDetails: [],
   loading: false,
+  loadingOwner: false,
+  loadingButtonCreate: false,
   hasSaved: false,
   headerAsset: [],
+  headerAssetDetail: [],
   headerOwner: [],
   selectedAsset: null,
 });

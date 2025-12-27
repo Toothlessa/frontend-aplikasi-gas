@@ -6,11 +6,20 @@
       <v-divider></v-divider>
       <v-card rounded="xl" elevation="4" class="mt-n5">
         <v-data-table-virtual
-          :headers="localHeaderSummaryDebt"
+          :headers="headerOutstandingDebt"
           :items="outstandingDebtData"
           :loading="loadingData"
           class="modern-table text-black mt-n2"
         > 
+        <template #[`item.total_debt`]="{ item }">
+          {{ formatPrice(item.total_debt) }}
+        </template>
+        <template #[`item.total_pay`]="{ item }">
+          {{ formatPrice(item.total_pay) }}
+        </template>
+        <template #[`item.debt_left`]="{ item }">
+          {{ formatPrice(item.debt_left) }}
+        </template>
         </v-data-table-virtual>
       </v-card>
     </div>
@@ -18,20 +27,42 @@
   
 <script setup lang="ts">
 import { useDebt } from '@/composables/useDebt';
+import { useGlobal } from '@/composables/useGlobal';
 import { onMounted } from 'vue';
 
+  /* -----------------------------------------------------*
+   * COMPOSABLES                                          *
+   * ---------------------------------------------------- */
+const {
+  formatPrice,
+  handleError,
+} = useGlobal();
 
 const {
   outstandingDebtData,
   loadingData,
-  localHeaderSummaryDebt,
+  headerOutstandingDebt,
 
   fetchOutstandingDebt
 } = useDebt();
 
+  /* -----------------------------------------------------*
+   * ON MOUNTED                                           *
+   * ---------------------------------------------------- */
 onMounted(() => {
-  fetchOutstandingDebt();
+  onFetchOutstandingDebt();
 });
+
+  /* -----------------------------------------------------*
+   * FUNCTIONS                                            *
+   * ---------------------------------------------------- */
+const onFetchOutstandingDebt = async () => {
+  try {
+    fetchOutstandingDebt();
+  } catch (e) {
+    handleError(e);
+  }
+};
 
 </script>
   

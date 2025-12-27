@@ -3,6 +3,7 @@ export interface CustomerState {
   topCustomerTransaction: TopCustomerTransaction[];
   headerCustomer: HeaderCustomer[];
   loading: boolean;
+  loadingButtonCreate: boolean;
   hasSaved: boolean;
 }
 
@@ -42,12 +43,12 @@ export interface HeaderCustomer {
 }
 
 export const headerCustomer: HeaderCustomer[] = [
-    { title: 'Customer Name', align: 'start', key: 'customer_name' },
-    { title: 'Type', align: 'start', key: 'customer_type' },
-    { title: 'NIK', align: 'start', key: 'nik' },
-    { title: 'E-mail', align: 'start', key: 'email' },
-    { title: 'Address', align: 'start', key: 'address' },
-    { title: 'Handphone', align: 'center', key: 'phone'},
-    { title: 'Status', align: 'start', key: 'active_flag'},
-    { title: 'Actions', align: 'center', key: 'actions', sortable: false },
+  { title: 'Customer Name', align: 'start', key: 'customer_name' },
+  { title: 'Type', align: 'start', key: 'customer_type' },
+  { title: 'NIK', align: 'start', key: 'nik' },
+  { title: 'E-mail', align: 'start', key: 'email' },
+  { title: 'Address', align: 'start', key: 'address' },
+  { title: 'Handphone', align: 'center', key: 'phone' },
+  { title: 'Status', align: 'start', key: 'active_flag' },
+  { title: 'Actions', align: 'center', key: 'actions', sortable: false },
 ]

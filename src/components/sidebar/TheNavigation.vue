@@ -201,7 +201,11 @@
 import { onMounted, watch } from 'vue';
 import { useUser } from '@/composables/useUser';
 import { useNavigation } from '@/composables/useNavigation';
+import router from '@/router';
 
+  /*================================================================*
+  * COMPOSABLES                                                     *
+  * ================================================================*/
 const {
   userData,
   userLoad,
@@ -224,12 +228,28 @@ const {
   appBarStyles,
 
   toggleDrawerLocation,
-  onLogout,
+  logout,
 } = useNavigation();
 
+  /*================================================================*
+  * LIFECYCLE & HOOKS                                               *
+  * ================================================================*/
 onMounted(() => {
   userLoad();
 });
+
+  /*================================================================*
+  * METHODS                                                         *
+  * ================================================================*/
+  const onLogout = async() => {
+    try {
+      await logout();
+      router.push(`/login`)
+    }catch(error){
+      console.error('Logout faiiled', error);
+    }
+  }
+
 
 // Watch for theme changes and persist
 watch(isDarkTheme, (newVal) => {

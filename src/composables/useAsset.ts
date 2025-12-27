@@ -1,107 +1,152 @@
+import { computed, handleError, reactive, ref } from "vue";
+
 import router from "@/router";
 import store from "@/store/store";
-import { CREATE_ASSET, CREATE_OWNER, LOAD_ASSET, LOAD_OWNER } from "@/store/storeconstant";
-import { Asset, headerAsset, Owner } from "@/types";
-import { computed, reactive, ref } from "vue";
+
+import {
+  CREATE_ASSET,
+  CREATE_OWNER,
+  LOAD_ASSET,
+  LOAD_ASSET_DETAILS_BY_SUMMARY,
+  LOAD_OWNER,
+} from "@/store/storeconstant";
+
+import { Asset, headerAsset, headerAssetDetail, Owner } from "@/types";
 
 export function useAsset() {
+  /* -----------------------------------------------------*
+   * REACTIVE OBJECTS                                     *
+   * ---------------------------------------------------- */
+  const dialogOwner = ref(false);
+  const searchQuery = ref("");
+  const isEdit = ref(false);
 
-  const openDialogOwner = ref(false);
-
-  const searchQuery = ref('');
-  const isCreatingAsset = ref(false);
-
-  const assetHeader = headerAsset;
+  const isNavigatingBack = ref(false);
+  const loadingDetailKey = ref<string | null>(null);
 
   const assetData = reactive<Partial<Asset>>({});
   const newOwnerData = ref<Partial<Owner>>({});
-  const isEdit = ref(false);
 
-  const snackbar = reactive({
-    show: false,
-    message: '',
-    color: '',
+  const createDefaultAsset = (): Asset => ({
+    id: 0,
+    owner_id: 0,
+    item_id: 0,
+    owner_name: '',
+    item_name: '',
+    quantity: 0,
+    cogs: 0,
+    selling_price: 0,
+    description: '',
+    created_at: '',
+    created_by: '',
   });
-  const showSnackbar = (message: string, color: string) => {
-    snackbar.message = message;
-    snackbar.color = color;
-    snackbar.show = true;
-  };
+
+  const assetToUpdate = reactive<Asset>(createDefaultAsset());
+
+  /* -----------------------------------------------------*
+   * FORM HELPERS                                         *
+   * ---------------------------------------------------- */
   const resetAssetForm = () => {
     Object.assign(assetData, {
-      asset_name: '',
-      owner_id: '',
+      asset_name: "",
+      owner_id: "",
       quantity: 0,
       cogs: 0,
       selling_price: 0,
-      description: '',
+      description: "",
     });
   };
-  const goToAssetDetails = (ownerId: number, itemId: number) => {
-    router.push({ name: 'AssetDetails', params: { ownerId, itemId } });
+
+  /* -----------------------------------------------------*
+   * NAVIGATION & EVENT HANDLERS                           *
+   * ---------------------------------------------------- */
+  const goToAssetDetails = (owner_id: number, item_id: number) => {
+    loadingDetailKey.value = `${owner_id}-${item_id}`;
+    setTimeout(() => {
+      router.push({
+        name: 'AssetDetails',
+        params: {
+          owner_id,
+          item_id
+        },
+      });
+    }, 300);
   };
+
+  const goBack = () => {
+    isNavigatingBack.value = true;
+    setTimeout(() => {
+      router.back();
+    }, 300);
+  };
+
   const onUpdateOwner = (item: Owner) => {
-    newOwnerData.value = { ...item }; // Set item to pass to the dialog
+    newOwnerData.value = { ...item };
   };
 
-
-  // --- Computed Properties ---
+  /* -----------------------------------------------------*
+   * COMPUTED PROPERTIES                                  *
+   * ---------------------------------------------------- */
   const assetOwners = computed<Owner[]>(() => store.state.asset.owners);
   const assets = computed<Asset[]>(() => store.state.asset.assets);
+  const assetDetails = computed(() => store.state.asset.assetDetails);
 
+  const hasSaved = computed(() => store.state.asset.hasSaved);
+  const loading = computed(() => store.state.asset.loading);
+  const loadingOwner = computed(() => store.state.asset.loadingOwner);
+  const loadingButtonCreate = computed(() => store.state.asset.loadingButtonCreate);
+
+  /* -----------------------------------------------------*
+   * VUEX ACTION WRAPPERS                                 *
+   * ---------------------------------------------------- */
   const loadAssets = () => store.dispatch(`asset/${LOAD_ASSET}`);
   const loadOwners = () => store.dispatch(`asset/${LOAD_OWNER}`);
-  const loading = computed(() => store.state.asset.loading);
-
-  const createAsset = async () => {
-    try {
-      isCreatingAsset.value = true;
-      await store.dispatch(`asset/${CREATE_ASSET}`, assetData);
-      showSnackbar('Asset created successfully!', 'success');
-      resetAssetForm();
-    } catch (error) {
-      showSnackbar('Failed to create asset.', 'error');
-    } finally {
-      isCreatingAsset.value = false;
-    }
+  const loadAssetDetail = (owner_id: number, item_id: number) => {
+    return store.dispatch(`asset/${LOAD_ASSET_DETAILS_BY_SUMMARY}`, {
+      owner_id,
+      item_id,
+    });
   };
 
-  const createOwner = async (ownerData: Partial<Owner>) => {
-    try {
-      await store.dispatch(`asset/${CREATE_OWNER}`, ownerData);
-      showSnackbar('Owner created successfully!', 'success');
-      openDialogOwner.value = false;
-    } catch (error) {
-      showSnackbar('Failed to create owner.', 'error');
-    }
-  };
+  const createAsset = (asset: Partial<Asset>) => store.dispatch(`asset/${CREATE_ASSET}`, asset);
+  const createOwner = (ownerData: Partial<Owner>) => store.dispatch(`asset/${CREATE_OWNER}`, ownerData);
 
+  /* -----------------------------------------------------*
+   * EXPOSED API                                          *
+   * ---------------------------------------------------- */
   return {
-    openDialogOwner,
-
+    dialogOwner,
     searchQuery,
-    isCreatingAsset,
 
-    // table
-    assetHeader,
+    headerAsset,
+    headerAssetDetail,
 
-    assetData,
     newOwnerData,
     isEdit,
 
-    snackbar,
-    showSnackbar,
+    loadingDetailKey,
+    isNavigatingBack,
+    goBack,
 
-    // computed properties
+    assetData,
+    assetToUpdate,
     assetOwners,
     assets,
-    loadAssets,
-    loadOwners,
-    loading,
+    assetDetails,
 
-    //call vuex
+    hasSaved,
+    loading,
+    loadingOwner,
+    loadingButtonCreate,
+
+    // handleError,
+
     createAsset,
     createOwner,
+
+    loadAssets,
+    loadOwners,
+    loadAssetDetail,
 
     resetAssetForm,
     goToAssetDetails,

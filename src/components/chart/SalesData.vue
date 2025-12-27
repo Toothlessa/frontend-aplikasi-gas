@@ -21,9 +21,9 @@
 </template>
 
 <script setup lang="ts">
-/* -------------------------------
-   IMPORT CHART.JS & VUE-CHARTJS
---------------------------------*/
+/* -----------------------------------------------------*
+  * IMPORT CHART.JS & VUE-CHARTJS                          *
+  * ---------------------------------------------------- */
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -46,15 +46,22 @@ ChartJS.register(
   Legend
 );
 
-/* -------------------------------
-   IMPORT TRANSACTION LOGIC
---------------------------------*/
-import { onMounted, ref, watch } from "vue";
+  /* -----------------------------------------------------*
+  * IMPORT LOGIC                                         *
+  * ---------------------------------------------------- */
+import { onMounted, watch } from "vue";
 import { useTransaction } from "@/composables/useTransaction";
 import { useLineChart } from "@/composables/chart/useLineChart";
+import { useGlobal } from "@/composables/useGlobal";
 
-/* composable */
-const { last30DaysTransaction, fetchLast30DaysSale } = useTransaction();
+  /* -----------------------------------------------------*
+  * COMPOSABLE                                           *
+  * ---------------------------------------------------- */
+const { 
+        last30DaysTransaction, 
+        fetchLast30DaysSale 
+      } = useTransaction();
+
 const {
   data,
   options,
@@ -63,16 +70,20 @@ const {
   plugins,
 } = useLineChart();
 
-/* -------------------------------
-   FETCH API ON LOAD
---------------------------------*/
+const { 
+        handleError,
+      } = useGlobal();
+
+  /* -----------------------------------------------------*
+   * ON MOUNTED                                           *
+   * ---------------------------------------------------- */
 onMounted(() => {
-  fetchLast30DaysSale();
+  onFetchLast30DaysSale();
 });
 
-/* -------------------------------
-   WATCH TRANSACTION DATA
---------------------------------*/
+  /* -----------------------------------------------------*
+   * WATCHERS                                             *
+   * ---------------------------------------------------- */
 watch(
   last30DaysTransaction,
   (val) => {
@@ -98,4 +109,16 @@ watch(
   },
   { immediate: true }
 );
+
+  /* -----------------------------------------------------*
+   * FUNCTIONS                                            *
+   * ---------------------------------------------------- */
+   const onFetchLast30DaysSale = async () => {
+    try {
+      fetchLast30DaysSale();
+    } catch (e) {
+      handleError(e);
+    }
+   };
+
 </script>

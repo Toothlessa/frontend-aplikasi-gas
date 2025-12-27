@@ -7,6 +7,7 @@ import {
   SET_DATA_TOP_CUSTOMER,
   SET_HASSAVED,
   SET_LOADING,
+  SET_LOADING_BUTTON_CREATE,
   UPLOAD_CUSTOMER
 } from '@/store/storeconstant';
 import { ActionTree } from 'vuex';
@@ -17,6 +18,7 @@ import { CustomerService } from '@/services/CustomerService';
 const actions: ActionTree<CustomerState, RootState> = {
 
   async [CREATE_CUSTOMER]({ commit, dispatch }, customer) {
+    commit(SET_LOADING_BUTTON_CREATE, true);
     try {
 
       await CustomerService.createOrUpdateCustomer(customer);
@@ -27,9 +29,11 @@ const actions: ActionTree<CustomerState, RootState> = {
         commit(SET_HASSAVED, false)
       }, 2000);
 
-    } catch (error) {
-      console.error('Failed to create customer:', error);
-      throw error;
+    } catch (e) {
+      console.error('Failed to create customer:', e);
+      throw e;
+    } finally {
+      commit(SET_LOADING_BUTTON_CREATE, false);
     }
   },
 
@@ -69,20 +73,20 @@ const actions: ActionTree<CustomerState, RootState> = {
   },
 
   async[UPLOAD_CUSTOMER]({ commit, dispatch }, file: File) {
+    commit(SET_LOADING, true);
     try {
-
       await CustomerService.uploadCustomer(file);
-
       dispatch(LOAD_CUSTOMER_DATA);
+
       commit(SET_HASSAVED, true);
       setTimeout(() => {
-        commit(SET_HASSAVED, true);
+        commit(SET_HASSAVED, false);
       }, 2000);
     } catch (error) {
       console.error('Failed to upload customers: ', error);
       throw error;
     } finally {
-      commit(SET_HASSAVED, false);
+      commit(SET_LOADING, false);
     }
   },
 

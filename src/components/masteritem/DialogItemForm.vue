@@ -90,7 +90,9 @@
 import { ref, watch, reactive } from 'vue';
 import type { MasterItem, Field } from '@/types/MasterItem';
 
-// 1. Define props and emits
+/* ======================================================*
+ * PROPS                                                  *
+ * ======================================================*/
 const props = defineProps<{
   dialog: boolean;
   isEdit: boolean;
@@ -98,6 +100,9 @@ const props = defineProps<{
   allFields: Field[];
 }>();
 
+/* ======================================================*
+ * EMITS                                                  *
+ * ======================================================*/
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'submit', item: Partial<MasterItem>): void;
@@ -105,10 +110,21 @@ const emit = defineEmits<{
   (e: 'update:dialog', val: boolean): void;
 }>();
 
-// 2. Create a local ref for dialog
-const localDialog = ref(props.dialog);
+/* ======================================================*
+ * STATE — DIALOG                                         *
+ * ======================================================*/
+const localDialog = ref<boolean>(props.dialog);
+
+/* ======================================================*
+ * STATE — FORM ITEM                                      *
+ * ======================================================*/
 const localItem = reactive<Partial<MasterItem>>({});
 
+/* ======================================================*
+ * WATCHERS                                               *
+ * ======================================================*/
+
+// Populate localItem when dialog opens or editedItem changes
 watch(
   () => [props.dialog, props.editedItem],
   ([dialog, newVal]) => {
@@ -119,16 +135,23 @@ watch(
   { immediate: true }
 );
 
-// 3. Sync parent prop → local state
-watch(() => props.dialog, (val) => {
-  localDialog.value = val;
-});
+// Sync dialog state from parent → local
+watch(
+  () => props.dialog,
+  (val) => {
+    localDialog.value = val;
+  }
+);
 
-// 4. Sync local state → emit to parent
-watch(localDialog, (val) => {
-  emit('update:dialog', val);
-});
+// Emit dialog state changes from local → parent
+watch(
+  localDialog,
+  (val) => {
+    emit('update:dialog', val);
+  }
+);
 </script>
+
 
 <style scoped>
 .dialog-card {

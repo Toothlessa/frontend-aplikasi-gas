@@ -36,6 +36,7 @@
           class="save-btn"
           @click="handleSave"
           rounded="pill"
+          :loading="loadingButtonOwner"
         >
           Save        
         </v-btn>
@@ -44,8 +45,7 @@
       <!-- Search Bar -->
       <v-toolbar flat class="bg-grey-lighten-4 pa-2" density="comfortable">
         <v-text-field
-          :model-value="search"
-          @update:model-value="$emit('update:search', $event)"
+          v-model="search"
           label="Search Owners"
           variant="solo-filled"
           density="comfortable"
@@ -62,12 +62,12 @@
         :headers="headers"
         :items="filteredItems"
         class="modern-table"
-        :filter-keys="['name']"
-        :loading="loading"
+        :loading="loadingOwner"
         loading-text="Loading owners..."
         density="comfortable"
         item-value="id"
         hover
+        height="300"
       >
         <template v-slot:[`item.active_flag`]="{ item }">
           <v-chip
@@ -87,7 +87,7 @@
             size="small"
             variant="text"
             class="mr-1 text-primary"
-            @click="$emit('updateOwner', item)"
+            @click="handleEdit(item)"
           />
           <v-btn
             icon="mdi-radioactive"
@@ -110,72 +110,129 @@
 </template>
 
 <script setup lang="ts">
-import { watch, computed } from 'vue';
+import { useOwner } from '@/composables/useOwner';
+import { watch, computed, reactive, ref } from "vue";
 import type { Owner, HeaderOwner } from '@/types/Asset';
 import DialogDeactivate from '@/components/globalComponent/DialogDeactivate.vue';
-import { useOwner } from '@/composables/useOwner';
+import { useGlobal } from '@/composables/useGlobal';
 
+  /*------------------------------------------------------*
+  * PROPS                                                 *
+  *-------------------------------------------------------*/
 const props = defineProps<{
   dialog: boolean;
-  newOwner: Partial<Owner>;
-  search: string;
   owners: Owner[];
   headers: HeaderOwner[];
-  loading: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'submit', item: Partial<Owner>): void;
-  (e: 'updateOwner', item: Owner): void;
-  (e: 'deactivate', item: Owner): void;
-  (e: 'update:search', search: string): void;
 }>();
 
+  /*------------------------------------------------------*
+  * COMPOSABLE                                              *
+  *-------------------------------------------------------*/
 const {
-  localDialog,
-  dialogDeactivate,
+  //helpers
+  //error
+  handleError,
+} = useGlobal();
 
-  localOwner,
-  defaultOwner,
+const {
+  loadingOwner,
+  loadingButtonOwner,
+  loadOwners,
+  createOwner,
+  updateOwner,
+  deactivateOwner,
+} = useOwner();
 
-  handleClose,
-  handleSave,
 
-  openDeactivateDialog,
-  onDeactivateConfirm,
-        
-} = useOwner(props, emit);
+  /*------------------------------------------------------*
+  * LOCAL VARIABLES                                       *
+  *-------------------------------------------------------*/
+  const dialogDeactivate = ref(false);
+  const localDialog = ref(props.dialog);
+  const search = ref('');
 
-// Sync localDialog with parent
-watch(() => props.dialog, (val) => {
-  localDialog.value = val;
-});
+  const selectedItem = ref<Owner | null>(null);
+  const localOwner = reactive<Partial<Owner>>({});
 
-// When newCategory changes and dialog is open, fill localCategory
+  const defaultOwner: Partial<Owner> = {
+    name: '',
+    active_flag: true,
+    inactive_date: '',
+  };
+
+  /*------------------------------------------------------*
+  * WATCHERS                                              *
+  *-------------------------------------------------------*/
 watch(
-  () => [props.dialog, props.newOwner],
-  ([dialog, newVal]) => {
-    if (dialog) {
-      // Clear localOwner to ensure a fresh start
-      Object.assign(localOwner, defaultOwner); // Reset to default
-      if (newVal) {
-        Object.assign(localOwner, newVal); // Assign new values if available
-      }
+  () => props.dialog,
+  (val) => {
+    localDialog.value = val;
+    if (val) {
+      loadOwners();
+      Object.assign(localOwner, defaultOwner);
+      delete localOwner.id;
     }
   },
   { immediate: true }
 );
 
-  // Filtered category list
-const filteredItems = computed(() => {
-  if (!props.search) return props.owners;
 
-  const keyword = props.search.toLowerCase();
+  /*------------------------------------------------------*
+  * LOCAL FUNCTIONS                                       *
+  *-------------------------------------------------------*/
+ const filteredItems = computed(() => {
+  if (!search.value) return props.owners;
+
+  const keyword = search.value.toLowerCase();
   return props.owners.filter(item =>
     item.name?.toLowerCase().includes(keyword)
   );
 });
+
+ const handleEdit = (item: Owner) => {
+    Object.assign(localOwner, item);
+  };
+
+  const openDeactivateDialog = (item: Owner) => {
+    selectedItem.value = item;
+    dialogDeactivate.value = true;
+  };
+
+  const handleClose = () => {
+    emit('close');
+    Object.assign(localOwner, defaultOwner);
+    delete localOwner.id; 
+  };
+
+  const handleSave = async () => {
+    try {
+      if (localOwner.id) {
+        await updateOwner(localOwner as Owner);
+      } else {
+        await createOwner(localOwner);
+      }
+      setTimeout(() => {
+        handleClose();
+      }, 300);
+    } catch (e) {
+        handleError(e);
+      }
+  };
+
+  const onDeactivateConfirm = async () => {
+    if (selectedItem.value) {
+      try {
+        await deactivateOwner(selectedItem.value.id);
+        dialogDeactivate.value = false;
+      } catch (e) {
+        handleError(e);
+      }
+    }
+  };
 
 </script>
 

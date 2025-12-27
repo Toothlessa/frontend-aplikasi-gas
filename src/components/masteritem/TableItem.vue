@@ -4,25 +4,11 @@
     :items="filteredItems"
     :loading="loading"
     loading-text="Fetching item data..."
-    class="modern-table"
+    class="modern-table-item"
     density="comfortable"
     hover
     item-value="id"
   >
-    <!-- Custom Header -->
-    <template #header="{ props: headerProps }">
-      <thead class="table-header">
-        <tr>
-          <th 
-            v-for="header in headerProps.headers"
-            :key="header.key"
-            class="text-left px-4 py-3 font-weight-bold text-uppercase"
-          >
-            {{ header.title }}
-          </th>
-        </tr>
-      </thead>
-    </template>
 
     <!-- In Stock -->
     <template #[`item.in_stock`]="{ item }">
@@ -148,4 +134,11 @@ const filteredItems = computed(() => {
   color: #00ACC1; /* Cyan on hover */
   transform: scale(1.1);
 }
+
+.modern-table-item thead th {
+  text-transform: uppercase;
+  font-weight: bold;
+  padding: 12px 16px;
+}
+
 </style>

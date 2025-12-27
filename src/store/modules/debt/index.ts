@@ -12,6 +12,7 @@ const state = (): DebtState => ({
     outstandingDebts: [],
     headerDetailDebt: [],
     headerSummaryDebt: [],
+    headerOutstandingDebt: [],
     loading: false,
     loadingOne: false,
     loadingButtonCreate: false,

@@ -58,9 +58,9 @@ export function useTransaction() {
     { name: "Rp 20.000", value: 20000 }
   ];
 
-  /* ----------------------------------------------------
-   * REACTIVE OBJECTS
-   * ---------------------------------------------------- */
+  /* -----------------------------------------------------*
+   * REACTIVE OBJECTS                                     *
+   * -----------------------------------------------------*/
   const defaultItem: Partial<Transaction> = {
     id: null,
     quantity: null,
@@ -160,7 +160,8 @@ export function useTransaction() {
   /* ----------------------------------------------------
    * ACTIONS
    * ---------------------------------------------------- */
-
+  const fetchLast30DaysSale = () => store.dispatch(`transaction/${LOAD_LAST_30_DAYS_TRANSACTION}`);
+  const fetchOustandingTransaction = () => store.dispatch(`transaction/${LOAD_OUTSTANDING_TRANSACTION}`);
   const save = async () => {
     try {
       error.value = "";
@@ -209,22 +210,6 @@ export function useTransaction() {
       fieldDisabled.value =
         getDateOptions(new Date()) === formattedDate;
 
-    } catch (e) {
-      handleError(e);
-    }
-  };
-
-  const fetchOustandingTransaction = async () => {
-    try {
-      await store.dispatch(`transaction/${LOAD_OUTSTANDING_TRANSACTION}`);
-    } catch (e) {
-      handleError(e);
-    }
-  };
-
-  const fetchLast30DaysSale = async () => {
-    try {
-      await store.dispatch(`transaction/${LOAD_LAST_30_DAYS_TRANSACTION}`);
     } catch (e) {
       handleError(e);
     }

@@ -20,6 +20,9 @@
             mdi-pencil-outline
           </v-icon>
         </template>
+        <template #[`item.total`]="{ item }">
+          {{ formatPrice(item.total) }}
+        </template>
       </v-data-table-virtual>
     </v-card>
 
@@ -83,6 +86,16 @@
 import { onMounted } from "vue";
 import { useTransaction } from "@/composables/useTransaction";
 import { Transaction } from "@/types";
+import { useGlobal } from "@/composables/useGlobal";
+
+  /* -----------------------------------------------------*
+   * COMPOSABLES                                          *
+   * ---------------------------------------------------- */
+const{
+  formatPrice,
+  //helpers
+  handleError,
+} = useGlobal();
 
 const{
   //dialog
@@ -95,22 +108,20 @@ const{
   loading,
   loadingButtonUpdate,
   //function
-  handleError,
   fetchOustandingTransaction,
   updateDescriptionTransaction,
 } = useTransaction();
 
-// ---------------------
-// LIFECYCLE
-// ---------------------
+  /* -----------------------------------------------------*
+   * LIFECYCLE                                            *
+   * ---------------------------------------------------- */
 onMounted(() => {
-  fetchOustandingTransaction();
+  onFetchOutstandingTransaction();
 });
 
-// ---------------------
-// FUNCTIONS
-// ---------------------
-
+  /* -----------------------------------------------------*
+   * FUNCTIONS                                            *
+   * ---------------------------------------------------- */
 const editOutsTrx = async(item: Transaction) => {
   Object.assign(transactionUpdateDescription, item);
   DialogUpdateDescription.value = true;
@@ -121,8 +132,16 @@ const updateDescriptionTranaction = async() => {
     await updateDescriptionTransaction();
     DialogUpdateDescription.value = false;
     
-  }catch(error){
-    handleError(error);
+  }catch(e){
+    handleError(e);
+  }
+};
+
+const onFetchOutstandingTransaction = async() => {
+  try {
+    await fetchOustandingTransaction();
+  } catch (e) {
+    handleError(e);
   }
 };
 

@@ -71,7 +71,7 @@
               rounded="lg"
               :disabled="isSaveDisabled"
               :loading="loadingButtonCreate"
-              @click="saveDebt"
+              @click="onSaveDebt"
             >
               <v-icon start>mdi-content-save</v-icon>
               Save Debt
@@ -105,7 +105,7 @@
                   size="small"
                   variant="text"
                   color="blue-grey"
-                  @click="detailDebt(item)"
+                  @click="onLoadDetailDebt(item)"
                 />
               </template>
               <template v-slot:[`item.total_debt`]="{ item }">
@@ -113,6 +113,9 @@
               </template>
               <template v-slot:[`item.total_pay`]="{ item }">
                 {{ formatPrice(item.total_pay) }}
+              </template>
+              <template v-slot:[`item.debt_left`]="{ item }">
+                {{ formatPrice(item.debt_left) }}
               </template>
             </v-data-table-virtual>
           </v-card-text>
@@ -228,7 +231,7 @@
           <v-btn 
             class="debt-action-btn text-white"
             variant="elevated" 
-            @click="updateDebt" 
+            @click="onUpdateDebt" 
             rounded="lg"
             :loading="loadingButtonUpdate"
           >
@@ -259,10 +262,18 @@ import { onMounted } from 'vue';
 import { useDebt } from '@/composables/useDebt';
 import { useCustomer } from '@/composables/useCustomer';
 import { useGlobal } from '@/composables/useGlobal';
+import { Debt } from '@/types';
 
+  /* -----------------------------------------------------*
+   * COMPOSABLES                                          *
+   * ---------------------------------------------------- */
 const{
   search,
   formatPrice,
+
+  alert,
+  handleError,
+  error,
 } = useGlobal();
 
 const {
@@ -285,16 +296,13 @@ const {
     disableAmountPay,
     disableTotal,
 
-    // Error Handling
-    alert,
-    error,
-
     // Computed & Utils
     isSaveDisabled,
 
     // API & Actions
-    debtSummaryLoad,
-    detailDebt,
+    resetDebtData,
+    loadSummaryDebt,
+    loadDetailDebt,
     saveDebt,
     editDebt,
     updateDebt,
@@ -305,11 +313,72 @@ const {
   loadCustomerData,
 } = useCustomer();
 
+  /* -----------------------------------------------------*
+   * LIFECYCLE                                            *
+   * ---------------------------------------------------- */
 onMounted(() => {
-  debtSummaryLoad();
-  // customerLoad();
+  onLoadSummaryDebt();
   loadCustomerData();
 });
+
+  /* -----------------------------------------------------*
+   * METHODS                                              *
+   * ---------------------------------------------------- */
+const onSaveDebt = async() => {
+  const payload = { ...debtData };
+
+  if(isPay.value){
+    payload.total = 0;
+  }else{
+    payload.total = payload.amount_pay;
+    payload.amount_pay = 0;
+  }
+
+  try{
+    await saveDebt(payload);
+    resetDebtData(debtData);
+    isPay.value = false;
+  }catch(e){
+    handleError(e);
+    alert.value = true;
+  }
+};
+
+const onLoadSummaryDebt = async() => {
+  try{
+    await loadSummaryDebt();
+  }catch(e){
+    handleError(e);
+  }
+};
+
+const onLoadDetailDebt = async(item: Partial<Debt>) => {
+  Object.assign(debtUpdateData, item);
+  error.value = '';
+  try{
+    DialogDetail.value  = true;
+    await loadDetailDebt();
+  }catch(e){
+    handleError(e);
+    alert.value = true;
+  }
+};
+
+const onUpdateDebt = async() => {
+  try{
+    await updateDebt();
+    await loadDetailDebt();
+
+    setTimeout(() => {
+      DialogUpdate.value = false;
+      resetDebtData(debtUpdateData);
+    }, 1000);
+  }catch(e){
+    handleError(e);
+    alert.value = true;
+  }
+};
+
 </script>
 
 <style scoped>

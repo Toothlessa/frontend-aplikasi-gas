@@ -13,12 +13,12 @@
 
     <!-- Master Customer Table -->
     <TableCustomer
-      :headers="headersLocal"
+      :headers="headerCustomer"
       :items="customers"
       :search="search"
       :loading="loading"
       @edit="editItem"
-      @deactivate="deactivateCustomer"
+      @deactivate="deactiveCustomer"
     />
 
     <!-- Error & Success Snackbars -->
@@ -31,17 +31,19 @@
       :is-edit="isEditMode"
       :edited-item="editedItem"
       :all-fields="allFields"
+      :loading-button-create="loadingButtonCreate"
       @close="DialogClose"
-      @submit="onSubmit"
-      @update="onUpdate"
+      @submit="onCreateCustomer"
+      @update="onUpdateCustomer"
     />
 
     <!-- Deactivate Confirmation Dialog -->
     <DialogDeactivate
       :dialog="DialogOpenDeactive"
+      :loading="loading"
       title="Confirm Status Change"
       message="Are you sure you want to change this customer's status?"
-      @confirm="onDeactivated"
+      @confirm="onDeactivateCustomer"
       @cancel="DialogClose"
     />
 
@@ -66,7 +68,18 @@ import DialogCustomerForm from './DialogCustomerForm.vue';
 import DialogDeactivate from './DialogDeactivate.vue';
 import DialogUploadCustomer from './DialogUploadCustomer.vue';
 import { useCustomer } from '@/composables/useCustomer';
+import { useGlobal } from '@/composables/useGlobal';
 
+  /* -----------------------------------------------------*
+   * COMPOSABLES                                          *
+   * ---------------------------------------------------- */
+
+const {
+  error,
+  showError,
+  errorMessages,
+  handleError,
+} = useGlobal();
 
 const {
   DialogOpenCreate,
@@ -78,32 +91,92 @@ const {
     search,
 
     editedItem,
-
+    editedIndex,
     csvFile,
     uploading,
 
-    headersLocal,
+    headerCustomer,
 
     allFields,
     customers,
     loading,
+    loadingButtonCreate,
     hasSaved,
     isEditMode,
 
+    createCustomer,
+    updateCustomer,
     loadCustomerData,
 
-    editItem,
-    onSubmit,
-    onUpdate,
     deactivateCustomer,
-    onDeactivated,
-    onUploadCustomer,
-    showError,
-    errorMessages,
+    uploadCustomer,
 } = useCustomer();
 
-//mounted
-onMounted(loadCustomerData);
+  /* -----------------------------------------------------*
+   * HOOKS & LIFECYCLE                                    *
+   * ---------------------------------------------------- */
+onMounted(
+  loadCustomerData
+);
+
+  /* -----------------------------------------------------*
+   * METHODS                                              *
+   * ---------------------------------------------------- */
+
+  const editItem = (item: Customer) => {
+    editedIndex.value = customers.value.indexOf(item);
+    Object.assign(editedItem, item);
+    error.value = '';
+    DialogOpenCreate.value = true;
+  };
+
+  const onCreateCustomer = async(item: Partial<Customer>) => {
+    try {
+      Object.assign(editedItem, item);
+      await createCustomer();
+      DialogClose();
+    } catch (e) {
+      handleError(e);
+    }
+  };
+
+  const onUpdateCustomer = async(item: Partial<Customer>) => {
+    try {
+      Object.assign(editedItem, item);
+      await updateCustomer();
+      DialogClose();
+    } catch (e) {
+      handleError(e);
+    }
+  };
+
+  /* DEACTIVE CUSTOMER------------------------------------*/
+  const deactiveCustomer = (item: Customer) => {
+    Object.assign(editedItem, item);
+    DialogOpenDeactive.value = true;
+  };
+
+  const onDeactivateCustomer = async() => {
+    try {
+      await deactivateCustomer();
+      DialogClose();
+    } catch (e) {
+      handleError(e);
+    }
+  };
+
+  const onUploadCustomer = async() => {
+    try{
+      if(!csvFile.value){
+        handleError('Please select a CSV file to upload.');
+        return;
+      }
+      await uploadCustomer();
+      DialogClose();
+    } catch (e) {
+      handleError(e);
+    }
+  };
 
 </script>
 

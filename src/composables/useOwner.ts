@@ -1,73 +1,33 @@
 import store from "@/store/store";
-import { DEACTIVE_OWNER } from "@/store/storeconstant";
+import { CREATE_OWNER, DEACTIVE_OWNER, LOAD_OWNER } from "@/store/storeconstant";
 import { Owner } from "@/types";
-import { reactive, ref } from "vue";
+import { computed } from "vue";
 
-export function useOwner(props: any, emit: any) {
+export function useOwner() {
 
-    const dialogDeactivate = ref(false);
-    const localDialog = ref(props.dialog);
+    /*-----------------------------------------------------*
+    * COMPUTED PROPERTIES                                  *
+    * ---------------------------------------------------- */
+    const loadingOwner = computed(() => store.state.asset.loading);
+    const loadingButtonOwner = computed(() => store.state.asset.loadingOwner);
+    const assetOwners = computed<Owner[]>(() => store.state.asset.owners);
 
-    const selectedItem = ref<Owner | null>(null);
-    const localOwner = reactive<Partial<Owner>>({});
-
-    const defaultOwner: Partial<Owner> = {
-        id: 0,
-        name: '',
-        active_flag: true,
-        inactive_date: '',
-    };
-
-    const closeDialog = () => emit('close')
-    const submitOwner = (item: Partial<Owner>) => emit('submit', item)
-
-    const handleClose = () => {
-        emit('close');
-        Object.assign(localOwner, defaultOwner);
-    };
-
-    const handleSave = () => {
-        emit('submit', localOwner);
-        handleClose();
-    };
-
-    const openDeactivateDialog = (item: Owner) => {
-        selectedItem.value = item;
-        dialogDeactivate.value = true;
-        console.log(selectedItem.value);
-    };
-
-    const onDeactivateConfirm = async () => {
-        console.log('Start onDeactivate Confirm');
-        if (selectedItem.value) {
-            
-            try {
-            console.log('execute');
-            await store.dispatch(`asset/${DEACTIVE_OWNER}`, selectedItem.value.id);
-            dialogDeactivate.value = false;
-            } catch (e) {
-            // Handle error, e.g., show a snackbar
-            console.error('Deactivation failed:', e);
-            }
-        }
-    };
+    /*-----------------------------------------------------*
+    * VUEX ACTION                                          *
+    * ---------------------------------------------------- */
+    const loadOwners = () => store.dispatch(`asset/${LOAD_OWNER}`);
+    const createOwner = (ownerData: Partial<Owner>) => store.dispatch(`asset/${CREATE_OWNER}`, ownerData);
+    const updateOwner = (ownerData: Owner) => store.dispatch(`asset/${CREATE_OWNER}`, ownerData);
+    const deactivateOwner = (owner_id: number) => store.dispatch(`asset/${DEACTIVE_OWNER}`, owner_id);
 
     return {
+        loadingOwner,
+        loadingButtonOwner,
 
-        localDialog,
-        dialogDeactivate,
-
-        localOwner,
-        selectedItem,
-        defaultOwner,
-
-        closeDialog, 
-        submitOwner,
-
-        handleClose,
-        handleSave,
-
-        openDeactivateDialog,
-        onDeactivateConfirm,
+        assetOwners,
+        loadOwners,
+        createOwner,
+        updateOwner,
+        deactivateOwner,
     }
 }

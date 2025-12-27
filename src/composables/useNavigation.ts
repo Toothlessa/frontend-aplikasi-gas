@@ -19,7 +19,7 @@ export function useNavigation() {
 
   const isDarkTheme = ref<boolean>(theme.global.current.value.dark);
   const savedTheme = localStorage.getItem('theme');
-  
+
   const rail = ref(false);
   const drawer = ref<boolean>(false);
   //
@@ -40,6 +40,11 @@ export function useNavigation() {
     ['mdi-package-variant', 'Item', '/masteritem'],
   ];
 
+  const toggleDrawerLocation = () => {
+    drawerLocation.value = drawerLocation.value === 'left' ? 'right' : 'left';
+    localStorage.setItem('drawerLocation', drawerLocation.value);
+  };
+
   // ================================================================
   // 📌 COMPUTED
   // ================================================================
@@ -52,43 +57,27 @@ export function useNavigation() {
   });
 
   // ================================================================
-  // 📌 UTILITIES
-  // ================================================================
-  
-  // ================================================================
   // 📌 ACTIONS
   // ================================================================
 
-  const toggleDrawerLocation = () => {
-    drawerLocation.value = drawerLocation.value === 'left' ? 'right' : 'left';
-    localStorage.setItem('drawerLocation', drawerLocation.value);
-  }
+  const logout = () => store.dispatch(`auth/${LOGOUT_ACTION}`);
 
-  const onLogout = async() => {
-    try {
-      await store.dispatch(`auth/${LOGOUT_ACTION}`);
-      router.push(`/login`)
-    }catch(error){
-      console.error('Logout faiiled', error);
-    }
-  }
-
-// ================================================================
-// 📌 RETURN EXPORT
-// ================================================================
+  // ================================================================
+  // 📌 RETURN EXPORT
+  // ================================================================
   return {
     DialogLogout,
-    
+
     theme,
     isDarkTheme,
-    savedTheme, 
-    
+    savedTheme,
+
     pages,
     masterPageChild,
 
     router,
     store,
-    
+
     search,
     drawer,
     rail,
@@ -97,7 +86,7 @@ export function useNavigation() {
     appBarStyles,
 
     toggleDrawerLocation,
-    onLogout,
+    logout,
   };
 
 }

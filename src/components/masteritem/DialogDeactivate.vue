@@ -36,33 +36,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits } from 'vue';
+import { ref, watch } from 'vue';
 
+/* ======================================================*
+ * PROPS                                                  *
+ * ======================================================*/
 const props = defineProps<{
   dialog: boolean;
   title?: string;
   message?: string;
 }>();
 
+/* ======================================================*
+ * EMITS                                                  *
+ * ======================================================*/
 const emit = defineEmits<{
   (e: 'confirm'): void;
   (e: 'cancel'): void;
   (e: 'update:dialog', val: boolean): void;
 }>();
 
-const localDialog = ref(props.dialog);
+/* ======================================================*
+ * STATE — DIALOG                                         *
+ * ======================================================*/
+const localDialog = ref<boolean>(props.dialog);
 
-// Watch for changes from parent
-watch(() => props.dialog, (val) => {
-  localDialog.value = val;
-});
+/* ======================================================*
+ * WATCHERS                                               *
+ * ======================================================*/
 
-// Emit changes to parent when closed
-watch(localDialog, (val) => {
-  emit('update:dialog', val);
-});
+// Sync dialog state from parent → local
+watch(
+  () => props.dialog,
+  (val) => {
+    localDialog.value = val;
+  }
+);
 
+// Emit dialog state changes to parent
+watch(
+  localDialog,
+  (val) => {
+    emit('update:dialog', val);
+  }
+);
 </script>
+
 
 <style scoped>
 .dialog-header-deactivate {

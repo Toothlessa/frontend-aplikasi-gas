@@ -11,6 +11,7 @@ const state = (): CustomerState => ({
   customers: [],
   topCustomerTransaction: [],
   loading: false,
+  loadingButtonCreate: false,
   hasSaved: false,
   headerCustomer: [],
 });

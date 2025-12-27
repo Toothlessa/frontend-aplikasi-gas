@@ -10,25 +10,28 @@ import {
   LOAD_ASSET_DETAILS_BY_SUMMARY,
   SET_LOADING,
   SET_DATA_ASSET_DETAIL,
+  SET_LOADING_BUTTON_CREATE,
+  SET_LOADING_ONE,
 } from '@/store/storeconstant';
 import { ActionTree } from 'vuex';
-import { RootState } from '@/store/types'; // ← create this file too
-import { AssetState} from '@/types';
+import { RootState } from '@/store/types';
+import { AssetState } from '@/types';
 import { AssetService } from '@/services/AssetService';
 import { AssetOwnerService } from '@/services/AssetOwnerService';
 
 const actions: ActionTree<AssetState, RootState> = {
 
-  async [CREATE_ASSET]({ commit, dispatch }, asset){
+  async [CREATE_ASSET]({ commit, dispatch }, asset) {
+    commit(SET_LOADING_BUTTON_CREATE, true);
     try {
       await AssetService.createOrUpdateAsset(asset);
-      dispatch(LOAD_ASSET);
 
       commit(SET_HASSAVED, true);
       setTimeout(() => {
         commit(SET_HASSAVED, false)
+        commit(SET_LOADING_BUTTON_CREATE, false);
       }, 2000);
-    } catch(error) {
+    } catch (error) {
       console.error('Failed to create asset');
       throw error;
     }
@@ -39,7 +42,7 @@ const actions: ActionTree<AssetState, RootState> = {
     try {
       const data = await AssetService.fetchAssetSummary();
       commit(SET_DATA_ASSET, data);
-    } catch(error) {
+    } catch (error) {
       console.error('Failed to load asset data');
       throw error;
     } finally {
@@ -61,7 +64,7 @@ const actions: ActionTree<AssetState, RootState> = {
   },
 
   async [CREATE_OWNER]({ commit, dispatch }, owner) {
-
+    commit(SET_LOADING_ONE, true);
     try {
       await AssetOwnerService.createOrUpdate(owner.id, owner);
       dispatch(LOAD_ASSET);
@@ -70,14 +73,16 @@ const actions: ActionTree<AssetState, RootState> = {
       setTimeout(() => {
         commit(SET_HASSAVED, false);
       }, 2000);
-    } catch(error) {
+    } catch (error) {
       console.error('Failed to create owner');
       throw error;
+    } finally {
+      commit(SET_LOADING_ONE, false);
     }
   },
 
-  async [DEACTIVE_OWNER]({commit, dispatch}, id) {
-    try{
+  async [DEACTIVE_OWNER]({ commit, dispatch }, id) {
+    try {
       await AssetOwnerService.deactive(id);
       dispatch(LOAD_OWNER);
       dispatch(LOAD_ASSET);
@@ -85,19 +90,24 @@ const actions: ActionTree<AssetState, RootState> = {
       setTimeout(() => {
         commit(SET_HASSAVED, false)
       }, 2000);
-    } catch(error) {
+    } catch (error) {
       console.error('Failed to deactive owner');
       throw error;
     }
   },
 
-  async[LOAD_ASSET_DETAILS_BY_SUMMARY]({commit}, {ownerId, itemId}) {
+  async [LOAD_ASSET_DETAILS_BY_SUMMARY]({ commit }, { owner_id, item_id }) {
     commit(SET_LOADING, true);
     try {
-      const data = await AssetService.fetchAssetDetailSummary(ownerId, itemId);
+
+      const data = await AssetService.fetchAssetDetailSummary(
+        owner_id,
+        item_id
+      );
+
       commit(SET_DATA_ASSET_DETAIL, data);
-    }catch(error) {
-      console.error('Failed to load data detail asset');
+    } catch (error) {
+      console.error('Failed to load data detail asset', error);
       throw error;
     } finally {
       commit(SET_LOADING, false);

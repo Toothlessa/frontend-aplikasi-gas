@@ -32,7 +32,7 @@
           Create New Asset
         </v-card-title>
         <v-card-text class="pt-4">
-          <v-form @submit.prevent="createAsset">
+          <v-form @submit.prevent="onCreateAsset">
             <v-row>
               <v-col cols="12" md="6">
                 <v-select
@@ -65,7 +65,7 @@
                     <template #activator="{ props }">
                     <v-btn
                       v-bind="props"
-                      @click="openDialogOwner = true; isEdit = false; newOwnerData = {};"
+                      @click="dialogOwner = true"
                       variant="text"
                       class="ml-3"
                       icon="mdi-plus-circle-outline"
@@ -122,7 +122,7 @@
               type="submit"
               color="teal"
               class="mt-4 text-white"
-              :loading="isCreatingAsset"
+              :loading="loadingButtonCreate"
               block
               rounded="xl"
               size="large"
@@ -143,7 +143,7 @@
         <v-divider />
         <v-card-text>
           <v-data-table
-            :headers="assetHeader"
+            :headers="headerAsset"
             :items="assets"
             :loading="loading"
             class="modern-table"
@@ -154,12 +154,25 @@
               <div class="action-buttons">
                 <v-tooltip text="Details" location="top">
                   <template #activator="{ props }">
-                    <v-btn v-bind="props" icon variant="text" @click="goToAssetDetails(item.owner_id, item.item_id)">
+                    <v-btn 
+                      v-bind="props" 
+                      icon 
+                      variant="text" 
+                      :loading="loadingDetailKey === `${item.owner_id}-${item.item_id}`" 
+                      @click="goToAssetDetails(item.owner_id, item.item_id)">
                       <v-icon size="22">mdi-information-outline</v-icon>
                     </v-btn>
                   </template>
                 </v-tooltip>
               </div>
+            </template>
+
+            <template #[`item.cogs`]="{ item }">
+              {{ formatPrice(item.cogs) }}
+            </template>
+
+            <template #[`item.selling_price`]="{ item }">
+              {{ formatPrice(item.selling_price) }}
             </template>
           </v-data-table>
         </v-card-text>
@@ -167,76 +180,100 @@
 
       <!-- Dialogs -->
       <DialogOwner
-        :dialog="openDialogOwner"
+        :dialog="dialogOwner"
         :headers="headerOwner"
         :owners="assetOwners"
-        :newOwner="newOwnerData"
-        :search="searchQuery"
-        :loading="loading"
-        @close="openDialogOwner = false"
-        @submit="createOwner"
-        @update:search="searchQuery = $event"
-        @updateOwner="onUpdateOwner"
+        @close="dialogOwner = false"
       />
 
       <!-- Snackbar for notifications -->
-      <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="top right" rounded="xl" elevation="12">
-        <v-icon start>{{ snackbar.color === 'success' ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}</v-icon>
-        {{ snackbar.message }}
+      <v-snackbar
+        v-model="hasSaved"
+        color="success"
+        location="top right"
+        rounded="xl"
+        elevation="12"
+      >
+        <v-icon start>mdi-check-circle-outline</v-icon>
+        Data has been saved successfully.
       </v-snackbar>
     </v-container>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
-import { headerOwner, Owner } from '@/types/Asset';
+import { onMounted } from 'vue';
+import { headerOwner } from '@/types/Asset';
 import DialogOwner from './DialogOwner.vue';
 import { useAsset } from '@/composables/useAsset';
 import { useMasterItem } from '@/composables/useMasterItem';
+import { useGlobal } from '@/composables/useGlobal';
 
-const {
-  openDialogOwner,
+  /* -----------------------------------------------------*
+   * COMPOSABLES                                          *
+   * ---------------------------------------------------- */
+  const {
+    //ultilities
+    formatPrice,
 
-  searchQuery,
-  isCreatingAsset,
+    //helpers 
+    //error helpers
+    handleError,
+  } = useGlobal();
 
-  //table
-  assetHeader,
+  const {
+    dialogOwner,
 
-  assetData,
-  newOwnerData,
-  isEdit,
+    //table
+    headerAsset,
 
-  snackbar,
+    assetData,
 
-  //computed properties
-  assetOwners,
-  assets,
-  loadAssets,
-  loadOwners,
-  loading,
+    hasSaved,
 
-  //call vuex
-  createAsset,
-  createOwner,
-  
-  goToAssetDetails,
-  onUpdateOwner,
+    //computed
+    resetAssetForm,
+    assetOwners,
+    assets,
+    loading,
+    loadingButtonCreate,
 
-} = useAsset();
+    //vuex
+    loadAssets,
+    loadOwners,
+    createAsset,
+    
+    loadingDetailKey,
+    goToAssetDetails,
 
-const {
-  mItems,
-  loadMasterItem,
-} = useMasterItem();
+  } = useAsset();
 
-// --- Lifecycle Hooks ---
-onMounted(() => {
-  loadMasterItem();
-  loadAssets();
-  loadOwners();
-});
+  const {
+    mItems,
+    loadMasterItem,
+  } = useMasterItem();
+
+  /* -----------------------------------------------------*
+   * LIFECYCLE HOOKS                                      *
+   * ---------------------------------------------------- */
+  onMounted(() => {
+    loadMasterItem();
+    loadAssets();
+    loadOwners();
+  });
+
+ /* ------------------------------------------------------*
+   * FUNCTIONS                                            *
+   * ---------------------------------------------------- */
+const onCreateAsset = async () => {
+  try {
+    await createAsset(assetData);
+    await loadAssets();
+    resetAssetForm();
+  } catch (error) {
+    handleError(error); 
+  }
+};
 
 </script>
 

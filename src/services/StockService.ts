@@ -4,18 +4,18 @@ import { errorHandler } from "@/utils/ErrorHandler";
 
 export const StockService = {
 
-    async create(itemId: number, stock: Stock): Promise<void> {
+    async create(itemId: number, stock: number): Promise<void> {
         try {
             await StockApi.create(itemId, stock);
-        } catch(error) {
+        } catch (error) {
             throw errorHandler.pareseMItemError(error);
         }
     },
 
-     async update(id:number, stock: Stock): Promise<void> {
+    async update(id: number, stock: Stock): Promise<void> {
         try {
             await StockApi.update(id, stock);
-        } catch(error) {
+        } catch (error) {
             throw errorHandler.pareseMItemError(error);
         }
     },
@@ -23,8 +23,8 @@ export const StockService = {
     async fetchData(): Promise<Stock[]> {
         try {
             const response = await StockApi.get();
-            return response.data.data;    
-        } catch(error) {
+            return response.data.data;
+        } catch (error) {
             throw errorHandler.pareseMItemError(error);
         }
     },
@@ -33,16 +33,16 @@ export const StockService = {
         try {
             const response = await StockApi.getDetail(itemId);
             return response.data.data;
-        } catch(error) {
+        } catch (error) {
             throw errorHandler.pareseMItemError(error);
         }
     },
 
-    async fetchDataDisplayStock(filledId: number, emptyId: number): Promise<StockDisplay[]>{
+    async fetchDataDisplayStock(filledId: number, emptyId: number): Promise<StockDisplay[]> {
         try {
             const response = await StockApi.fetchDataDisplayStock(filledId, emptyId);
             return response.data.data;
-        }catch(error){
+        } catch (error) {
             throw errorHandler.parseAxiosError(error);
         }
     },

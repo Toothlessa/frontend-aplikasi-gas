@@ -77,21 +77,7 @@
         item-value="id"
         hover
       >
-        <!-- Custom Header -->
-        <template #header="{ props: headerProps }">
-          <thead class="table-header">
-            <tr>
-              <th 
-                v-for="header in headerProps.headers"
-                :key="header.key"
-                class="text-left px-4 py-3 font-weight-bold text-uppercase"
-              >
-                {{ header.title }}
-              </th>
-            </tr>
-          </thead>
-        </template>
-
+      
         <template #[`item.active_flag`]="{ item }">
           <v-chip
             :color="item.active_flag ? '#00BCD4' : '#9E9E9E'" 
@@ -145,6 +131,9 @@
 import { ref, watch, reactive, computed } from 'vue';
 import type { CategoryItem, HeaderCategory } from '@/types/MasterItem';
 
+/* ======================================================*
+ * PROPS                                                  *
+ * ======================================================*/
 const props = defineProps<{
   dialog: boolean;
   newCategory: Partial<CategoryItem>;
@@ -154,6 +143,9 @@ const props = defineProps<{
   loading: boolean;
 }>();
 
+/* ======================================================*
+ * EMITS                                                  *
+ * ======================================================*/
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'submit', item: Partial<CategoryItem>): void;
@@ -163,22 +155,37 @@ const emit = defineEmits<{
   (e: 'update:search', search: string): void;
 }>();
 
-const localDialog = ref(props.dialog);
+/* ======================================================*
+ * STATE — DIALOG                                         *
+ * ======================================================*/
+const localDialog = ref<boolean>(props.dialog);
+
+/* ======================================================*
+ * STATE — CATEGORY                                       *
+ * ======================================================*/
 const localCategory = reactive<Partial<CategoryItem>>({});
+
 const defaultCategory: Partial<CategoryItem> = {
-  id: '',
+  id: 0,
   name: '',
   active_flag: 'Y',
   inactive_date: '',
 };
 
-// Sync localDialog with parent
-watch(() => props.dialog, (val) => {
-  localDialog.value = val;
-  emit('update:dialog', val);
-});
+/* ======================================================*
+ * WATCHERS                                               *
+ * ======================================================*/
 
-// When newCategory changes and dialog is open, fill localCategory
+// Sync dialog state with parent
+watch(
+  () => props.dialog,
+  (val) => {
+    localDialog.value = val;
+    emit('update:dialog', val);
+  }
+);
+
+// Fill localCategory when dialog opens & newCategory changes
 watch(
   () => props.newCategory,
   (newVal) => {
@@ -189,7 +196,9 @@ watch(
   { immediate: true }
 );
 
-// Filtered category list
+/* ======================================================*
+ * COMPUTED                                               *
+ * ======================================================*/
 const filteredItems = computed(() => {
   if (!props.search) return props.categories;
 
@@ -199,17 +208,20 @@ const filteredItems = computed(() => {
   );
 });
 
+/* ======================================================*
+ * METHODS — ACTION HANDLERS                               *
+ * ======================================================*/
 const handleClose = () => {
-  emit('close');               // Let parent clear state
-  Object.assign(localCategory, defaultCategory);      
+  emit('close'); // Let parent clear state
+  Object.assign(localCategory, defaultCategory);
 };
 
 const handleSave = () => {
-  emit('submit', localCategory); // Submit to parent
-  Object.assign(localCategory, defaultCategory); 
+  emit('submit', localCategory);
+  Object.assign(localCategory, defaultCategory);
 };
-
 </script>
+
 
 <style scoped>
 .dialog-card {
@@ -290,4 +302,11 @@ const handleSave = () => {
 .modern-table-category .v-data-table-virtual__tr:hover {
   background-color: #f9f9f9 !important;
 }
+
+.modern-table-category thead th {
+  text-transform: uppercase;
+  font-weight: bold;
+  padding: 12px 16px;
+}
+
 </style>

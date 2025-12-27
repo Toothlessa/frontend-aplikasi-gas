@@ -32,7 +32,7 @@
                     {{ error }}
                   </v-alert>
 
-                  <v-form @submit.prevent="login">
+                  <v-form @submit.prevent="onLogin">
                     <label class="form-label">Email address</label>
                     <v-text-field
                       v-model="loginForm.email"
@@ -83,7 +83,7 @@
                     {{ error }}
                   </v-alert>
 
-                  <v-form @submit.prevent="signUp">
+                  <v-form @submit.prevent="onSignUp">
                     <label class="form-label">Username</label>
                     <v-text-field
                       v-model="signupForm.username"
@@ -139,26 +139,60 @@
 </template>
 
 <script setup lang="ts">
+import { useGlobal } from '@/composables/useGlobal';
 import PasswordInput from './PasswordInput.vue';
 import { useAuth } from '@/composables/useAuth';
+import { useRouter } from 'vue-router';
 
-const {
-  // state
-    step,
-    error,
+  /* -----------------------------------------------------*
+   * CONSTANTS                                          *
+   * ---------------------------------------------------- */
+  const router = useRouter();
 
-    // computed
-    loading,
+  /* -----------------------------------------------------*
+   * COMPOSABLES                                          *
+   * ---------------------------------------------------- */
+  const {
+    handleError,
+  } = useGlobal();
 
-    // forms
-    loginForm,
-    signupForm,
+  const {
+    // state
+      step,
+      error,
 
-    // methods
-    login,
-    signUp,
-} = useAuth();
+      // computed
+      loading,
 
+      // forms
+      loginForm,
+      signupForm,
+
+      // methods
+      login,
+      signUp,
+  } = useAuth();
+
+  /* -----------------------------------------------------*
+   * FUNCTIONS                                            *
+   * ---------------------------------------------------- */
+  const onLogin = async () => {
+    try {
+      await login();
+      router.push("/");
+    }catch(e) {
+      handleError(e);
+    }
+  };
+
+  const onSignUp = async () => {
+    try {
+      await signUp();
+      router.push("/");
+    }catch(e) {
+      handleError(e);
+    }
+  };
 </script>
 
 <style scoped>

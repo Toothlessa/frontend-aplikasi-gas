@@ -12,8 +12,8 @@ export interface StockState {
 }
 
 export interface CreateStockPayload {
-  itemId: number;
-  stock: Stock;
+    itemId: number;
+    stock: number;
 }
 
 export interface StockField {
@@ -60,29 +60,29 @@ export interface StockTableColumn {
 }
 
 export interface StockDetailTableColumn {
-  title: string;
-  key: string;
-  align?: 'start' | 'center' | 'end';
-  sortable?: boolean;
+    title: string;
+    key: string;
+    align?: 'start' | 'center' | 'end';
+    sortable?: boolean;
 }
 
 export const stockTableColumn: StockTableColumn[] = [
-    { key: 'item_name', align: 'start', title: 'Item Name'},
-    { key: 'item_code', align: 'start', title: 'Item Code'},
-    { key: 'category', align: 'start', title: 'Category'},
-    { key: 'cogs', align: 'center', title: 'Cost of Goods'},
-    { key: 'selling_price', align: 'center', title: 'Selling Price'},
-    { key: 'total_stock', align: 'center', title: 'Running Stock'},
-    { key: 'actions', align: 'center', title: 'Details', sortable: false},
+    { key: 'item_name', align: 'start', title: 'Item Name' },
+    { key: 'item_code', align: 'start', title: 'Item Code' },
+    { key: 'category', align: 'start', title: 'Category' },
+    { key: 'cogs', align: 'center', title: 'Cost of Goods' },
+    { key: 'selling_price', align: 'center', title: 'Selling Price' },
+    { key: 'total_stock', align: 'center', title: 'Running Stock' },
+    { key: 'actions', align: 'center', title: 'Details', sortable: false },
 ];
 
 export const stockDetailTableColumn: StockDetailTableColumn[] = [
-    { key: 'id', align: 'center', title: 'No.'},
-    { key: 'item_name', align: 'start', title: 'Item Name'},
-    { key: 'item_code', align: 'start', title: 'Item Code'},
-    { key: 'category', align: 'start', title: 'Category'},
-    { key: 'stock', align: 'start', title: 'Stock Input'} ,
-    { key: 'created_at', align: 'start', title: 'Date'},
-    { key: 'actions', align: 'start', title: 'Actions', sortable: false}
+    { key: 'id', align: 'center', title: 'No.' },
+    { key: 'item_name', align: 'start', title: 'Item Name' },
+    { key: 'item_code', align: 'start', title: 'Item Code' },
+    { key: 'category', align: 'start', title: 'Category' },
+    { key: 'stock', align: 'start', title: 'Stock Input' },
+    { key: 'created_at', align: 'start', title: 'Date' },
+    { key: 'actions', align: 'start', title: 'Actions', sortable: false }
 
 ];

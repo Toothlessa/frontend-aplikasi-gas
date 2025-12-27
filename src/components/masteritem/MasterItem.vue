@@ -26,7 +26,6 @@
       @deactivate="deactivateItem"
     />
       
-
     <!-- Error Snackbar -->
     <SnackbarError :messages="Array.isArray(error) ? error : [error]" v-model="showError" :timeout="4000" />
 
@@ -64,7 +63,7 @@
       :dialog="dialogDeactivate"
       title="Change Item Status?"
       message="Are you sure you want to deactivate this item?"
-      @confirm="onDeactivated"
+      @confirm="onDeactivateItem"
       @cancel="close"
     />
 
@@ -85,18 +84,19 @@ import TableItem from './TableItem.vue';
 import DialogItemForm from './DialogItemForm.vue';
 import DialogCategory from './DialogCategory.vue';
 import DialogDeactivate from './DialogDeactivate.vue';
-import type { CategoryItem, MasterItem, Field } from '@/types/MasterItem'; // ✅ type-only
+import type { CategoryItem, MasterItem } from '@/types/MasterItem'; // ✅ type-only
 
-// import SuccessSnackbar from '@/components/globalcomponent/SuccessSnackbar.vue';
-import {  onMounted } from 'vue';
-import { 
-  CREATE_ITEM, 
-  DEACTIVATE_ITEM, 
-  CREATE_CATEGORY_ITEM,
-  DEACTIVATE_ITEM_CATEGORY,
-} from '@/store/storeconstant';
+import { onMounted } from 'vue';
 import { useMasterItem } from '@/composables/useMasterItem';
 import { useCategoryItem } from '@/composables/useCategoryItem';
+import { useGlobal } from '@/composables/useGlobal';
+
+  /* ======================================================*
+   * COMPOSABLES                                           *
+   * ======================================================*/
+const{
+  handleError,
+} = useGlobal();
 
 const {
   store,
@@ -112,8 +112,10 @@ const {
   allFields,
 
   mItems,
+  createItem,
   loadMasterItem,
   loadCategories,
+  deactiveItem,
 
   hasSaved,
   loading,
@@ -132,122 +134,99 @@ const {
 
     categories,
 
+    createCategory,
+    deactiveCategory,
     onUpdateCategory,
     onClose,
 } = useCategoryItem();
 
+  /* ======================================================*
+   * LIFECYCLE HOOKS                                       *
+   * ======================================================*/
 onMounted(() => {
   loadMasterItem();
   loadCategories();
 });
 
-function editItem(item: MasterItem) {
+  /* ======================================================*
+   * METHODS                                             *
+   * ======================================================*/
+
+const editItem = (item: MasterItem) => {
   editedIndex.value = mItems.value.indexOf(item);
   Object.assign(editedItem, item);
   DialogOpenCreate.value = true;
-}
+};
 
-function close() {
+const close = () => {
   DialogOpenCreate.value = false;
   dialogDeactivate.value = false;
   dialogDeactivateCategory.value = false;
   editedIndex.value = -1;
 }
 
-function resetEditedItem() {
-  // Reset field edit and update item
+const resetEditedItem = () => {
   Object.assign(editedItem, defaultItem);
-}
+};
 
-function onSubmit(item: Partial<MasterItem>) {
+const onSubmit = (item: Partial<MasterItem>) => {
   Object.assign(editedItem, item); 
   onCreateItem(); 
-}
+};
 
-function deactivateItem(item: MasterItem) {
-  // editedIndex.value = mItems.value.indexOf(item);
+const deactivateItem = (item: MasterItem) => {
   Object.assign(editedItem, item);
   dialogDeactivate.value = true;
-}
+};
 
-function deactivateCategory(item: CategoryItem) {
+const deactivateCategory = (item: CategoryItem) => {
   Object.assign(newCategory, item);
   dialogDeactivateCategory.value = true;
-}
+};
 
-async function onCreateItem() {
+const onCreateItem = async () => {
   try {
     error.value = '';
-    await store.dispatch(`masteritem/${CREATE_ITEM}`, editedItem);
+    await createItem();
     DialogOpenCreate.value = false;
   } catch (e) {
+    handleError(e);
     showError.value = true;
-    
-    if (Array.isArray(e)) {
-      error.value = e; // e is string[]
-    } else if (e instanceof Error) {
-      error.value = e.message; // e is an Error
-    } else {
-      error.value = String(e); // fallback
-    }
   }
-}
+};
 
-async function onDeactivated() {
+const onDeactivateItem = async () => {
   try {
     error.value = '';
-
-    await store.dispatch(`masteritem/${DEACTIVATE_ITEM}`, editedItem.id);
+    await deactiveItem();
     dialogDeactivate.value = false;
   } catch (e) {
+    handleError(e);
     showError.value = true;
-
-    if (Array.isArray(e)) {
-      error.value = e; // e is string[]
-    } else if (e instanceof Error) {
-      error.value = e.message; // e is an Error
-    } else {
-      error.value = String(e); // fallback
-    }
   }
-}
+};
 
-async function onCreateCategory(item: Partial<CategoryItem>) {
+const onCreateCategory = async (item: Partial<CategoryItem>) => {
   try {
     error.value = '';
 
-    await store.dispatch(`masteritem/${CREATE_CATEGORY_ITEM}`, item);
+    await createCategory(item);
     DialogOpenCategory.value = false;
     newCategory.name = '';
   } catch (e) {
+    handleError(e);
     showError.value = true;
-
-    if (Array.isArray(e)) {
-      error.value = e; // e is string[]
-    } else if (e instanceof Error) {
-      error.value = e.message; // e is an Error
-    } else {
-      error.value = String(e); // fallback
-    }
   }
-}
+};
 
-async function onDeactivatedCategory() {
+const onDeactivatedCategory = async () => {
   try {
     error.value = '';
-
-    await store.dispatch(`masteritem/${DEACTIVATE_ITEM_CATEGORY}`, newCategory.id);
+    await deactiveCategory();
     dialogDeactivateCategory.value = false;
   } catch (e) {
+    handleError(e);
     showError.value = true;
-
-    if (Array.isArray(e)) {
-      error.value = e; // e is string[]
-    } else if (e instanceof Error) {
-      error.value = e.message; // e is an Error
-    } else {
-      error.value = String(e); // fallback
-    }
   }
-}
+};
 </script>

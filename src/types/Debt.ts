@@ -5,6 +5,7 @@ export interface DebtState {
 
     headerDetailDebt: HeaderDetailDebt[];
     headerSummaryDebt: HeaderSummaryDebt[];
+    headerOutstandingDebt: HeaderSummaryDebt[];
 
     loading: boolean;
     loadingOne: boolean;
@@ -46,9 +47,9 @@ export interface HeaderSummaryDebt {
 
 export const headerSummaryDebt: HeaderSummaryDebt[] = [
     { key: "customer_name", title: "Customer Name", align: "start" },
-    { key: "total_debt", title: "Total Debt", align: "end" },
-    { key: "total_pay", title: "Total Pay", align: "end" },
-    { key: "debt_left", title: "Debt Left", align: "end" },
+    { key: "total_debt", title: "Total Debt", align: "center" },
+    { key: "total_pay", title: "Total Pay", align: "center" },
+    { key: "debt_left", title: "Debt Left", align: "center" },
     { key: "actions", title: "Details", align: "center", sortable: false },
 ];
 
@@ -60,3 +61,9 @@ export const headerDetailDebt: HeaderDetailDebt[] = [
     { key: "created_at", title: "Created Date" },
     { key: "actions", title: "Actions", sortable: false },
 ];
+
+export const headerOutstandingDebt = headerSummaryDebt.filter((h) =>
+    [
+        "customer_name", "total_debt", "total_pay", "debt_left"
+    ].includes(h.key)
+);

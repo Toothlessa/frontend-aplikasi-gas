@@ -1,41 +1,52 @@
 import { ref, reactive, computed } from "vue";
 import store from "@/store/store";
-import { CREATE_DEBT,  LOAD_DATA_DEBT, LOAD_DATA_OUTSTANDING_DEBT, LOAD_DATA_SUMMARY_DEBT, LOAD_OUTSTANDING_TRANSACTION, UPDATE_DEBT } from "@/store/storeconstant";
-import { Debt, headerDetailDebt, headerSummaryDebt, SummaryDebt } from "@/types";
+import {
+  CREATE_DEBT,
+  LOAD_DATA_DEBT,
+  LOAD_DATA_OUTSTANDING_DEBT,
+  LOAD_DATA_SUMMARY_DEBT,
+  UPDATE_DEBT,
+} from "@/store/storeconstant";
+import {
+  Debt,
+  headerDetailDebt,
+  headerOutstandingDebt,
+  headerSummaryDebt,
+  SummaryDebt,
+} from "@/types";
 
 export function useDebt() {
 
-  // ================================================================
-  // 📌 STATE (ref, reactive)
-  // ================================================================
+  /* -----------------------------------------------------*
+   * STATE ref & reactive                                 *
+   * ---------------------------------------------------- */
 
-  // UI States
+  /* UI Dialog State */
   const DialogDetail = ref(false);
   const DialogUpdate = ref(false);
 
-  // UI Table Headers
+  /* Table Headers */
   const localHeaderDetailDebt = headerDetailDebt;
   const localHeaderSummaryDebt = headerSummaryDebt;
 
-  // Debt Forms
+  /* Form State */
   const debtData = reactive<Partial<Debt>>({});
   const debtUpdateData = reactive<Partial<Debt>>({});
 
-  // Control Logic States
+  /* Control Flags */
   const isPay = ref(false);
   const disableAmountPay = ref(false);
   const disableTotal = ref(false);
 
-  // Error Handling
+  /* Error & Alert State */
   const alert = ref(false);
-  // Error State
   const showError = ref(false);
   const error = ref<string | string[] | undefined>();
 
+  /* -----------------------------------------------------*
+   * COMPUTED Derived state from store & local state      *
+   * ---------------------------------------------------- */
 
-  // ================================================================
-  // 📌 COMPUTED
-  // ================================================================
   const isSaveDisabled = computed(() => {
     return !(
       debtData.customer_id &&
@@ -44,19 +55,32 @@ export function useDebt() {
     );
   });
 
+  /* Store State */
   const debts = computed<Debt[]>(() => store.state.debt.debts);
-  const summaryDebtData = computed<SummaryDebt[]>(() => store.state.debt.summaryDebts);
-  const outstandingDebtData = computed<SummaryDebt[]>(() => store.state.debt.outstandingDebts);
+  const summaryDebtData = computed<SummaryDebt[]>(
+    () => store.state.debt.summaryDebts
+  );
+  const outstandingDebtData = computed<SummaryDebt[]>(
+    () => store.state.debt.outstandingDebts
+  );
+
   const loadingDataDetail = computed(() => store.state.debt.loading);
   const loadingData = computed(() => store.state.debt.loadingOne);
-  const loadingButtonCreate = computed(() => store.state.debt.loadingButtonCreate);
-  const loadingButtonUpdate = computed(() => store.state.debt.loadingButtonUpdate);
+  const loadingButtonCreate = computed(
+    () => store.state.debt.loadingButtonCreate
+  );
+  const loadingButtonUpdate = computed(
+    () => store.state.debt.loadingButtonUpdate
+  );
   const hasSaved = computed(() => store.state.debt.hasSaved);
 
+  /* -----------------------------------------------------*
+   * UTILITIES Helper & reusable functions                *
+   * ---------------------------------------------------- */
 
-  // ================================================================
-  // 📌 UTILITIES
-  // ================================================================
+  /**
+   * Global error handler
+   */
   const handleError = (e: unknown) => {
     showError.value = true;
 
@@ -65,77 +89,47 @@ export function useDebt() {
     else error.value = String(e);
   };
 
+  /**
+   * Default debt form value
+   */
   const defaultDebtData: Partial<Debt> = {
     id: 0,
     customer_id: null,
-    customer_name: '',
-    description: '',
+    customer_name: "",
+    description: "",
     amount_pay: 0,
     total: 0,
-  }
+  };
 
-  const resetDebtData = (data: any) => {
+  /**
+   * Reset form data to default state
+   */
+  const resetDebtData = (data: Partial<Debt>) => {
     Object.assign(data, defaultDebtData);
   };
-  // ================================================================
-  // 📌 ACTIONS
-  // ================================================================
-  const detailDebt = async (item: any) => {
-    Object.assign(debtUpdateData, item);
-    error.value = '';
-    try{
-      await store.dispatch(`debt/${LOAD_DATA_DEBT}`, debtUpdateData.customer_id);
 
-      DialogDetail.value = true;
-    } catch(error){
-      handleError(error);
-      alert.value = true;
-    }
-  };
+  /* -----------------------------------------------------*
+   * ACTIONS Store dispatch & business logic              *
+   * ---------------------------------------------------- */
 
-  const debtSummaryLoad = async () => {
-    try{
-      await store.dispatch(`debt/${LOAD_DATA_SUMMARY_DEBT}`);
-    }catch(error){
-      handleError(error);
-      alert.value = true;
-    }
-  };
+  const fetchOutstandingDebt = () =>
+    store.dispatch(`debt/${LOAD_DATA_OUTSTANDING_DEBT}`);
 
-  const fetchOutstandingDebt = async () => {
-    try{
-      await store.dispatch(`debt/${LOAD_DATA_OUTSTANDING_DEBT}`);
+  const loadSummaryDebt = () =>
+    store.dispatch(`debt/${LOAD_DATA_SUMMARY_DEBT}`);
 
-    }catch(error){
-      handleError(error);
-      alert.value = true;
-    }
-  };
+  const loadDetailDebt = () =>
+    store.dispatch(`debt/${LOAD_DATA_DEBT}`, debtUpdateData.customer_id);
 
-  const saveDebt = async () => {
-    const payload = { ...debtData }; 
+  const saveDebt = (payload: Partial<Debt>) =>
+    store.dispatch(`debt/${CREATE_DEBT}`, payload);
 
-    if(isPay.value) {
-      payload.total = 0;    
-    }else{
-      payload.total = payload.amount_pay;  
-      payload.amount_pay = 0;
-    }
-    try {
-      await store.dispatch(`debt/${CREATE_DEBT}`, payload);
-      //reset form
-      resetDebtData(debtData);          
-      isPay.value = false;
-    }catch(error){
-      handleError(error);
-      alert.value = true;
-    }               
-  };
+  const updateDebt = () =>
+    store.dispatch(`debt/${UPDATE_DEBT}`, debtUpdateData);
 
-  const editDebt = (item: any) => {
+  const editDebt = (item: Partial<Debt>) => {
     Object.assign(debtUpdateData, item);
 
-    // Parse currency to number
     const parsedAmountPay = parseFloat(
       String(item.amount_pay).replace(/[^0-9,-]+/g, "").replace(",", ".")
     );
@@ -152,25 +146,30 @@ export function useDebt() {
     DialogUpdate.value = true;
   };
 
-  const updateDebt = async () => {
-    try{
-      await store.dispatch(`debt/${UPDATE_DEBT}`, debtUpdateData);
-      await store.dispatch(`debt/${LOAD_DATA_DEBT}`, debtUpdateData.customer_id);
-      setTimeout(()=> {
-        DialogUpdate.value = false;
-        resetDebtData(debtUpdateData);   
-      }, 1000); 
-    }catch(error){
-      handleError(error);
-      alert.value = true;
-    }
-  };
+  // const updateDebt = async () => {
+  //   try {
+  //     await store.dispatch(`debt/${UPDATE_DEBT}`, debtUpdateData);
+  //     await store.dispatch(
+  //       `debt/${LOAD_DATA_DEBT}`,
+  //       debtUpdateData.customer_id
+  //     );
 
-  // ================================================================
-  // 📌 RETURN EXPORT
-  // ================================================================
+  //     setTimeout(() => {
+  //       DialogUpdate.value = false;
+  //       resetDebtData(debtUpdateData);
+  //     }, 1000);
+  //   } catch (err) {
+  //     handleError(err);
+  //     alert.value = true;
+  //   }
+  // };
+
+  /* -----------------------------------------------------*
+   * RETURN Public API of this composable                 *
+   * ---------------------------------------------------- */
+
   return {
-    // State
+    /* State */
     localHeaderDetailDebt,
     localHeaderSummaryDebt,
     debtData,
@@ -178,8 +177,9 @@ export function useDebt() {
     debts,
     summaryDebtData,
     outstandingDebtData,
+    headerOutstandingDebt,
 
-    // UI Flags
+    /* UI Flags */
     DialogDetail,
     DialogUpdate,
     loadingData,
@@ -191,16 +191,18 @@ export function useDebt() {
     disableTotal,
     hasSaved,
 
-    // Error Handling
+    /* Error Handling */
     alert,
     error,
 
-    // Computed & Utils
+    /* Computed */
     isSaveDisabled,
 
-    // API & Actions
-    debtSummaryLoad,
-    detailDebt,
+    /* Actions */
+    loadSummaryDebt,
+    loadDetailDebt,
+    // detailDebt,
+    resetDebtData,
     saveDebt,
     editDebt,
     updateDebt,
