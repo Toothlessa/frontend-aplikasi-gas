@@ -99,14 +99,8 @@
               height="400px"
               hover
             >
-              <template v-slot:[`item.actions`]="{ item }">
-                <v-btn
-                  icon="mdi-information-outline"
-                  size="small"
-                  variant="text"
-                  color="blue-grey"
-                  @click="onLoadDetailDebt(item)"
-                />
+              <template v-slot:[`item.no`]="{ index }">
+                {{ index + 1 }}
               </template>
               <template v-slot:[`item.total_debt`]="{ item }">
                 {{ formatPrice(item.total_debt) }}
@@ -116,6 +110,16 @@
               </template>
               <template v-slot:[`item.debt_left`]="{ item }">
                 {{ formatPrice(item.debt_left) }}
+              </template>
+              <template v-slot:[`item.actions`]="{ item }">
+                <v-btn
+                  icon="mdi-information-outline"
+                  size="small"
+                  variant="text"
+                  color="blue-grey"
+                  :loading="loadingDetailDebt === item.customer_id"
+                  @click="onLoadDetailDebt(item)"
+                />
               </template>
             </v-data-table-virtual>
           </v-card-text>
@@ -140,14 +144,8 @@
             height="300px"
             hover
           >
-            <template v-slot:[`item.actions`]="{ item }">
-              <v-btn
-                icon="mdi-pencil"
-                size="small"
-                variant="text"
-                color="blue-grey"
-                @click="editDebt(item)"
-              />
+            <template v-slot:[`item.no`]="{ index }">
+              {{ index + 1 }}
             </template>
             <template v-slot:[`item.amount_pay`]="{ item }">
               {{ formatPrice(item.amount_pay) }}
@@ -155,10 +153,26 @@
             <template v-slot:[`item.total`]="{ item }">
               {{ formatPrice(item.total) }}
             </template>
+            <template v-slot:[`item.actions`]="{ item }">
+              <v-btn
+                icon="mdi-pencil"
+                size="small"
+                variant="text"
+                color="blue-grey"
+                :loading="loadingUpdateDebtAction === item.id"
+                @click="editDebt(item)"
+              />
+            </template>
           </v-data-table-virtual>
         </v-card-text>
         <v-card-actions class="justify-end pa-4">
-          <v-btn color="grey-darken-1" variant="text" @click="DialogDetail = false" rounded="lg">
+          <v-btn 
+            color="grey-darken-1" 
+            variant="text" 
+            @click="closeDialogDetail()" 
+            rounded="lg"
+            :loading="loadingCloseDialogDetail"
+          >
             Close
           </v-btn>
         </v-card-actions>
@@ -225,8 +239,13 @@
           />
         </v-card-text>
         <v-card-actions class="justify-end pa-4">
-          <v-btn color="grey-darken-1" variant="text" @click="DialogUpdate = false" rounded="lg">
-            Cancel
+          <v-btn 
+            color="grey-darken-1" 
+            variant="text" 
+            :loading="loadingCloseUpdateButton"
+            @click="CloseDialogUpdate()" 
+            rounded="lg">
+            Close
           </v-btn>
           <v-btn 
             class="debt-action-btn text-white"
@@ -258,7 +277,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useDebt } from '@/composables/useDebt';
 import { useCustomer } from '@/composables/useCustomer';
 import { useGlobal } from '@/composables/useGlobal';
@@ -304,8 +323,8 @@ const {
     loadSummaryDebt,
     loadDetailDebt,
     saveDebt,
-    editDebt,
     updateDebt,
+    resetDetailDebt,
 } = useDebt();
 
 const {
@@ -324,6 +343,52 @@ onMounted(() => {
   /* -----------------------------------------------------*
    * METHODS                                              *
    * ---------------------------------------------------- */
+const loadingDetailDebt = ref<number | null | undefined>(null);
+const loadingUpdateDebtAction = ref<number | null | undefined>(null);
+const loadingCloseDialogDetail = ref<boolean>(false);
+const loadingCloseUpdateButton = ref<boolean>(false);
+
+const closeDialogDetail = () => {
+  loadingCloseDialogDetail.value = true;
+  setTimeout(() => {
+    DialogDetail.value = false;
+    loadingCloseDialogDetail.value = false;
+    resetDetailDebt();
+  }, 500);
+};
+
+const CloseDialogUpdate = () => {
+  loadingCloseUpdateButton.value = true;
+  setTimeout(() => {
+    DialogUpdate.value = false;
+    loadingCloseUpdateButton.value = false;
+  }, 500);
+};
+
+const editDebt = (item: Partial<Debt>) => {
+  Object.assign(debtUpdateData, item);
+
+  const parsedAmountPay = parseFloat(
+    String(item.amount_pay).replace(/[^0-9,-]+/g, "").replace(",", ".")
+  );
+  const parsedTotal = parseFloat(
+    String(item.total).replace(/[^0-9,-]+/g, "").replace(",", ".")
+  );
+
+  debtUpdateData.amount_pay = isNaN(parsedAmountPay) ? 0 : parsedAmountPay;
+  debtUpdateData.total = isNaN(parsedTotal) ? 0 : parsedTotal;
+
+  disableAmountPay.value = !!debtUpdateData.amount_pay;
+  disableTotal.value = !!debtUpdateData.total;
+
+  loadingUpdateDebtAction.value = item.id;
+  DialogUpdate.value = true;
+  setTimeout(() => {
+    loadingUpdateDebtAction.value = null;
+  }, 500);
+};
+
+
 const onSaveDebt = async() => {
   const payload = { ...debtData };
 
@@ -353,6 +418,7 @@ const onLoadSummaryDebt = async() => {
 };
 
 const onLoadDetailDebt = async(item: Partial<Debt>) => {
+  loadingDetailDebt.value = item.customer_id;
   Object.assign(debtUpdateData, item);
   error.value = '';
   try{
@@ -361,6 +427,8 @@ const onLoadDetailDebt = async(item: Partial<Debt>) => {
   }catch(e){
     handleError(e);
     alert.value = true;
+  }finally{
+    loadingDetailDebt.value = null;
   }
 };
 

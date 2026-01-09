@@ -6,9 +6,9 @@ export const AssetOwnerService = {
     async createOrUpdate(id: number, owner: Owner): Promise<void> {
         try {
             owner.id ? await AssetOwnerApi.update(id, owner)
-                     : await AssetOwnerApi.create(owner);
+                : await AssetOwnerApi.create(owner);
         } catch (error) {
-            throw errorHandler.parseAxiosError(error);
+            throw errorHandler.parseAssetOwnerError(error);
         }
     },
 
@@ -17,7 +17,7 @@ export const AssetOwnerService = {
             const response = await AssetOwnerApi.fetchData();
             return response.data.data;
         } catch (error) {
-            throw errorHandler.parseAxiosError(error);
+            throw errorHandler.parseAssetOwnerError(error);
         }
     },
 
@@ -25,7 +25,7 @@ export const AssetOwnerService = {
         try {
             await AssetOwnerApi.deactive(id);
         } catch (error) {
-            throw errorHandler.parseAxiosError(error);
+            throw errorHandler.parseAssetOwnerError(error);
         }
     },
 

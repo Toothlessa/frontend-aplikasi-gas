@@ -122,5 +122,70 @@ export class errorHandler {
     return ["Terjadi kesalahan yang tidak diketahui."];
   }
 
+  /* ======================================================*
+   * ERROR ASSET                                           *
+   * ======================================================*/
+  static parseAssetError(error: any): string[] {
+    const axiosError = error as {
+      response?: {
+        data?: {
+          errors?: { [key: string]: string[] };
+          error?: string;
+          message?: string;
+        };
+      };
+    };
+
+    // Jika backend kirim errors: { field: [message] }
+    const errors = axiosError.response?.data?.errors;
+    if (errors) {
+      const messages: string[] = [];
+      for (const field in errors) {
+        if (Array.isArray(errors[field])) {
+          const message = errors[field][0];
+          messages.push(Validation.getErrorMessageCodeFromAsset(message));
+        }
+      }
+      return messages;
+    }
+
+    // Jika backend kirim message langsung
+    const message = axiosError.response?.data?.message;
+    if (message) {
+      return [Validation.getErrorMessageCodeFromAsset(message)];
+    }
+
+    // Fallback: pesan umum
+    return ["Terjadi kesalahan yang tidak diketahui."];
+  }
+
+  /* ======================================================*
+   * ERROR ASSET OWNER                                       *
+   * ======================================================*/
+  static parseAssetOwnerError(error: any): string[] {
+    const axiosError = error as {
+      response?: {
+        data?: {
+          errors?: { [key: string]: string[] };
+          error?: string;
+          message?: string;
+        };
+      };
+    };
+
+    const errors = axiosError.response?.data?.errors;
+    if (errors) {
+      const messages: string[] = [];
+      for (const field in errors) {
+        if (Array.isArray(errors[field])) {
+          const message = errors[field][0];
+          messages.push(Validation.getErrorMessageCodeFromAssetOwner(message));
+        }
+      }
+      return messages;
+    }
+
+    return ["Unknow Error, Please Contact Support"];
+  }
 
 }

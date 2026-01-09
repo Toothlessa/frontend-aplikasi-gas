@@ -26,17 +26,25 @@
         <v-list-item
           prepend-icon="mdi-view-dashboard-outline"
           title="Dashboard"
-          to="/"
           class="nav-item"
           rounded="xl"
-        />
+          @click="handleNavigation('/')"
+        >
+          <template v-slot:append v-if="loadingPath === '/'">
+            <v-progress-circular indeterminate size="20" width="2" color="#66BB6A" />
+          </template>
+        </v-list-item>
         <v-list-item
           prepend-icon="mdi-file-document-outline"
           title="Transaction"
-          to="/transaction"
           class="nav-item"
           rounded="xl"
-        />
+          @click="handleNavigation('/transaction')"
+        >
+          <template v-slot:append v-if="loadingPath === '/transaction'">
+            <v-progress-circular indeterminate size="20" width="2" color="#66BB6A" />
+          </template>
+        </v-list-item>
 
         <!-- Master Group -->
         <v-list-group value="Master" class="nav-group">
@@ -55,25 +63,32 @@
             :key="i"
             :prepend-icon="icon"
             :title="title"
-            :to="to"
             class="nav-subitem"
             rounded="xl"
-          />
+            @click="handleNavigation(to)"
+          >
+            <template v-slot:append v-if="loadingPath === to">
+              <v-progress-circular indeterminate size="20" width="2" color="#66BB6A" />
+            </template>
+          </v-list-item>
         </v-list-group>
 
         <!-- Other Items -->
         <v-list-item
           v-for="(item, i) in pages"
           :key="i"
-          :to="item.to"
           class="nav-item"
           rounded="xl"
+          @click="handleNavigation(item.to)"
           
         >
           <template #prepend>
             <v-icon>{{ item.icon }}</v-icon>
           </template>
           <v-list-item-title>{{ item.text }}</v-list-item-title>
+          <template v-slot:append v-if="loadingPath === item.to">
+            <v-progress-circular indeterminate size="20" width="2" color="#66BB6A" />
+          </template>
         </v-list-item>
       </v-list>
 
@@ -84,7 +99,7 @@
           hide-details
           inset
           :label="`Dark Theme: ${isDarkTheme ? 'On' : 'Off'}`"
-          color="primary"
+          color="#00BCD4"
         ></v-switch>
       </v-list-item>
 
@@ -198,7 +213,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue';
+import { onMounted, watch, ref } from 'vue';
 import { useUser } from '@/composables/useUser';
 import { useNavigation } from '@/composables/useNavigation';
 import router from '@/router';
@@ -241,6 +256,19 @@ onMounted(() => {
   /*================================================================*
   * METHODS                                                         *
   * ================================================================*/
+  const loadingPath = ref<string | null>(null);
+
+  const handleNavigation = async (path: string) => {
+    loadingPath.value = path;
+    try {
+      await router.push(path);
+    } catch (e) {
+      console.error('Navigation error:', e);
+    } finally {
+      loadingPath.value = null;
+    }
+  };
+
   const onLogout = async() => {
     try {
       await logout();

@@ -129,6 +129,32 @@
       <v-icon start>mdi-check-circle-outline</v-icon>
       Data has been saved successfully.
     </v-snackbar>
+
+    <!-- Snackbar for errors -->
+    <v-snackbar
+      v-model="showError"
+      color="error"
+      location="top right"
+      rounded="xl"
+      elevation="12"
+    >
+      <div class="d-flex align-start">
+        <v-icon start class="mt-1">mdi-alert-circle-outline</v-icon>
+        <div class="d-flex flex-column">
+          <span v-for="(msg, i) in errorMessages" :key="i">
+            {{ msg }}
+          </span>
+        </div>
+      </div>
+      <template v-slot:actions>
+        <v-btn
+          color="white"
+          variant="text"
+          icon="mdi-close"
+          @click="showError = false"
+        />
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -146,6 +172,9 @@ import { useRoute } from 'vue-router';
 const {
 
   formatPrice,
+  handleError,
+  showError,
+  errorMessages,
 } = useGlobal();
 
 const {
@@ -173,6 +202,7 @@ const {
 
   assetOwners,
   assetDetails,
+  resetAssetDetail,
 } = useAsset();
 
   /* -----------------------------------------------------*
@@ -192,12 +222,12 @@ onMounted(() => {
   loadAssetDetail(owner_id, item_id);
   loadOwners();
   loadMasterItem();
+  resetAssetDetail();
 });
 
  /* ------------------------------------------------------*
    * FUNCTIONS                                            *
    * ---------------------------------------------------- */
-
 const openEditAssetDialog = (asset: Asset) => {
   dialogUpdateAssetDetail.value = true;
   Object.assign(assetToUpdate, asset);
@@ -209,8 +239,9 @@ const updateAsset = async () => {
     await loadAssetDetail(assetToUpdate.owner_id, assetToUpdate.item_id);
     dialogUpdateAssetDetail.value = false;
     
-  } catch (error) {
-    console.error('Update failed:', error);
+  } catch (e) {
+    console.error('Update failed:', e);
+    handleError(e);
   } 
 };
 

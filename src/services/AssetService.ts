@@ -10,16 +10,16 @@ export const AssetService = {
                 ? await AssetApi.updateAsset(asset.id, asset)
                 : await AssetApi.createAsset(asset);
         } catch (error) {
-            throw errorHandler.parseAxiosError(error);
+            throw errorHandler.parseAssetError(error);
         }
     },
-    
+
     async fetchAssetSummary(): Promise<Asset[]> {
-        try{
+        try {
             const response = await AssetApi.fetchAssetSummary();
             return response.data.data;
-        } catch(error) {
-            throw errorHandler.parseAxiosError(error);
+        } catch (error) {
+            throw errorHandler.parseAssetError(error);
         }
     },
 
@@ -27,8 +27,8 @@ export const AssetService = {
         try {
             const response = await AssetApi.fetchAssetDetailSummary(ownerId, itemId);
             return response.data.data;
-        } catch(error) {
-            throw errorHandler.parseAxiosError(error);
+        } catch (error) {
+            throw errorHandler.parseAssetError(error);
         }
     },
 

@@ -5,6 +5,7 @@ import {
   LOAD_DATA_DEBT,
   LOAD_DATA_OUTSTANDING_DEBT,
   LOAD_DATA_SUMMARY_DEBT,
+  RESET_DETAIL_DEBT,
   UPDATE_DEBT,
 } from "@/store/storeconstant";
 import {
@@ -63,6 +64,7 @@ export function useDebt() {
   const outstandingDebtData = computed<SummaryDebt[]>(
     () => store.state.debt.outstandingDebts
   );
+  const resetDetailDebt = () => store.dispatch(`debt/${RESET_DETAIL_DEBT}`);
 
   const loadingDataDetail = computed(() => store.state.debt.loading);
   const loadingData = computed(() => store.state.debt.loadingOne);
@@ -127,43 +129,6 @@ export function useDebt() {
   const updateDebt = () =>
     store.dispatch(`debt/${UPDATE_DEBT}`, debtUpdateData);
 
-  const editDebt = (item: Partial<Debt>) => {
-    Object.assign(debtUpdateData, item);
-
-    const parsedAmountPay = parseFloat(
-      String(item.amount_pay).replace(/[^0-9,-]+/g, "").replace(",", ".")
-    );
-    const parsedTotal = parseFloat(
-      String(item.total).replace(/[^0-9,-]+/g, "").replace(",", ".")
-    );
-
-    debtUpdateData.amount_pay = isNaN(parsedAmountPay) ? 0 : parsedAmountPay;
-    debtUpdateData.total = isNaN(parsedTotal) ? 0 : parsedTotal;
-
-    disableAmountPay.value = !!debtUpdateData.amount_pay;
-    disableTotal.value = !!debtUpdateData.total;
-
-    DialogUpdate.value = true;
-  };
-
-  // const updateDebt = async () => {
-  //   try {
-  //     await store.dispatch(`debt/${UPDATE_DEBT}`, debtUpdateData);
-  //     await store.dispatch(
-  //       `debt/${LOAD_DATA_DEBT}`,
-  //       debtUpdateData.customer_id
-  //     );
-
-  //     setTimeout(() => {
-  //       DialogUpdate.value = false;
-  //       resetDebtData(debtUpdateData);
-  //     }, 1000);
-  //   } catch (err) {
-  //     handleError(err);
-  //     alert.value = true;
-  //   }
-  // };
-
   /* -----------------------------------------------------*
    * RETURN Public API of this composable                 *
    * ---------------------------------------------------- */
@@ -204,8 +169,8 @@ export function useDebt() {
     // detailDebt,
     resetDebtData,
     saveDebt,
-    editDebt,
     updateDebt,
     fetchOutstandingDebt,
+    resetDetailDebt,
   };
 }

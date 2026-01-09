@@ -26,6 +26,7 @@ export interface StockField {
 
 export interface Stock {
     id: number;
+    no: number;
     item_id: number;
     item_name: string;
     item_code: string;
@@ -37,6 +38,7 @@ export interface Stock {
 
 export interface StockDetail {
     id: number;
+    no: number;
     item_id: number;
     item_name: string;
     item_code: string;
@@ -67,6 +69,7 @@ export interface StockDetailTableColumn {
 }
 
 export const stockTableColumn: StockTableColumn[] = [
+    { key: 'no', align: 'center', title: 'No.' },
     { key: 'item_name', align: 'start', title: 'Item Name' },
     { key: 'item_code', align: 'start', title: 'Item Code' },
     { key: 'category', align: 'start', title: 'Category' },
@@ -77,7 +80,7 @@ export const stockTableColumn: StockTableColumn[] = [
 ];
 
 export const stockDetailTableColumn: StockDetailTableColumn[] = [
-    { key: 'id', align: 'center', title: 'No.' },
+    { key: 'no', align: 'center', title: 'No.' },
     { key: 'item_name', align: 'start', title: 'Item Name' },
     { key: 'item_code', align: 'start', title: 'Item Code' },
     { key: 'category', align: 'start', title: 'Category' },

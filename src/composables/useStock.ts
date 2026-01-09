@@ -1,5 +1,12 @@
 import store from '@/store/store';
-import { CREATE_STOCK, LOAD_DISPLAY_STOCK, LOAD_STOCK } from '@/store/storeconstant';
+import {
+    CREATE_STOCK,
+    LOAD_DETAIL_STOCK,
+    LOAD_DISPLAY_STOCK,
+    LOAD_STOCK,
+    RESET_DETAIL_STOCK,
+    UPDATE_STOCK
+} from '@/store/storeconstant';
 import {
     Stock,
     StockDetail,
@@ -88,12 +95,12 @@ export function useStock() {
      * ======================================================*/
     const createStock = () => store.dispatch(`stock/${CREATE_STOCK}`, {
         itemId: selectedItem.value,
-        stock: input.value,
+        stock: { stock: Number(input.value) },
     });
 
-    const loadCurrentStock = () =>
-        store.dispatch(`stock/${LOAD_STOCK}`);
-
+    const loadDetailStock = (item_id: number) => store.dispatch(`stock/${LOAD_DETAIL_STOCK}`, item_id);
+    const resetStockDetail = () => store.dispatch(`stock/${RESET_DETAIL_STOCK}`);
+    const loadCurrentStock = () => store.dispatch(`stock/${LOAD_STOCK}`);
     const loadDisplayStock = async () => {
         try {
             await store.dispatch(`stock/${LOAD_DISPLAY_STOCK}`, {
@@ -104,6 +111,10 @@ export function useStock() {
             handleError(err);
         }
     };
+    const updateStock = (id: number, stock: number) => store.dispatch(`stock/${UPDATE_STOCK}`, {
+        id,
+        stock: { stock }
+    });
 
     /* ======================================================*
      * EXPOSED API                                            *
@@ -138,6 +149,9 @@ export function useStock() {
 
         // Actions
         createStock,
+        updateStock,
+        loadDetailStock,
+        resetStockDetail,
         resetEditedStock,
         loadCurrentStock,
         loadDisplayStock,

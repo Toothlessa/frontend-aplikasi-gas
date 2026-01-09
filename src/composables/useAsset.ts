@@ -9,6 +9,7 @@ import {
   LOAD_ASSET,
   LOAD_ASSET_DETAILS_BY_SUMMARY,
   LOAD_OWNER,
+  RESET_DETAIL_ASSET,
 } from "@/store/storeconstant";
 
 import { Asset, headerAsset, headerAssetDetail, Owner } from "@/types";
@@ -61,6 +62,7 @@ export function useAsset() {
    * NAVIGATION & EVENT HANDLERS                           *
    * ---------------------------------------------------- */
   const goToAssetDetails = (owner_id: number, item_id: number) => {
+    resetAssetDetail();
     loadingDetailKey.value = `${owner_id}-${item_id}`;
     setTimeout(() => {
       router.push({
@@ -90,6 +92,7 @@ export function useAsset() {
   const assetOwners = computed<Owner[]>(() => store.state.asset.owners);
   const assets = computed<Asset[]>(() => store.state.asset.assets);
   const assetDetails = computed(() => store.state.asset.assetDetails);
+  const resetAssetDetail = () => store.dispatch(`asset/${RESET_DETAIL_ASSET}`);
 
   const hasSaved = computed(() => store.state.asset.hasSaved);
   const loading = computed(() => store.state.asset.loading);
@@ -151,5 +154,7 @@ export function useAsset() {
     resetAssetForm,
     goToAssetDetails,
     onUpdateOwner,
+
+    resetAssetDetail,
   };
 }

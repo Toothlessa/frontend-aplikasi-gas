@@ -5,7 +5,8 @@ import {
   SET_DATA_OWNER,
   SET_DATA_ASSET_DETAIL,
   SET_LOADING_BUTTON_CREATE,
-  SET_LOADING_ONE
+  SET_LOADING_ONE,
+  RESET_DETAIL_ASSET
 } from '@/store/storeconstant';
 
 import type { MutationTree } from 'vuex';
@@ -32,6 +33,9 @@ const mutations: MutationTree<AssetState> = {
   },
   [SET_HASSAVED](state, value: boolean) {
     state.hasSaved = value;
+  },
+  [RESET_DETAIL_ASSET](state) {
+    state.assetDetails = [];
   },
 };
 

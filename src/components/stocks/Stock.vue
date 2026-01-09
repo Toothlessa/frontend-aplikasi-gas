@@ -48,7 +48,7 @@
               rounded="lg"
               color="teal-darken-1"
               :disabled="isSaveDisabled"
-              :loading="loadingButton"
+              :loading="loadingCreateStock"
               @click="onCreateStock"
             >
               <v-icon start>mdi-plus</v-icon>
@@ -77,13 +77,23 @@
               height="400px"
               hover
             >
+              <template v-slot:[`item.no`]="{ index }">
+                {{ index + 1 }}
+              </template>
+              <template v-slot:[`item.cogs`]="{ item }">
+                {{ formatPrice(item.cogs) }}
+              </template>
+              <template v-slot:[`item.selling_price`]="{ item }">
+                {{ formatPrice(item.selling_price) }}
+              </template>
               <template v-slot:[`item.actions`]="{ item }">
                 <v-btn
                   icon="mdi-information-outline"
                   size="small"
                   variant="text"
                   color="blue-grey"
-                  @click="getStockDetail(item.item_id)"
+                  :loading="loadingItemId === item.item_id"
+                  @click="onLoadDetailStock(item.item_id)"
                 />
               </template>
             </v-data-table-virtual>
@@ -110,19 +120,29 @@
             height="300px"
             hover
           >
+            <template v-slot:[`item.no`]="{ index }">
+              {{ index + 1 }}
+            </template>
             <template v-slot:[`item.actions`]="{ item }">
               <v-btn
                 icon="mdi-pencil"
                 size="small"
                 variant="text"
                 color="blue-grey"
+                :loading="loadingActionUpdate === item.id"
                 @click="editStock(item)"
               />
             </template>
           </v-data-table-virtual>
         </v-card-text>
         <v-card-actions class="justify-end pa-4">
-          <v-btn color="grey-darken-1" variant="text" @click="DialogDetails = false" rounded="lg">
+          <v-btn 
+            color="grey-darken-1" 
+            variant="text" 
+            @click="closeStockDetail" 
+            rounded="lg"
+            :loading="loadingCloseStockDetail"
+          >
             Close
           </v-btn>
         </v-card-actions>
@@ -165,15 +185,27 @@
             variant="outlined"
             rounded="lg"
             prepend-inner-icon="mdi-numeric"
-            @keyup.enter="updateStock"
+            @keyup.enter="onUpdateStock"
             class="mb-3"
           />
         </v-card-text>
         <v-card-actions class="justify-end pa-4">
-          <v-btn color="grey-darken-1" variant="text" @click="DialogUpdate = false" rounded="lg">
+          <v-btn 
+            color="grey-darken-1" 
+            variant="text"
+            rounded="lg"
+            :loading="loadingCloseUpdate"
+            @click="closeUpdateStock" 
+          >
             Cancel
           </v-btn>
-          <v-btn color="teal-darken-1" variant="elevated" @click="updateStock" rounded="lg">
+          <v-btn
+            color="teal-darken-1"
+            variant="elevated"
+            @click="onUpdateStock"
+            rounded="lg"
+            :loading="loadingButtonUpdate"
+          >
             <v-icon start>mdi-content-save</v-icon>
             Update Stock
           </v-btn>
@@ -197,12 +229,11 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import store from '@/store/store';
-import { LOAD_DETAIL_STOCK, UPDATE_STOCK } from '@/store/storeconstant';
 import { useMasterItem } from '@/composables/useMasterItem';
 import { useStock } from '@/composables/useStock';
 import { StockDetail } from '@/types';
 import { useGlobal } from '@/composables/useGlobal';
+import { ref } from 'vue';
 
  /* ======================================================*
   * COMPOSABLES                                           *
@@ -236,9 +267,11 @@ const {
   error,
 
   createStock,
+  updateStock,
+  loadDetailStock,
+  resetStockDetail,
   loadCurrentStock,
   resetEditedStock,
-  // handleError,
 } = useStock();
 
 const {
@@ -251,9 +284,17 @@ const isSaveDisabled = computed(() => !(selectedItem.value && input.value));
  /* ======================================================*
   * HOOKS                                                 *
   * ======================================================*/
+const loadingCreateStock = ref<boolean>(false);
+const loadingItemId = ref<number | null>(null);
+const loadingCloseStockDetail = ref<boolean>(false);
+const loadingActionUpdate = ref<number | null>(null);
+const loadingCloseUpdate = ref<boolean>(false);
+const loadingButtonUpdate = ref<boolean>(false);
+
 onMounted(() => {
   loadCurrentStock();
   loadMasterItem();
+  resetStockDetail();
 });
 
  /* ======================================================*
@@ -262,49 +303,70 @@ onMounted(() => {
 
 const editStock = (item: StockDetail) => {
   Object.assign(editedStock, item);
+  loadingActionUpdate.value = item.id;
   DialogUpdate.value = true;
+
+  setTimeout(() => {
+    loadingActionUpdate.value = null;
+  }, 250);
 };
 
-// async function create() {
-//   try {
-//     await store.dispatch(`stock/${CREATE_STOCK}`, { itemId: selectedItem.value, stock: { stock: input.value} });
-//     resetEditedStock();
-//   } catch(error) {
-//      handleError(error);
-//   }
-// }
+const closeStockDetail = () => {
+  loadingCloseStockDetail.value = true;
+  
+  setTimeout(() => {
+    DialogDetails.value = false;
+    loadingCloseStockDetail.value = false;
+    resetStockDetail();
+  }, 250);
+};
+
+const closeUpdateStock = () => {
+  loadingCloseUpdate.value = true;
+  setTimeout(() => {
+    DialogUpdate.value = false;
+    loadingCloseUpdate.value = false;
+  }, 250);
+};
 
 const onCreateStock = async() => {
+  loadingCreateStock.value = true;
   try {
     await createStock();
     resetEditedStock();
   } catch(error) {
     handleError(error);
+  } finally {
+    loadingCreateStock.value = false;
   }
 }
 
-async function getStockDetail(itemId: number) {
+const onLoadDetailStock = async(item_id: number) => {
+  loadingItemId.value = item_id;
   try {
+    await loadDetailStock(item_id);
     DialogDetails.value = true;
-    await store.dispatch(`stock/${LOAD_DETAIL_STOCK}`, itemId);
-  } catch(error) {
-    handleError(error);
-  } 
-}
+  } catch(e) {
+    handleError(e);
+  } finally {
+    loadingItemId.value = null;
+  }
+};
 
-async function updateStock() {
+const onUpdateStock = async() => {
+  loadingButtonUpdate.value = true;
   const postData = editedStock;
   try {
-    await store.dispatch(`stock/${UPDATE_STOCK}`, { id: postData.id, stock: postData});
+    await updateStock(postData.id, postData.stock);
     DialogUpdate.value = false;
-    await getStockDetail(postData.item_id);
+    await onLoadDetailStock(postData.item_id);
     await loadCurrentStock();
-
-  } catch(error) {
-    handleError(error);
+  } catch(e) {
+    handleError(e);
+  }finally {
+    loadingButtonUpdate.value = false;
   }
-}
-
+};
 </script>
 
 <style scoped>

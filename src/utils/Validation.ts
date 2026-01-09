@@ -65,4 +65,35 @@ export default class Validations {
         return "Unexpected error occurred. Please try again.";
     }
   }
+
+  /**
+  * Asset — get error message from backend
+  */
+  static getErrorMessageCodeFromAsset(errorCode: string): string {
+    switch (errorCode) {
+      case "The item id field is required.":
+        return "Please select an asset name.";
+      case "The owner id field is required.":
+        return "Please select an owner.";
+      case "The quantity field is required.":
+        return "Please fill in the quantity.";
+      case "The cogs field is required.":
+        return "Please fill in the cost of goods.";
+      case "The selling price field is required.":
+        return "Please fill in the selling price.";
+      default:
+        return "Unexpected error occurred. Please try again.";
+    }
+  }
+
+  static getErrorMessageCodeFromAssetOwner(errorCode: string): string {
+    switch (errorCode) {
+      case "The owner id field is required.":
+        return "Please select an owner.";
+      case "The name field is required.":
+        return "Please fill in the owner name.";
+      default:
+        return "Unexpected error occurred. Please try again.";
+    }
+  }
 }

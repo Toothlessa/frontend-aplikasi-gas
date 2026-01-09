@@ -149,7 +149,13 @@
             class="modern-table"
             hover
           >
-           <!-- Actions -->
+            <template #[`item.cogs`]="{ item }">
+              {{ formatPrice(item.cogs) }}
+            </template>
+            <template #[`item.selling_price`]="{ item }">
+              {{ formatPrice(item.selling_price) }}
+            </template>
+            <!-- Actions -->
             <template #[`item.actions`]="{ item }">
               <div class="action-buttons">
                 <v-tooltip text="Details" location="top">
@@ -165,14 +171,6 @@
                   </template>
                 </v-tooltip>
               </div>
-            </template>
-
-            <template #[`item.cogs`]="{ item }">
-              {{ formatPrice(item.cogs) }}
-            </template>
-
-            <template #[`item.selling_price`]="{ item }">
-              {{ formatPrice(item.selling_price) }}
             </template>
           </v-data-table>
         </v-card-text>
@@ -197,6 +195,32 @@
         <v-icon start>mdi-check-circle-outline</v-icon>
         Data has been saved successfully.
       </v-snackbar>
+
+      <!-- Snackbar for errors -->
+      <v-snackbar
+        v-model="showError"
+        color="error"
+        location="top right"
+        rounded="xl"
+        elevation="12"
+      >
+        <div class="d-flex align-start">
+          <v-icon start class="mt-1">mdi-alert-circle-outline</v-icon>
+          <div class="d-flex flex-column">
+            <span v-for="(msg, i) in errorMessages" :key="i">
+              {{ msg }}
+            </span>
+          </div>
+        </div>
+        <template v-slot:actions>
+          <v-btn
+            color="white"
+            variant="text"
+            icon="mdi-close"
+            @click="showError = false"
+          />
+        </template>
+      </v-snackbar>
     </v-container>
   </div>
 </template>
@@ -219,6 +243,8 @@ import { useGlobal } from '@/composables/useGlobal';
     //helpers 
     //error helpers
     handleError,
+    showError,
+    errorMessages,
   } = useGlobal();
 
   const {
@@ -270,8 +296,8 @@ const onCreateAsset = async () => {
     await createAsset(assetData);
     await loadAssets();
     resetAssetForm();
-  } catch (error) {
-    handleError(error); 
+  } catch (e) {
+    handleError(e); 
   }
 };
 

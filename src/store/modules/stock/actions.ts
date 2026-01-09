@@ -1,4 +1,17 @@
-import { CREATE_STOCK, LOAD_DETAIL_STOCK, LOAD_DISPLAY_STOCK, LOAD_STOCK, SET_DATA_DISPLAY_STOCK, SET_DATA_STOCK, SET_DETAIL_DATA_STOCK, SET_HASSAVED, SET_LOADING, SET_LOADING_DETAIL_STOCK, UPDATE_STOCK } from "@/store/storeconstant";
+import {
+    CREATE_STOCK,
+    LOAD_DETAIL_STOCK,
+    LOAD_DISPLAY_STOCK,
+    LOAD_STOCK,
+    RESET_DETAIL_STOCK,
+    SET_DATA_DISPLAY_STOCK,
+    SET_DATA_STOCK,
+    SET_DETAIL_DATA_STOCK,
+    SET_HASSAVED,
+    SET_LOADING,
+    SET_LOADING_DETAIL_STOCK,
+    UPDATE_STOCK
+} from "@/store/storeconstant";
 import { ActionTree } from "vuex";
 import { RootState } from "@/store/types";
 import { StockService } from "@/services/StockService";
@@ -6,6 +19,18 @@ import { CreateStockPayload, Stock, StockState } from "@/types";
 
 const actions: ActionTree<StockState, RootState> = {
 
+    /* ======================================================*
+     * ACTIONS — GLOBAL                                       *
+     * ======================================================*/
+
+    //reset detail stock
+    async [RESET_DETAIL_STOCK]({ commit }) {
+        commit(RESET_DETAIL_STOCK);
+    },
+
+    /* ======================================================*
+     * ACTIONS — STOCK                                       *
+     * ======================================================*/
     async [CREATE_STOCK]({ commit, dispatch }, payload: CreateStockPayload) {
 
         try {
@@ -15,13 +40,13 @@ const actions: ActionTree<StockState, RootState> = {
             setTimeout(() => {
                 commit(SET_HASSAVED, false)
             }, 2000);
-        } catch(error) {
+        } catch (error) {
             console.error('Failed to input stock');
             throw error;
         }
     },
 
-    async [UPDATE_STOCK]({ commit, dispatch }, payload: {id:number, stock: Stock}) {
+    async [UPDATE_STOCK]({ commit, dispatch }, payload: { id: number, stock: Stock }) {
         try {
             await StockService.update(payload.id, payload.stock);
             dispatch(LOAD_STOCK);
@@ -29,7 +54,7 @@ const actions: ActionTree<StockState, RootState> = {
             setTimeout(() => {
                 commit(SET_HASSAVED, false);
             }, 2000);
-        } catch(error) {
+        } catch (error) {
             console.error('Failed to update stock');
             throw error;
         }
@@ -38,10 +63,10 @@ const actions: ActionTree<StockState, RootState> = {
     async [LOAD_STOCK]({ commit }): Promise<void> {
         commit(SET_LOADING, true);
 
-        try{
+        try {
             const data = await StockService.fetchData();
             commit(SET_DATA_STOCK, data);
-        } catch(error) {
+        } catch (error) {
             console.error('Failed to load current stock data');
             throw error;
         } finally {
@@ -54,7 +79,7 @@ const actions: ActionTree<StockState, RootState> = {
         try {
             const data = await StockService.fetchDetailData(itemId);
             commit(SET_DETAIL_DATA_STOCK, data);
-        }catch(error) {
+        } catch (error) {
             console.error('Failed to load detail stock data');
             throw error;
         } finally {
@@ -62,19 +87,21 @@ const actions: ActionTree<StockState, RootState> = {
         }
     },
 
-    async [LOAD_DISPLAY_STOCK]({ commit }, payload: {filledId: number, emptyId: number}){
+    async [LOAD_DISPLAY_STOCK]({ commit }, payload: { filledId: number, emptyId: number }) {
         commit(SET_LOADING, true);
-        try{
+        try {
             const data = await StockService.fetchDataDisplayStock(payload.filledId, payload.emptyId);
             commit(SET_DATA_DISPLAY_STOCK, data);
-        }catch(error){
+        } catch (error) {
             console.error('Failed to load data display stock');
             throw error;
-        }finally{
+        } finally {
             commit(SET_LOADING, false);
         }
     },
-    
+
+
+
 };
 
 export default actions;

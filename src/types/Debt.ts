@@ -16,6 +16,7 @@ export interface DebtState {
 
 export interface Debt {
     id: number,
+    no: number,
     customer_id: number | null,
     customer_name: string,
     description: string,
@@ -24,6 +25,7 @@ export interface Debt {
 }
 
 export interface SummaryDebt {
+    no: number,
     customer_id: number | null,
     customer_name: string,
     total_debt: number,
@@ -46,6 +48,7 @@ export interface HeaderSummaryDebt {
 }
 
 export const headerSummaryDebt: HeaderSummaryDebt[] = [
+    { key: "no", title: "No.", align: "start" },
     { key: "customer_name", title: "Customer Name", align: "start" },
     { key: "total_debt", title: "Total Debt", align: "center" },
     { key: "total_pay", title: "Total Pay", align: "center" },
@@ -54,6 +57,7 @@ export const headerSummaryDebt: HeaderSummaryDebt[] = [
 ];
 
 export const headerDetailDebt: HeaderDetailDebt[] = [
+    { key: "no", title: "No.", align: "start" },
     { key: "customer_name", title: "Customer Name" },
     { key: "description", title: "Description" },
     { key: "amount_pay", title: "Paid Amount", align: "end" },

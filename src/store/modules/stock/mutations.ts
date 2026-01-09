@@ -1,5 +1,5 @@
-import { SET_DATA_DISPLAY_STOCK, SET_DATA_STOCK, SET_DETAIL_DATA_STOCK, SET_HASSAVED, SET_LOADING, SET_LOADING_DETAIL_STOCK } from "@/store/storeconstant";
-import {  Stock, StockDetail, StockDisplay, StockState } from "@/types";
+import { RESET_DETAIL_STOCK, SET_DATA_DISPLAY_STOCK, SET_DATA_STOCK, SET_DETAIL_DATA_STOCK, SET_HASSAVED, SET_LOADING, SET_LOADING_DETAIL_STOCK } from "@/store/storeconstant";
+import { Stock, StockDetail, StockDisplay, StockState } from "@/types";
 import { MutationTree } from "vuex";
 
 const mutations: MutationTree<StockState> = {
@@ -10,7 +10,7 @@ const mutations: MutationTree<StockState> = {
     [SET_DETAIL_DATA_STOCK](state, payload: StockDetail[]) {
         state.stockDetails = payload;
     },
-    [SET_DATA_DISPLAY_STOCK](state, payload: StockDisplay){
+    [SET_DATA_DISPLAY_STOCK](state, payload: StockDisplay) {
         state.stockDisplay = payload;
     },
     // global mutations
@@ -22,7 +22,10 @@ const mutations: MutationTree<StockState> = {
     },
     [SET_HASSAVED](state, value: boolean) {
         state.hasSaved = value;
-  },
+    },
+    [RESET_DETAIL_STOCK](state) {
+        state.stockDetails = [];
+    }
 };
 
 export default mutations;

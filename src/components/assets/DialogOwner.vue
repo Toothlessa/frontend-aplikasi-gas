@@ -107,6 +107,42 @@
     @confirm="onDeactivateConfirm"
     @cancel="dialogDeactivate = false"
   />
+
+  <!-- Snackbar for errors -->
+  <v-snackbar
+    v-model="showError"
+    color="error"
+    location="top right"
+    rounded="xl"
+    elevation="12"
+  >
+    <div class="d-flex align-start ga-2">
+      <v-icon
+        size="20"
+      >
+        mdi-alert-circle-outline
+      </v-icon>
+
+      <div class="d-flex flex-column">
+        <span
+          v-for="(msg, i) in errorMessages"
+          :key="i"
+          class="text-body-2"
+        >
+          {{ msg }}
+        </span>
+      </div>
+    </div>
+
+    <template v-slot:actions>
+      <v-btn
+        color="white"
+        variant="text"
+        icon="mdi-close"
+        @click="showError = false"
+      />
+    </template>
+  </v-snackbar>
 </template>
 
 <script setup lang="ts">
@@ -133,9 +169,9 @@ const emit = defineEmits<{
   * COMPOSABLE                                              *
   *-------------------------------------------------------*/
 const {
-  //helpers
-  //error
   handleError,
+  showError,
+  errorMessages,
 } = useGlobal();
 
 const {
@@ -209,6 +245,7 @@ watch(
   };
 
   const handleSave = async () => {
+    // errorMessages.value = [];
     try {
       if (localOwner.id) {
         await updateOwner(localOwner as Owner);
@@ -218,7 +255,8 @@ watch(
       setTimeout(() => {
         handleClose();
       }, 300);
-    } catch (e) {
+    } catch (e: any) {
+        console.error(e);
         handleError(e);
       }
   };
@@ -228,7 +266,7 @@ watch(
       try {
         await deactivateOwner(selectedItem.value.id);
         dialogDeactivate.value = false;
-      } catch (e) {
+      } catch (e: any) {
         handleError(e);
       }
     }

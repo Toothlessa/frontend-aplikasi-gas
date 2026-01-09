@@ -12,6 +12,7 @@ import {
   SET_DATA_ASSET_DETAIL,
   SET_LOADING_BUTTON_CREATE,
   SET_LOADING_ONE,
+  RESET_DETAIL_ASSET,
 } from '@/store/storeconstant';
 import { ActionTree } from 'vuex';
 import { RootState } from '@/store/types';
@@ -21,7 +22,18 @@ import { AssetOwnerService } from '@/services/AssetOwnerService';
 
 const actions: ActionTree<AssetState, RootState> = {
 
-  async [CREATE_ASSET]({ commit, dispatch }, asset) {
+  /* ======================================================*
+   * ACTIONS — SMALL METHODS                               *
+   * ======================================================*/
+  async [RESET_DETAIL_ASSET]({ commit }) {
+    commit(RESET_DETAIL_ASSET);
+  },
+
+  /* ======================================================*
+   * ACTIONS — ASSET                                       *
+   * ======================================================*/
+
+  async [CREATE_ASSET]({ commit }, asset) {
     commit(SET_LOADING_BUTTON_CREATE, true);
     try {
       await AssetService.createOrUpdateAsset(asset);
@@ -34,6 +46,8 @@ const actions: ActionTree<AssetState, RootState> = {
     } catch (error) {
       console.error('Failed to create asset');
       throw error;
+    } finally {
+      commit(SET_LOADING_BUTTON_CREATE, false);
     }
   },
 
