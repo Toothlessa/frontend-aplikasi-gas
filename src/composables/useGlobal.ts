@@ -1,3 +1,4 @@
+import { errorHandler } from "@/utils/ErrorHandler";
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTheme } from "vuetify/lib/framework.mjs";
@@ -43,6 +44,46 @@ export function useGlobal() {
         else error.value = String(e);
     };
 
+    /* -----------------------------------------------------*
+    * VALIDATION ERROR HELPERS                              *
+    * ----------------------------------------------------  */
+    const validationErrorMessages = ref<string[]>([]);
+    const validationShowError = ref(false);
+
+    const validationError = (
+        error: unknown,
+        mapMessage?: (message: string) => string,
+        fallback = "Unknow Error, Please Contact Support."
+    ) => {
+        validationShowError.value = true;
+
+        // Sudah array → langsung pakai
+        if (Array.isArray(error)) {
+            validationErrorMessages.value = error;
+            return;
+        }
+
+        // Ada mapper → pakai Validation parser
+        if (mapMessage) {
+            validationErrorMessages.value = errorHandler.parseError(
+                error,
+                mapMessage,
+                fallback
+            );
+            return;
+        }
+
+        // Error JS biasa
+        if (error instanceof Error) {
+            validationErrorMessages.value = [error.message];
+            return;
+        }
+
+        // Fallback terakhir
+        validationErrorMessages.value = [String(error)];
+    };
+
+
     return {
         //vue component
         store,
@@ -61,6 +102,11 @@ export function useGlobal() {
         handleError,
         errorMessages,
         showError,
-        error
+        error,
+
+        //validation helpers
+        validationErrorMessages,
+        validationShowError,
+        validationError
     }
 }

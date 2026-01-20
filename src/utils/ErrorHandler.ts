@@ -1,6 +1,9 @@
 import Validation from "./Validation";
+type ErrorMessageMapper = (message: string) => string;
 
 export class errorHandler {
+
+
   static parseAxiosError(error: any): string[] {
     const axiosError = error as {
       response?: {
@@ -123,43 +126,6 @@ export class errorHandler {
   }
 
   /* ======================================================*
-   * ERROR ASSET                                           *
-   * ======================================================*/
-  static parseAssetError(error: any): string[] {
-    const axiosError = error as {
-      response?: {
-        data?: {
-          errors?: { [key: string]: string[] };
-          error?: string;
-          message?: string;
-        };
-      };
-    };
-
-    // Jika backend kirim errors: { field: [message] }
-    const errors = axiosError.response?.data?.errors;
-    if (errors) {
-      const messages: string[] = [];
-      for (const field in errors) {
-        if (Array.isArray(errors[field])) {
-          const message = errors[field][0];
-          messages.push(Validation.getErrorMessageCodeFromAsset(message));
-        }
-      }
-      return messages;
-    }
-
-    // Jika backend kirim message langsung
-    const message = axiosError.response?.data?.message;
-    if (message) {
-      return [Validation.getErrorMessageCodeFromAsset(message)];
-    }
-
-    // Fallback: pesan umum
-    return ["Terjadi kesalahan yang tidak diketahui."];
-  }
-
-  /* ======================================================*
    * ERROR ASSET OWNER                                       *
    * ======================================================*/
   static parseAssetOwnerError(error: any): string[] {
@@ -187,5 +153,40 @@ export class errorHandler {
 
     return ["Unknow Error, Please Contact Support"];
   }
+
+  /* ======================================================*
+  * ERROR ASSET                                            *
+  * =======================================================*/
+
+  static parseError(
+    error: any,
+    mapMessage: ErrorMessageMapper,
+    fallbackMessage: string,
+  ): string[] {
+    const axiosError = error as {
+      response?: {
+        data?: {
+          errors?: Record<string, string[]>;
+          message?: string;
+        };
+      };
+    };
+
+    const errors = axiosError.response?.data?.errors;
+
+    if (errors) {
+      return Object.values(errors)
+        .filter(Array.isArray)
+        .map(messages => mapMessage(messages[0]));
+    }
+
+    const message = axiosError.response?.data?.message;
+    if (message) {
+      return [mapMessage(message)];
+    }
+
+    return [fallbackMessage];
+  }
+
 
 }

@@ -1,6 +1,7 @@
 import { AssetApi } from "@/api/AssetApi";
 import { Asset } from "@/types";
 import { errorHandler } from "@/utils/ErrorHandler";
+import Validations from "@/utils/Validation";
 
 export const AssetService = {
 
@@ -9,8 +10,10 @@ export const AssetService = {
             asset.id
                 ? await AssetApi.updateAsset(asset.id, asset)
                 : await AssetApi.createAsset(asset);
-        } catch (error) {
-            throw errorHandler.parseAssetError(error);
+        } catch (e) {
+            throw errorHandler.parseError(e,
+                Validations.getErrorMessageCodeFromAsset,
+                "Unknow Error, Please Contact Support");
         }
     },
 
@@ -19,7 +22,9 @@ export const AssetService = {
             const response = await AssetApi.fetchAssetSummary();
             return response.data.data;
         } catch (error) {
-            throw errorHandler.parseAssetError(error);
+            throw errorHandler.parseError(error,
+                Validations.getErrorMessageCodeFromAsset,
+                "Unknow Error, Please Contact Support");
         }
     },
 
@@ -28,7 +33,9 @@ export const AssetService = {
             const response = await AssetApi.fetchAssetDetailSummary(ownerId, itemId);
             return response.data.data;
         } catch (error) {
-            throw errorHandler.parseAssetError(error);
+            throw errorHandler.parseError(error,
+                Validations.getErrorMessageCodeFromAsset,
+                "Unknow Error, Please Contact Support");
         }
     },
 

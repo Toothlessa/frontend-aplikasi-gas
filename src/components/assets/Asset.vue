@@ -198,7 +198,7 @@
 
       <!-- Snackbar for errors -->
       <v-snackbar
-        v-model="showError"
+        v-model="validationShowError"
         color="error"
         location="top right"
         rounded="xl"
@@ -207,7 +207,7 @@
         <div class="d-flex align-start">
           <v-icon start class="mt-1">mdi-alert-circle-outline</v-icon>
           <div class="d-flex flex-column">
-            <span v-for="(msg, i) in errorMessages" :key="i">
+            <span v-for="(msg, i) in validationErrorMessages" :key="i">
               {{ msg }}
             </span>
           </div>
@@ -217,7 +217,7 @@
             color="white"
             variant="text"
             icon="mdi-close"
-            @click="showError = false"
+            @click="validationShowError = false"
           />
         </template>
       </v-snackbar>
@@ -239,39 +239,31 @@ import { useGlobal } from '@/composables/useGlobal';
   const {
     //ultilities
     formatPrice,
-
-    //helpers 
-    //error helpers
-    handleError,
-    showError,
-    errorMessages,
+    //validation helpers
+    validationErrorMessages,
+    validationShowError,
+    validationError,
   } = useGlobal();
 
   const {
     dialogOwner,
-
     //table
     headerAsset,
-
     assetData,
-
     hasSaved,
-
     //computed
     resetAssetForm,
     assetOwners,
     assets,
     loading,
     loadingButtonCreate,
-
     //vuex
     loadAssets,
     loadOwners,
     createAsset,
-    
+    //loading
     loadingDetailKey,
     goToAssetDetails,
-
   } = useAsset();
 
   const {
@@ -297,7 +289,7 @@ const onCreateAsset = async () => {
     await loadAssets();
     resetAssetForm();
   } catch (e) {
-    handleError(e); 
+    validationError(e); 
   }
 };
 

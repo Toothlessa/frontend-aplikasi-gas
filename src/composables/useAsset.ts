@@ -11,7 +11,6 @@ import {
   LOAD_OWNER,
   RESET_DETAIL_ASSET,
 } from "@/store/storeconstant";
-
 import { Asset, headerAsset, headerAssetDetail, Owner } from "@/types";
 
 export function useAsset() {

@@ -110,7 +110,7 @@
 
   <!-- Snackbar for errors -->
   <v-snackbar
-    v-model="showError"
+    v-model="validationShowError"
     color="error"
     location="top right"
     rounded="xl"
@@ -125,7 +125,7 @@
 
       <div class="d-flex flex-column">
         <span
-          v-for="(msg, i) in errorMessages"
+          v-for="(msg, i) in validationErrorMessages"
           :key="i"
           class="text-body-2"
         >
@@ -139,7 +139,7 @@
         color="white"
         variant="text"
         icon="mdi-close"
-        @click="showError = false"
+        @click="validationShowError = false"
       />
     </template>
   </v-snackbar>
@@ -172,6 +172,10 @@ const {
   handleError,
   showError,
   errorMessages,
+
+  validationError,
+  validationErrorMessages,
+  validationShowError,
 } = useGlobal();
 
 const {
@@ -257,7 +261,7 @@ watch(
       }, 300);
     } catch (e: any) {
         console.error(e);
-        handleError(e);
+        validationError(e);
       }
   };
 
@@ -267,7 +271,7 @@ watch(
         await deactivateOwner(selectedItem.value.id);
         dialogDeactivate.value = false;
       } catch (e: any) {
-        handleError(e);
+        validationError(e);
       }
     }
   };
