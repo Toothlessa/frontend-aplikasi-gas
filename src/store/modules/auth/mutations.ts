@@ -1,4 +1,9 @@
-import { SET_AUTO_LOGOUT_MUTATION, SET_LOADING, SET_LOADING_BUTTON_CREATE, SET_USER_TOKEN_DATA_MUTATION } from "@/store/storeconstant";
+import { 
+    SET_AUTO_LOGOUT_MUTATION, 
+    SET_LOADING, 
+    SET_LOADING_BUTTON_CREATE, 
+    SET_USER_TOKEN_DATA_MUTATION 
+} from "@/store/storeconstant";
 import { AuthState } from "@/types/Auth";
 import { MutationTree } from "vuex";
 

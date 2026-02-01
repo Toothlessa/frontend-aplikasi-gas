@@ -1,6 +1,3 @@
-// ⚡️ JANGAN import useTransaction di sini
-// Header harus statis, tidak boleh memakai composable
-
 export interface TransactionState {
   transactions: Transaction[];
   outstandingTransaction: Transaction[];
@@ -52,7 +49,6 @@ export const headerTransaction: HeaderTransaction[] = [
   { title: "Created", align: "start", key: "created_at", class: "text-subtitle-1" },
   { title: "Actions", align: "center", key: "actions", class: "text-subtitle-1", sortable: false },
 ];
-
 
 // Dashboard header → hanya ambil kolom tertentu
 export const headerOutstanding = headerTransaction.filter((h) =>

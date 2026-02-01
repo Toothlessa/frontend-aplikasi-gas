@@ -1,4 +1,13 @@
-import { RESET_DETAIL_DEBT, SET_DATA_DEBT, SET_DATA_OUTSTANDING_DEBT, SET_DATA_SUMMARY_DEBT, SET_HASSAVED, SET_LOADING, SET_LOADING_BUTTON_CREATE, SET_LOADING_BUTTON_UPDATE, SET_LOADING_ONE } from "@/store/storeconstant";
+import { 
+    RESET_DETAIL_DEBT, 
+    SET_DATA_DEBT, 
+    SET_DATA_OUTSTANDING_DEBT, 
+    SET_DATA_SUMMARY_DEBT, 
+    SET_HASSAVED, SET_LOADING, 
+    SET_LOADING_BUTTON_CREATE, 
+    SET_LOADING_BUTTON_UPDATE, 
+    SET_LOADING_ONE 
+} from "@/store/storeconstant";
 import { Debt, DebtState, SummaryDebt } from "@/types";
 import { MutationTree } from "vuex";
 

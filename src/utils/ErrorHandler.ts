@@ -2,193 +2,81 @@ type ErrorMessageMapper = (message: string) => string;
 
 export class errorHandler {
 
-  // static parseAxiosError(error: any): string[] {
-  //   const axiosError = error as {
-  //     response?: {
-  //       data?: {
-  //         errors?: { [key: string]: string[] };
-  //         error?: string;
-  //         message?: string;
-  //       };
-  //     };
-  //   };
-
-  //   // Jika backend kirim errors: { field: [message] }
-  //   const errors = axiosError.response?.data?.errors;
-  //   if (errors) {
-  //     const messages: string[] = [];
-  //     for (const field in errors) {
-  //       if (Array.isArray(errors[field])) {
-  //         const message = errors[field][0];
-  //         messages.push(Validation.getErrorMessageFromCodeCustomer(message));
-  //       }
-  //     }
-  //     return messages;
-  //   }
-
-  //   // Jika backend kirim message langsung
-  //   const message = axiosError.response?.data?.message;
-  //   if (message) {
-  //     return [Validation.getErrorMessageFromCodeCustomer(message)];
-  //   }
-
-  //   // Fallback: pesan umum
-  //   return ["Terjadi kesalahan yang tidak diketahui."];
-  // }
-
-  // static parseUploadError(error: any): string[] {
-  //   const axiosError = error as { response?: { data?: { message?: string } } };
-  //   const errorMessage: string = axiosError.response?.data?.message ?? "";
-
-  //   if (errorMessage.includes("Duplicate entry")) {
-  //     const fieldMatch = errorMessage.match(/for key '(.+?)'/);
-  //     const fieldKey = fieldMatch ? fieldMatch[1] : null;
-
-  //     const fieldMap: Record<string, string> = {
-  //       customer_nik_unique: "NIK",
-  //       customers_email_unique: "Email",
-  //     };
-
-  //     const userFriendlyField = fieldKey ? fieldMap[fieldKey] || "field" : "field";
-  //     return [`Data duplicate on ${userFriendlyField}.`];
-  //   }
-
-  //   return [Validation.getErrorMessageFromCodeCustomer(errorMessage)];
-  // }
-
-  // static pareseMItemError(error: any): string[] {
-  //   const axiosError = error as {
-  //     response?: {
-  //       data?: {
-  //         errors?: { [key: string]: string[] };
-  //         error?: string;
-  //         message?: string;
-  //       };
-  //     };
-  //   };
-
-  //   // Jika backend kirim errors: { field: [message] }
-  //   const errors = axiosError.response?.data?.errors;
-  //   if (errors) {
-  //     const messages: string[] = [];
-  //     for (const field in errors) {
-  //       if (Array.isArray(errors[field])) {
-  //         const message = errors[field][0];
-  //         messages.push(Validation.getErrorMessageFromCodeMasterItem(message));
-  //       }
-  //     }
-  //     return messages;
-  //   }
-
-  //   // Jika backend kirim message langsung
-  //   const message = axiosError.response?.data?.message;
-  //   if (message) {
-  //     return [Validation.getErrorMessageFromCodeCustomer(message)];
-  //   }
-
-  //   // Fallback: pesan umum
-  //   return ["Terjadi kesalahan yang tidak diketahui."];
-  // }
-
-  // static pareseCategoryItemError(error: any): string[] {
-  //   const axiosError = error as {
-  //     response?: {
-  //       data?: {
-  //         errors?: { [key: string]: string[] };
-  //         error?: string;
-  //         message?: string;
-  //       };
-  //     };
-  //   };
-
-  //   // Jika backend kirim errors: { field: [message] }
-  //   const errors = axiosError.response?.data?.errors;
-  //   if (errors) {
-  //     const messages: string[] = [];
-  //     for (const field in errors) {
-  //       if (Array.isArray(errors[field])) {
-  //         const message = errors[field][0];
-  //         messages.push(Validation.getErrorMessageFromCodeCategoryItem(message));
-  //       }
-  //     }
-  //     return messages;
-  //   }
-
-  //   // Jika backend kirim message langsung
-  //   const message = axiosError.response?.data?.message;
-  //   if (message) {
-  //     return [Validation.getErrorMessageFromCodeCategoryItem(message)];
-  //   }
-  //   // Fallback: pesan umum
-  //   return ["Terjadi kesalahan yang tidak diketahui."];
-  // }
-
-  // /* ======================================================*
-  //  * ERROR ASSET OWNER                                       *
-  //  * ======================================================*/
-  // static parseAssetOwnerError(error: any): string[] {
-  //   const axiosError = error as {
-  //     response?: {
-  //       data?: {
-  //         errors?: { [key: string]: string[] };
-  //         error?: string;
-  //         message?: string;
-  //       };
-  //     };
-  //   };
-
-  //   const errors = axiosError.response?.data?.errors;
-  //   if (errors) {
-  //     const messages: string[] = [];
-  //     for (const field in errors) {
-  //       if (Array.isArray(errors[field])) {
-  //         const message = errors[field][0];
-  //         messages.push(Validation.getErrorMessageCodeFromAssetOwner(message));
-  //       }
-  //     }
-  //     return messages;
-  //   }
-
-  //   return ["Unknow Error, Please Contact Support"];
-  // }
-
   /* ======================================================*
   * ERROR GENERAL                                         *
   * =======================================================*/
+  // static parseError(
+  //   error: unknown,
+  //   mapMessage: ErrorMessageMapper,
+  //   fallbackMessage: string,
+  // ): string[] {
+  //   const defaultFallback = fallbackMessage ?? "Unknown Error";
+  //   const axiosError = error as {
+  //     response?: {
+  //       data?: {
+  //         errors?: Record<string, string[]>;
+  //         message?: string;
+  //       };
+  //     };
+  //   };
 
-  static parseError(
-    error: unknown,
-    mapMessage: ErrorMessageMapper,
-    fallbackMessage: string,
-  ): string[] {
-    const defaultFallback = fallbackMessage ?? "Unknown Error";
-    const axiosError = error as {
-      response?: {
-        data?: {
-          errors?: Record<string, string[]>;
-          message?: string;
-        };
+  //   const errors = axiosError.response?.data?.errors;
+  //   if (errors) {
+  //     if (typeof errors === 'string') {
+  //       return [mapMessage(errors)];
+  //     }
+
+  //     return Object.values(errors)
+  //       .filter(Array.isArray)
+  //       .map(messages => mapMessage(messages[0]));
+  //   }
+
+  //   const message = axiosError.response?.data?.message;
+  //   if (message) {
+  //     return [mapMessage(message)];
+  //   }
+    
+
+  //   return [defaultFallback];
+  // }
+static parseError(
+  error: unknown,
+  mapMessage: ErrorMessageMapper,
+  fallbackMessage?: string,
+): string[] {
+  const defaultFallback = fallbackMessage ?? "Unknown Error";
+
+  const axiosError = error as {
+    response?: {
+      data?: {
+        errors?: Record<string, string[]>;
+        message?: string;
+        error?: string; // 👈 TAMBAH INI
       };
     };
+  };
 
-    const errors = axiosError.response?.data?.errors;
-    if (errors) {
-      if (typeof errors === 'string') {
-        return [mapMessage(errors)];
-      }
+  const data = axiosError.response?.data;
 
-      return Object.values(errors)
-        .filter(Array.isArray)
-        .map(messages => mapMessage(messages[0]));
-    }
-
-    const message = axiosError.response?.data?.message;
-    if (message) {
-      return [mapMessage(message)];
-    }
-
-    return [defaultFallback];
+  // 1️⃣ validation errors
+  if (data?.errors) {
+    return Object.values(data.errors)
+      .filter(Array.isArray)
+      .map(messages => mapMessage(messages[0]));
   }
+
+  // 2️⃣ single error code (CUSTOMER_NAME_EXISTS)
+  if (typeof data?.error === "string") {
+    return [mapMessage(data.error)];
+  }
+
+  // 3️⃣ generic message
+  if (typeof data?.message === "string") {
+    return [mapMessage(data.message)];
+  }
+
+  return [defaultFallback];
+}
 
 
 }

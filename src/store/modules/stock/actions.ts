@@ -40,9 +40,9 @@ const actions: ActionTree<StockState, RootState> = {
             setTimeout(() => {
                 commit(SET_HASSAVED, false)
             }, 2000);
-        } catch (error) {
+        } catch (e) {
             console.error('Failed to input stock');
-            throw error;
+            throw e;
         }
     },
 
@@ -54,9 +54,9 @@ const actions: ActionTree<StockState, RootState> = {
             setTimeout(() => {
                 commit(SET_HASSAVED, false);
             }, 2000);
-        } catch (error) {
+        } catch (e) {
             console.error('Failed to update stock');
-            throw error;
+            throw e;
         }
     },
 
@@ -66,9 +66,9 @@ const actions: ActionTree<StockState, RootState> = {
         try {
             const data = await StockService.fetchData();
             commit(SET_DATA_STOCK, data);
-        } catch (error) {
+        } catch (e) {
             console.error('Failed to load current stock data');
-            throw error;
+            throw e;
         } finally {
             commit(SET_LOADING, false);
         }
@@ -79,9 +79,9 @@ const actions: ActionTree<StockState, RootState> = {
         try {
             const data = await StockService.fetchDetailData(itemId);
             commit(SET_DETAIL_DATA_STOCK, data);
-        } catch (error) {
+        } catch (e) {
             console.error('Failed to load detail stock data');
-            throw error;
+            throw e;
         } finally {
             commit(SET_LOADING_DETAIL_STOCK, false);
         }
@@ -92,15 +92,13 @@ const actions: ActionTree<StockState, RootState> = {
         try {
             const data = await StockService.fetchDataDisplayStock(payload.filledId, payload.emptyId);
             commit(SET_DATA_DISPLAY_STOCK, data);
-        } catch (error) {
+        } catch (e) {
             console.error('Failed to load data display stock');
-            throw error;
+            throw e;
         } finally {
             commit(SET_LOADING, false);
         }
     },
-
-
 
 };
 

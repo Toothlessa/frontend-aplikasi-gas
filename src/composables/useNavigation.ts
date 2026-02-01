@@ -1,6 +1,5 @@
-import { computed, reactive, ref } from "vue";
+import { computed, ref } from "vue";
 import { useGlobal } from "./useGlobal";
-import { LOGOUT_ACTION } from "@/store/storeconstant";
 
 export function useNavigation() {
 

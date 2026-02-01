@@ -3,6 +3,7 @@ import store from "@/store/store";
 import { IS_USER_AUTHENTICATE_GETTER } from "@/store/storeconstant";
 import { UserApi } from "@/api/UserApi";
 import type { NavigationGuardNext, RouteLocationNormalized } from "vue-router";
+import axios from 'axios';
 
 /* ----------------------------------------------------
  * Lazy Loaded Components
@@ -113,9 +114,8 @@ router.beforeEach(
     if (to.meta.auth) {
       try {
         await UserApi.fetchCurrentUser();
-      } catch (error: any) {
-        if (error?.response?.status === 401) {
-          console.log("AUTO LOGOUT: ", error.response.status);
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
           localStorage.removeItem("userData");
           return next("/login");
         }
@@ -127,8 +127,8 @@ router.beforeEach(
       try {
         await UserApi.fetchCurrentUser();
         return next("/");
-      } catch (error: any) {
-        if (error?.response?.status === 401) {
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
           localStorage.removeItem("userData");
         }
       }

@@ -43,9 +43,9 @@ const actions: ActionTree<AssetState, RootState> = {
         commit(SET_HASSAVED, false)
         commit(SET_LOADING_BUTTON_CREATE, false);
       }, 2000);
-    } catch (error) {
+    } catch (e) {
       console.error('Failed to create asset');
-      throw error;
+      throw e;
     } finally {
       commit(SET_LOADING_BUTTON_CREATE, false);
     }
@@ -56,9 +56,9 @@ const actions: ActionTree<AssetState, RootState> = {
     try {
       const data = await AssetService.fetchAssetSummary();
       commit(SET_DATA_ASSET, data);
-    } catch (error) {
+    } catch (e) {
       console.error('Failed to load asset data');
-      throw error;
+      throw e;
     } finally {
       commit(SET_LOADING, false);
     }
@@ -69,9 +69,9 @@ const actions: ActionTree<AssetState, RootState> = {
     try {
       const data = await AssetOwnerService.fetchData();
       commit(SET_DATA_OWNER, data);
-    } catch (error) {
+    } catch (e) {
       console.error('Failed to load data owner');
-      throw error;
+      throw e;
     } finally {
       commit(SET_LOADING, false);
     }
@@ -87,9 +87,9 @@ const actions: ActionTree<AssetState, RootState> = {
       setTimeout(() => {
         commit(SET_HASSAVED, false);
       }, 2000);
-    } catch (error) {
+    } catch (e) {
       console.error('Failed to create owner');
-      throw error;
+      throw e;
     } finally {
       commit(SET_LOADING_ONE, false);
     }
@@ -104,9 +104,9 @@ const actions: ActionTree<AssetState, RootState> = {
       setTimeout(() => {
         commit(SET_HASSAVED, false)
       }, 2000);
-    } catch (error) {
+    } catch (e) {
       console.error('Failed to deactive owner');
-      throw error;
+      throw e;
     }
   },
 
@@ -119,9 +119,9 @@ const actions: ActionTree<AssetState, RootState> = {
       );
 
       commit(SET_DATA_ASSET_DETAIL, data);
-    } catch (error) {
-      console.error('Failed to load data detail asset', error);
-      throw error;
+    } catch (e) {
+      console.error('Failed to load data detail asset', e);
+      throw e;
     } finally {
       commit(SET_LOADING, false);
     }

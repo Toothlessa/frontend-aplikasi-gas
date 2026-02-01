@@ -1,4 +1,12 @@
-import { RESET_DETAIL_STOCK, SET_DATA_DISPLAY_STOCK, SET_DATA_STOCK, SET_DETAIL_DATA_STOCK, SET_HASSAVED, SET_LOADING, SET_LOADING_DETAIL_STOCK } from "@/store/storeconstant";
+import { 
+    RESET_DETAIL_STOCK, 
+    SET_DATA_DISPLAY_STOCK, 
+    SET_DATA_STOCK, 
+    SET_DETAIL_DATA_STOCK, 
+    SET_HASSAVED, 
+    SET_LOADING, 
+    SET_LOADING_DETAIL_STOCK 
+} from "@/store/storeconstant";
 import { Stock, StockDetail, StockDisplay, StockState } from "@/types";
 import { MutationTree } from "vuex";
 

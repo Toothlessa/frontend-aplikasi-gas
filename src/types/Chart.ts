@@ -20,7 +20,6 @@ export interface LineChartData {
 /* -------------------------------
    POLAR CHART
 --------------------------------*/
-
 export interface PolarChartDataset {
   label: string;
   backgroundColor: string;

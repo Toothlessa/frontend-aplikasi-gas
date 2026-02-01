@@ -12,7 +12,7 @@ import {
 } from '@/store/storeconstant';
 import { ActionTree } from 'vuex';
 import { CustomerState } from '@/types/Customer';
-import { RootState } from '@/store/types'; // ← create this file too
+import { RootState } from '@/store/types'; 
 import { CustomerService } from '@/services/CustomerService';
 
 const actions: ActionTree<CustomerState, RootState> = {
@@ -44,9 +44,9 @@ const actions: ActionTree<CustomerState, RootState> = {
 
       const data = await CustomerService.fetchCustomers();
       commit(SET_DATA_CUSTOMER, data);
-    } catch (error) {
-      console.error('Failed to load customers:', error);
-      throw error;
+    } catch (e) {
+      console.error('Failed to load customers:', e);
+      throw e;
     } finally {
       commit(SET_LOADING, false);
     }
@@ -64,9 +64,9 @@ const actions: ActionTree<CustomerState, RootState> = {
       setTimeout(() => {
         commit(SET_HASSAVED, false);
       }, 2000);
-    } catch (error) {
-      console.error('Failed to deactive the customer:', error);
-      throw error;
+    } catch (e) {
+      console.error('Failed to deactive the customer:', e);
+      throw e;
     } finally {
       commit(SET_LOADING, false);
     }
@@ -82,9 +82,9 @@ const actions: ActionTree<CustomerState, RootState> = {
       setTimeout(() => {
         commit(SET_HASSAVED, false);
       }, 2000);
-    } catch (error) {
-      console.error('Failed to upload customers: ', error);
-      throw error;
+    } catch (e) {
+      console.error('Failed to upload customers: ', e);
+      throw e;
     } finally {
       commit(SET_LOADING, false);
     }
@@ -95,9 +95,9 @@ const actions: ActionTree<CustomerState, RootState> = {
     try {
       const data = await CustomerService.fetchDataTopCustomer();
       commit(SET_DATA_TOP_CUSTOMER, data);
-    } catch (error) {
+    } catch (e) {
       console.error('Failed to load data top customer transaction');
-      throw error;
+      throw e;
     } finally {
       commit(SET_LOADING, false);
     }

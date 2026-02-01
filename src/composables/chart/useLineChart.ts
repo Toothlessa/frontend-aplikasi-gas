@@ -19,7 +19,7 @@ export function useLineChart(){
     /* Props-like local variables */
     const cssClasses = "";
     const styles = {};
-    const plugins: any[] = [];
+    const plugins: unknown[] = [];
 
     return{
         data,

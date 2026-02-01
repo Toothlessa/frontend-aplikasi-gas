@@ -1,4 +1,4 @@
-import { MasterItem, RawMasterItem } from "@/types";
+import { MasterItem } from "@/types";
 import AxiosInstance from "./AxiosInstance";
 
 export const MasterItemApi = {

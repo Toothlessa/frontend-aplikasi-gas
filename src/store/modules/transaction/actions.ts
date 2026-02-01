@@ -1,5 +1,17 @@
 import { TransactionService } from "@/services/TransactionService";
-import { CREATE_TRANSACTION, LOAD_LAST_30_DAYS_TRANSACTION, LOAD_OUTSTANDING_TRANSACTION, LOAD_TRANSACTION_BY_DATE, SET_DATA_LAST_30_DAYS_TRANSACTION, SET_DATA_OUTSTANDING_TRANSACTION, SET_DATA_TRANSACTION, SET_HASSAVED, SET_LOADING, SET_LOADING_BUTTON_CREATE, SET_LOADING_BUTTON_UPDATE, SET_LOADING_ONE } from "@/store/storeconstant";
+import { 
+    CREATE_TRANSACTION, 
+    LOAD_LAST_30_DAYS_TRANSACTION, 
+    LOAD_OUTSTANDING_TRANSACTION, 
+    LOAD_TRANSACTION_BY_DATE, 
+    SET_DATA_LAST_30_DAYS_TRANSACTION, 
+    SET_DATA_OUTSTANDING_TRANSACTION, 
+    SET_DATA_TRANSACTION, 
+    SET_HASSAVED, SET_LOADING, 
+    SET_LOADING_BUTTON_CREATE, 
+    SET_LOADING_BUTTON_UPDATE, 
+    SET_LOADING_ONE 
+} from "@/store/storeconstant";
 import { RootState } from "@/store/types";
 import { TransactionState } from "@/types/Transaction";
 import { ActionTree } from "vuex";
@@ -19,9 +31,9 @@ const actions: ActionTree<TransactionState, RootState> = {
                 commit(SET_HASSAVED, false)
             }, 2000);
 
-        } catch(error) {
-            console.error('Failed to create transaction data : ', error);
-            throw error;
+        } catch(e) {
+            console.error('Failed to create transaction data : ', e);
+            throw e;
         }finally{
         setTimeout(() => {
             transaction.id 
@@ -37,9 +49,9 @@ const actions: ActionTree<TransactionState, RootState> = {
         try{
             const data = await TransactionService.fetchTransactionByDate(date);
             commit(SET_DATA_TRANSACTION, data);
-        }catch(error){
-            console.error('Failed to load data transaction : ', error);
-            throw error;
+        }catch(e){
+            console.error('Failed to load data transaction : ', e);
+            throw e;
         }finally{
             commit(SET_LOADING, false);
         }
@@ -50,9 +62,9 @@ const actions: ActionTree<TransactionState, RootState> = {
         try{
             const data = await TransactionService.fetchOutstandingTransaction();
             commit(SET_DATA_OUTSTANDING_TRANSACTION, data);
-        }catch(error){
+        }catch(e){
             console.error('Failed to load data oustanding transaction');
-            throw error;
+            throw e;
         }finally{
             commit(SET_LOADING, false);
         }
@@ -63,9 +75,9 @@ const actions: ActionTree<TransactionState, RootState> = {
         try{
             const data = await TransactionService.fetchLast30DaysSale();
             commit(SET_DATA_LAST_30_DAYS_TRANSACTION, data);
-        }catch(error){
+        }catch(e){
             console.error('Failed to load last 30 days transaction');
-            throw error;
+            throw e;
         }finally{
             commit(SET_LOADING_ONE, true);
         }

@@ -1,7 +1,8 @@
 export default class Validations {
-  /**
-   * User Auth — get error message from backend
-   */
+  
+  /* ======================================================*
+  * ERROR CODE USER                                        *
+  * =======================================================*/
   static getErrorMessageFromCodeUser(errorCode: string): string {
     switch (errorCode) {
       case "EMAIL_PASSWORD_WRONG":
@@ -21,9 +22,9 @@ export default class Validations {
     }
   }
 
-  /**
-   * Master Items — get error message from backend
-   */
+  /*======================================================*
+  * ERROR CODE MASTER ITEM                                  *
+  * =======================================================*/
   static getErrorMessageFromCodeMasterItem(errorCode: string): string {
     switch (errorCode) {
       case "The item name field is required.":
@@ -39,9 +40,9 @@ export default class Validations {
     }
   }
 
-  /**
-   * Customer — get error message from backend
-   */
+  /* ======================================================*
+  * ERROR CODE CATEGORY ITEM                               *
+  * =======================================================*/
   static getErrorMessageFromCodeCategoryItem(errorCode: string): string {
     switch (errorCode) {
       case "NAME_EXISTS":
@@ -72,9 +73,9 @@ export default class Validations {
     }
   }
 
-  /**
-  * Asset — get error message from backend
-  */
+  /* ======================================================*
+  * ERROR CODE ASSET                                       *
+  * =======================================================*/
   static getErrorMessageCodeFromAsset(errorCode: string): string {
     switch (errorCode) {
       case "The item id field is required.":
@@ -92,6 +93,9 @@ export default class Validations {
     }
   }
 
+  /* =======================================================*
+  * ERROR CODE ASSET OWNER                                  *
+  * ========================================================*/
   static getErrorMessageCodeFromAssetOwner(errorCode: string): string {
     switch (errorCode) {
       case "The owner id field is required.":
@@ -103,6 +107,9 @@ export default class Validations {
     }
   }
 
+  /*=======================================================*
+  * ERROR CODE TRANSACTION                                 *
+  * =======================================================*/
   static getErrorMessageCodeFromTransaction(errorCode: string): string {
     switch (errorCode) {
       case "The customer id field is required.":
@@ -112,6 +119,9 @@ export default class Validations {
     }
   }
 
+  /*======================================================*
+  * ERROR CODE DEBT                                       *
+  * ======================================================*/
   static getErrorMessageCodeFromDebt(errorCode: string): string {
     switch (errorCode) {
       case "The owner id field is required.":
@@ -125,6 +135,9 @@ export default class Validations {
     }
   }
 
+  /* ======================================================*
+  * ERROR CODE STOCK                                       *
+  * =======================================================*/
   static getErrorMessageCodeFromStock(errorCode: string): string {
     switch (errorCode) {
       case "The item id field is required.":

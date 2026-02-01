@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
+import axios, { InternalAxiosRequestConfig } from "axios";
 import store from '../store/store';
 import { GET_USER_TOKEN_GETTER } from "@/store/storeconstant";
 

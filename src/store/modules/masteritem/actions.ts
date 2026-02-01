@@ -14,7 +14,7 @@ import {
 } from '@/store/storeconstant';
 import { ActionTree } from 'vuex';
 import { MasterItemState } from '@/types/MasterItem';
-import { RootState } from '@/store/types'; // ← create this file too
+import { RootState } from '@/store/types'; 
 import { MasterItemService } from '@/services/MasterItemService';
 import { CategoryItemService } from '@/services/CategoryItemService';
 
@@ -30,9 +30,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
       setTimeout(() => {
         commit(SET_HASSAVED, false)
       }, 2000);
-    } catch(error) {
-      console.error('Failed to create master item : ', error);
-      throw error;
+    } catch(e) {
+      console.error('Failed to create master item : ', e);
+      throw e;
     } finally {
       commit(SET_HASSAVED, false);
     }
@@ -45,9 +45,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
 
       const data = await MasterItemService.fetchData();
       commit(SET_DATA_MITEM, data);
-    }catch(error) {
+    }catch(e) {
       console.error('Failed to load master item data');
-      throw error;
+      throw e;
     } finally {
       commit(SET_LOADING, false);
     }
@@ -57,9 +57,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
     try {
       const data = await MasterItemService.fetchItemByType(itemType);
       commit(SET_DATA_MITEM_BY_TYPE, data);
-    }catch(error){
+    }catch(e){
       console.error('failed to load data masteritem by item type');
-      throw error;
+      throw e;
     }
   },
 
@@ -74,9 +74,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
         commit(SET_HASSAVED, false);
       }, 2000);
 
-    } catch (error) {
-      console.error('Failed to deactive the item', error);
-      throw error;
+    } catch (e) {
+      console.error('Failed to deactive the item', e);
+      throw e;
     } finally {
       commit(SET_HASSAVED, false);
     }
@@ -92,9 +92,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
         commit(SET_HASSAVED, true)
       }, 2000);
 
-    } catch(error) {
-      console.error('Failed to create the customer', error);
-      throw error;
+    } catch(e) {
+      console.error('Failed to create the customer', e);
+      throw e;
     } finally {
       commit(SET_HASSAVED, false);
     }
@@ -107,9 +107,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
 
       const data = await CategoryItemService.fetchData();
       commit(SET_DATA_CATEGORY, data);
-    }catch(error) {
+    }catch(e) {
       console.error('Failed to load category item data');
-      throw error;
+      throw e;
     } finally {
       commit(SET_LOADING, false);
     }
@@ -124,9 +124,9 @@ const actions: ActionTree<MasterItemState, RootState> = {
       setTimeout(() => {
         commit(SET_HASSAVED, true);
       });
-    } catch(error) {
-      console.error('Failed to deactive the master item', error);
-      throw error;
+    } catch(e) {
+      console.error('Failed to deactive the master item', e);
+      throw e;
     } finally {
       commit(SET_HASSAVED, false);
     }

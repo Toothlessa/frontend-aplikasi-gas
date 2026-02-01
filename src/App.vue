@@ -12,7 +12,7 @@ import { defineComponent, watch } from 'vue';
 import TheNavigation from '@/components/sidebar/TheNavigation.vue';
 import { AUTO_LOGIN_ACTION } from './store/storeconstant';
 import { useStore } from 'vuex';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { RootState } from './store/types';
 
 export default defineComponent({

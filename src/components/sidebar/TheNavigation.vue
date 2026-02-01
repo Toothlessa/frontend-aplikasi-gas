@@ -287,18 +287,6 @@ import { useAuth } from '@/composables/useAuth';
   /*================================================================*
   * METHODS                                                         *
   * ================================================================*/
-
-  const onLoadUser = async () => {
-    try {
-      await loadUser();
-
-      userData.username = user.value?.username;
-      userData.email = user.value?.email;
-    } catch (e) {
-      validationError(e);
-    }
-  };
-
   const handleNavigation = async (path: string) => {
     loadingPath.value = path;
     try {
@@ -309,6 +297,17 @@ import { useAuth } from '@/composables/useAuth';
       loadingPath.value = null;
     }
   };
+  
+  const onLoadUser = async () => {
+    try {
+      await loadUser();
+
+      userData.username = user.value?.username;
+      userData.email = user.value?.email;
+    } catch (e) {
+      validationError(e);
+    }
+  }; 
 
   const onLogout = async() => {
     try {

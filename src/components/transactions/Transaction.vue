@@ -337,8 +337,6 @@ import { useCustomer } from '@/composables/useCustomer';
 import { useMasterItem } from '@/composables/useMasterItem';
 import { useGlobal } from '@/composables/useGlobal';
 import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
-import { ref } from 'vue';
-
 
   /* -----------------------------------------------------*
    * COMPOSABLES                                          *
@@ -368,7 +366,6 @@ const {
     loadingButtonSave,
     loadingButtonUpdate,
     fieldDisabled,
-    alert,
 
     // headers
     headersLocal,
@@ -390,7 +387,6 @@ const {
     getColorByDescription,
 
     resetTransactionData,
-    resetTransactionUpdate,
     getDateOptions,
 
     // actions
@@ -418,12 +414,11 @@ const {
    * LIFECYCLE                                            *
    * ---------------------------------------------------- */
 onMounted(() => {
-  loadCustomerData();
-  loadMasterItemByType('ITEM');
-  getTransactionByDate();
-  loadTopCustomerTransaction();
+  onLoadCustomerData();
+  onLoadTopCustomerTransaction();
+  onLoadMasterItemByType('ITEM');
+  onGetTransactionByDate();
 });
-
 
   /* -----------------------------------------------------*
    * CONSTANTS AND API's                                  *
@@ -466,6 +461,31 @@ onMounted(() => {
       validationError(e);
     }
   };
+
+  const onLoadCustomerData = async () => {
+    try {
+      await loadCustomerData();
+    } catch (e) {
+      validationError(e);
+    }
+  };
+
+  const onLoadMasterItemByType = async (type: string) => {
+    try {
+      await loadMasterItemByType(type);
+    } catch (e) {
+      validationError(e);
+    }
+  };
+
+  const onLoadTopCustomerTransaction = async () => {
+    try {
+      await loadTopCustomerTransaction();
+    } catch (e) {
+      validationError(e);
+    }
+  };
+
 </script>
 
 <style scoped>

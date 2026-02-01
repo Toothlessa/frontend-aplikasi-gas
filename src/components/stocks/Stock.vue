@@ -9,16 +9,6 @@
             <span class="text-h6 font-weight-bold">Input Stock</span>
           </v-card-title>
           <v-card-text class="pa-4">
-            <v-alert
-              v-if="error"
-              v-model="alert"
-              type="error"
-              closable
-              variant="tonal"
-              class="mb-4"
-            >
-              {{ error }}
-            </v-alert>
             <v-autocomplete
               label="Item"
               v-model="selectedItem"
@@ -157,16 +147,6 @@
           <span class="text-h6 font-weight-bold">Update Stock</span>
         </v-card-title>
         <v-card-text class="pa-4">
-          <v-alert
-            v-if="error"
-            v-model="alert"
-            type="error"
-            closable
-            variant="tonal"
-            class="mb-4"
-          >
-            {{ error }}
-          </v-alert>
           <v-autocomplete
             label="Item"
             v-model="editedStock.item_id"
@@ -258,9 +238,6 @@ const {
   loadingDetail,
   hasSaved,
 
-  alert,
-  error,
-
   createStock,
   updateStock,
   loadDetailStock,
@@ -287,9 +264,8 @@ const loadingCloseUpdate = ref<boolean>(false);
 const loadingButtonUpdate = ref<boolean>(false);
 
 onMounted(() => {
-  loadCurrentStock();
-  loadMasterItem();
-  resetStockDetail();
+  onLoadCurrentStock();
+  onLoadMasterItem();
 });
 
  /* ======================================================*
@@ -335,6 +311,23 @@ const onCreateStock = async() => {
     loadingCreateStock.value = false;
   }
 }
+
+const onLoadCurrentStock = async() => {
+  resetStockDetail();
+  try {
+    await loadCurrentStock();
+  } catch(e) {
+    validationError(e);
+  }
+};
+
+const onLoadMasterItem = async() => {
+  try{
+    await loadMasterItem();
+  } catch(e) {
+    validationError(e);
+  }
+};
 
 const onLoadDetailStock = async(item_id: number) => {
   loadingItemId.value = item_id;

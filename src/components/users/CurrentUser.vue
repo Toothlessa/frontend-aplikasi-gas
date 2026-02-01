@@ -93,12 +93,8 @@ const {
   // State
   hasSaved,
   loadingButtonUpdate,
-  alert,
   isEditing,
   userData,
-
-  // Error Handling
-  error,
 
   // Computed
   user,

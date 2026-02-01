@@ -49,30 +49,31 @@ export interface RawCategoryItem {
   inactive_date: string;
 }
 
-export interface HeaderCategory {
+export interface HeaderCategory<T = unknown> {
   title: string;
   key: string;
-  value?: string | ((item: any) => any);
+  value?: string | ((item: T) => unknown);
   align?: 'start' | 'center' | 'end';
   sortable?: boolean;
 }
 
-export interface Header {
+
+export interface Header<T = unknown> {
   title: string;
   key: string;
-  value?: string | ((item: any) => any);
+  value?: string | ((item: T) => unknown);
   align?: 'start' | 'center' | 'end';
   sortable?: boolean;
 }
 
 type MasterItemKey = keyof MasterItem;
 
-export interface Field {
+export interface Field<TItem = unknown> {
   model: MasterItemKey;
   label: string;
-  items?: any[];          // Optional
-  itemTitle?: string;     // Optional
-  itemValue?: string;     // Optional
+  items?: TItem[];         
+  itemTitle?: keyof TItem | string;    
+  itemValue?: keyof TItem | string;    
   onEnterSubmit?: boolean;
 }
 
@@ -81,7 +82,7 @@ function formatPrice(value: number | string): string {
   return `Rp${num.toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&.')}`;
 }
 
-export const headers: Header[] = [
+export const headers: Header<MasterItem>[] = [
   { title: 'Item Name', align: 'start', key: 'item_name' },
   { title: 'Item Code', align: 'start', key: 'item_code' },
   { title: 'Item Type', align: 'start', key: 'item_type' },
