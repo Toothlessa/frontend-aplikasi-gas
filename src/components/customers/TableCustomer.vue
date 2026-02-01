@@ -10,18 +10,16 @@
     item-value="id"
   >
     <!-- Custom Header -->
-    <template #header="{ props: headerProps }">
-      <thead class="table-header">
-        <tr>
-          <th 
-            v-for="header in headerProps.headers"
-            :key="header.key"
-            class="text-left px-4 py-3 font-weight-bold text-uppercase"
-          >
-            {{ header.title }}
-          </th>
-        </tr>
-      </thead>
+    <template #headers>
+      <tr>
+        <th 
+          v-for="header in headers"
+          :key="header.key"
+          class="text-left px-4 py-3 font-weight-bold text-uppercase"
+        >
+          {{ header.title }}
+        </th>
+      </tr>
     </template>
 
     <!-- Active Flag -->
@@ -68,10 +66,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { Customer, Header } from '@/types/Customer';
+import type { Customer, HeaderCustomer } from '@/types/Customer';
 
 const props = defineProps<{
-  headers: Header[];
+  headers: HeaderCustomer[];
   items: Customer[];
   search: string;
   loading: boolean;

@@ -1,22 +1,31 @@
 import { StockApi } from "@/api/StockApi";
 import { Stock, StockDetail, StockDisplay } from "@/types";
 import { errorHandler } from "@/utils/ErrorHandler";
+import Validations from "@/utils/Validation";
+
+const FALLBACK_MESSAGE = "unknown error, please contact your support";
 
 export const StockService = {
 
     async create(itemId: number, stock: number): Promise<void> {
         try {
             await StockApi.create(itemId, stock);
-        } catch (error) {
-            throw errorHandler.pareseMItemError(error);
+        } catch (e) {
+            throw errorHandler.parseError(e,
+                Validations.getErrorMessageCodeFromStock,
+                FALLBACK_MESSAGE
+            );
         }
     },
 
     async update(id: number, stock: Stock): Promise<void> {
         try {
             await StockApi.update(id, stock);
-        } catch (error) {
-            throw errorHandler.pareseMItemError(error);
+        } catch (e) {
+            throw errorHandler.parseError(e,
+                Validations.getErrorMessageCodeFromStock,
+                FALLBACK_MESSAGE
+            );
         }
     },
 
@@ -24,8 +33,11 @@ export const StockService = {
         try {
             const response = await StockApi.get();
             return response.data.data;
-        } catch (error) {
-            throw errorHandler.pareseMItemError(error);
+        } catch (e) {
+            throw errorHandler.parseError(e,
+                Validations.getErrorMessageCodeFromStock,
+                FALLBACK_MESSAGE
+            );
         }
     },
 
@@ -33,8 +45,11 @@ export const StockService = {
         try {
             const response = await StockApi.getDetail(itemId);
             return response.data.data;
-        } catch (error) {
-            throw errorHandler.pareseMItemError(error);
+        } catch (e) {
+            throw errorHandler.parseError(e,
+                Validations.getErrorMessageCodeFromStock,
+                FALLBACK_MESSAGE
+            );
         }
     },
 
@@ -42,8 +57,11 @@ export const StockService = {
         try {
             const response = await StockApi.fetchDataDisplayStock(filledId, emptyId);
             return response.data.data;
-        } catch (error) {
-            throw errorHandler.parseAxiosError(error);
+        } catch (e) {
+            throw errorHandler.parseError(e,
+                Validations.getErrorMessageCodeFromStock,
+                FALLBACK_MESSAGE
+            );
         }
     },
 

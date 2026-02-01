@@ -1,16 +1,20 @@
 import { CategoryItemApi } from "@/api/CategoryItemApi";
 import { CategoryItem } from "@/types";
 import { errorHandler } from "@/utils/ErrorHandler";
-import Validations from "./Validations";
+import Validations from "@/utils/Validation";
+
+const FALLBACK_MESSAGE = "unknown error, please contact your support";
 
 export const CategoryItemService = {
 
     async createOrUpdate(categoryItem: CategoryItem): Promise<void> {
-        try{ 
-             categoryItem.id  ? await CategoryItemApi.update(categoryItem.id, categoryItem)
-                              : await CategoryItemApi.create(categoryItem);
-        } catch(error){
-            throw errorHandler.pareseCategoryItemError(error);
+        try {
+            categoryItem.id ? await CategoryItemApi.update(categoryItem.id, categoryItem)
+                : await CategoryItemApi.create(categoryItem);
+        } catch (e) {
+            throw errorHandler.parseError(e,
+                Validations.getErrorMessageFromCodeMasterItem,
+                FALLBACK_MESSAGE);
         }
     },
 
@@ -21,10 +25,10 @@ export const CategoryItemService = {
                 ...item,
                 active_flag: item.active_flag == 'Y',
             }));
-        } catch(error) {
-             throw errorHandler.pareseCategoryItemError(error);
-            // const axiosError = error as { response?: { data?: { errors?: string[] } } };
-            // throw Validations.getErrorMessageFromCodeMasterItem(axiosError.response?.data?.errors?.[0]);
+        } catch (error) {
+            throw errorHandler.parseError(error,
+                Validations.getErrorMessageFromCodeMasterItem,
+                FALLBACK_MESSAGE);
         }
     },
 
@@ -33,7 +37,9 @@ export const CategoryItemService = {
             await CategoryItemApi.deactive(id);
 
         } catch (error) {
-            throw errorHandler.pareseCategoryItemError(error);
+            throw errorHandler.parseError(error,
+                Validations.getErrorMessageFromCodeMasterItem,
+                FALLBACK_MESSAGE);
         }
     }
 }

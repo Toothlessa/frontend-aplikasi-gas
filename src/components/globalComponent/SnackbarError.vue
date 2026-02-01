@@ -2,7 +2,7 @@
   <v-snackbar
     v-model="model"
     :timeout="timeout"
-    location="bottom right"
+    location="top right"
     color="red-darken-3"
     elevation="24"
     rounded="lg"
@@ -28,14 +28,23 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
+/* -----------------------------------------------------*
+ * PROPS                                                *
+ * ---------------------------------------------------- */
 const props = defineProps<{
   modelValue: boolean;
   messages: string[];
   timeout?: number;
 }>();
 
+/* -----------------------------------------------------*
+ * EMITS                                                *
+ * ---------------------------------------------------- */
 const emit = defineEmits(['update:modelValue']);
 
+/* -----------------------------------------------------*
+ * COMPUTED                                             *
+ * ---------------------------------------------------- */
 const model = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val),

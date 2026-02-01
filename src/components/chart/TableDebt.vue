@@ -23,22 +23,32 @@
         </v-data-table-virtual>
       </v-card>
     </div>
+    
+    <!-- Snackbars -->
+    <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
+    
   </template>
   
 <script setup lang="ts">
 import { useDebt } from '@/composables/useDebt';
 import { useGlobal } from '@/composables/useGlobal';
 import { onMounted } from 'vue';
+import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
 
   /* -----------------------------------------------------*
    * COMPOSABLES                                          *
    * ---------------------------------------------------- */
 const {
   formatPrice,
-  handleError,
+  validationError,
+  validationErrorMessages,
+  validationShowError
 } = useGlobal();
 
 const {
+  hasSaved,
+  
   outstandingDebtData,
   loadingData,
   headerOutstandingDebt,
@@ -60,7 +70,7 @@ const onFetchOutstandingDebt = async () => {
   try {
     fetchOutstandingDebt();
   } catch (e) {
-    handleError(e);
+    validationError(e);
   }
 };
 

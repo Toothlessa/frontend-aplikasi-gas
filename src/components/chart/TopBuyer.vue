@@ -13,6 +13,11 @@
         <PolarArea :data="data" :options="defaultPolarOptions" />
       </div>
     </v-card>
+
+    <!-- Snackbars -->
+    <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
+
   </div>
 </template>
 
@@ -30,12 +35,13 @@ import { onMounted, computed } from "vue";
 import { useCustomer } from "@/composables/useCustomer";
 import { usePolarChart } from "@/composables/chart/usePolarChart";
 import { useGlobal } from "@/composables/useGlobal";
+import { SnackbarError, SnackbarSuccess } from "@/components/globalComponent";
 
  /* ------------------------------------------------------*
    * COMPOSABLES                                            *
    * ---------------------------------------------------- */
-const { handleError } = useGlobal();
-const { labels, totals, loadTopCustomerTransaction } = useCustomer();
+const { validationError, validationErrorMessages, validationShowError } = useGlobal();
+const { hasSaved,labels, totals, loadTopCustomerTransaction } = useCustomer();
 const { defaultPolarOptions, createPolarChartData, } = usePolarChart();
 
  /* ------------------------------------------------------*
@@ -57,7 +63,7 @@ const onloadTopCustomerTransaction = async () => {
   try{
     await loadTopCustomerTransaction();
   }catch(e){
-    handleError(e);
+    validationError(e);
   }
 };
 

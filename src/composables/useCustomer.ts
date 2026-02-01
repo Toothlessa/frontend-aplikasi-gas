@@ -11,14 +11,11 @@ import {
 } from '@/store/storeconstant';
 import { headerCustomer, type Customer, type CustomerField } from '@/types/Customer';
 
-/* ======================================================
- * COMPOSABLE
- * ====================================================== */
 export function useCustomer() {
 
-  /* ======================================================
-   * STATE — DIALOG CONTROL
-   * ====================================================== */
+  /* -----------------------------------------------------*
+   * STATE — DIALOG                                       *
+   * -----------------------------------------------------*/
   const DialogOpenCreate = ref(false);
   const DialogOpenDeactive = ref(false);
   const DialogOpenUploadCustomer = ref(false);
@@ -35,9 +32,9 @@ export function useCustomer() {
     DialogOpenUploadCustomer.value = false;
   };
 
-  /* ======================================================
-   * STATE — SEARCH & FORM
-   * ====================================================== */
+  /* -----------------------------------------------------*
+   * STATE — SEARCH & FORM                                *
+   * -----------------------------------------------------*/
   const search = ref('');
 
   const editedIndex = ref(-1);
@@ -59,15 +56,15 @@ export function useCustomer() {
   const csvFile = ref<File | null>(null);
   const uploading = ref(false);
 
-  /* ======================================================*
-   * STATE — TABLE & UI
-   * ====================================================== */
+  /* -----------------------------------------------------*
+   * STATE — TABLE & UI                                   *
+   * -----------------------------------------------------*/
 
   const error = ref<string | string[]>('');
 
-  /* ======================================================
-   * COMPUTED — FORM FIELDS
-   * ====================================================== */
+  /* -----------------------------------------------------*
+   * COMPUTED — FORM FIELDS                               *
+   * -----------------------------------------------------*/
   const allFields = computed<CustomerField[]>(() => [
     { model: 'customer_name', label: 'Customer Name' },
     { model: 'customer_type', label: 'Type' },
@@ -77,14 +74,9 @@ export function useCustomer() {
     { model: 'phone', label: 'Phone', onEnterSubmit: true },
   ]);
 
-  /* ======================================================*
-   * COMPUTED — STORE STATE                                *
-   * ======================================================*/
-  const customers = computed(() => store.state.customer.customers);
-  const topCustomerTransaction = computed(
-    () => store.state.customer.topCustomerTransaction ?? []
-  );
-
+  /* -----------------------------------------------------*
+   * COMPUTED — STORE STATE                               *
+   * -----------------------------------------------------*/
   const loading = computed(() => store.state.customer.loading);
   const loadingButtonCreate = computed(() => store.state.customer.loadingButtonCreate);
 
@@ -96,9 +88,22 @@ export function useCustomer() {
 
   const isEditMode = computed(() => editedIndex.value !== -1);
 
-  /* ======================================================
-   * COMPUTED — CHART DATA
-   * ====================================================== */
+  const resetEditedItem = () => {
+    Object.assign(editedItem, defaultItem);
+    editedIndex.value = -1;
+  };
+
+  /* -----------------------------------------------------*
+   * COMPUTED — STORE DATA                                *
+   * -----------------------------------------------------*/
+  const customers = computed(() => store.state.customer.customers);
+  const topCustomerTransaction = computed(
+    () => store.state.customer.topCustomerTransaction ?? []
+  );
+
+  /* -----------------------------------------------------*
+   * COMPUTED — CHART DATA                                *
+   * -----------------------------------------------------*/
   const labels = computed(() =>
     topCustomerTransaction.value.map(item => item.customer_name)
   );
@@ -107,9 +112,9 @@ export function useCustomer() {
     topCustomerTransaction.value.map(item => item.total)
   );
 
-  /* ======================================================
-   * VUEX ACTIONS — LOAD & RESET
-   * ====================================================== */
+  /* -----------------------------------------------------*
+   * VUEX ACTIONS — API's                                 *
+   * -----------------------------------------------------*/
   const loadCustomerData = () =>
     store.dispatch(`customer/${LOAD_CUSTOMER_DATA}`);
 
@@ -127,11 +132,6 @@ export function useCustomer() {
 
   const uploadCustomer = () =>
     store.dispatch(`customer/${UPLOAD_CUSTOMER}`, csvFile.value);
-
-  const resetEditedItem = () => {
-    Object.assign(editedItem, defaultItem);
-    editedIndex.value = -1;
-  };
 
   /* ======================================================*
    * EXPORTS                                               *

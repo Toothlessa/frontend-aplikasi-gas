@@ -18,6 +18,11 @@
       :plugins="plugins"
     />
   </v-card>
+
+  <!-- Snackbars -->
+  <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+  <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
+
 </template>
 
 <script setup lang="ts">
@@ -53,14 +58,25 @@ import { onMounted, watch } from "vue";
 import { useTransaction } from "@/composables/useTransaction";
 import { useLineChart } from "@/composables/chart/useLineChart";
 import { useGlobal } from "@/composables/useGlobal";
+import { SnackbarError, SnackbarSuccess } from "@/components/globalComponent";
 
   /* -----------------------------------------------------*
   * COMPOSABLE                                           *
   * ---------------------------------------------------- */
-const { 
-        last30DaysTransaction, 
-        fetchLast30DaysSale 
-      } = useTransaction();
+
+const {
+  //validation helpers
+  validationErrorMessages,
+  validationShowError,
+  validationError,
+} = useGlobal();
+
+const {
+  hasSaved,
+
+  last30DaysTransaction, 
+  fetchLast30DaysSale 
+} = useTransaction();
 
 const {
   data,
@@ -69,10 +85,6 @@ const {
   styles,
   plugins,
 } = useLineChart();
-
-const { 
-        handleError,
-      } = useGlobal();
 
   /* -----------------------------------------------------*
    * ON MOUNTED                                           *
@@ -117,7 +129,7 @@ watch(
     try {
       fetchLast30DaysSale();
     } catch (e) {
-      handleError(e);
+      validationError(e);
     }
    };
 

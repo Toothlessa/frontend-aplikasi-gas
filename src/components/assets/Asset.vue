@@ -184,43 +184,10 @@
         @close="dialogOwner = false"
       />
 
-      <!-- Snackbar for notifications -->
-      <v-snackbar
-        v-model="hasSaved"
-        color="success"
-        location="top right"
-        rounded="xl"
-        elevation="12"
-      >
-        <v-icon start>mdi-check-circle-outline</v-icon>
-        Data has been saved successfully.
-      </v-snackbar>
+      <!-- Snackbar -->
+      <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000"/>
+      <SnackbarError v-model="validationShowError" :messages="validationErrorMessages" :timeout="2000"/>
 
-      <!-- Snackbar for errors -->
-      <v-snackbar
-        v-model="validationShowError"
-        color="error"
-        location="top right"
-        rounded="xl"
-        elevation="12"
-      >
-        <div class="d-flex align-start">
-          <v-icon start class="mt-1">mdi-alert-circle-outline</v-icon>
-          <div class="d-flex flex-column">
-            <span v-for="(msg, i) in validationErrorMessages" :key="i">
-              {{ msg }}
-            </span>
-          </div>
-        </div>
-        <template v-slot:actions>
-          <v-btn
-            color="white"
-            variant="text"
-            icon="mdi-close"
-            @click="validationShowError = false"
-          />
-        </template>
-      </v-snackbar>
     </v-container>
   </div>
 </template>
@@ -232,6 +199,7 @@ import DialogOwner from './DialogOwner.vue';
 import { useAsset } from '@/composables/useAsset';
 import { useMasterItem } from '@/composables/useMasterItem';
 import { useGlobal } from '@/composables/useGlobal';
+import { SnackbarError, SnackbarSuccess } from '../globalComponent';
 
   /* -----------------------------------------------------*
    * COMPOSABLES                                          *
@@ -275,21 +243,46 @@ import { useGlobal } from '@/composables/useGlobal';
    * LIFECYCLE HOOKS                                      *
    * ---------------------------------------------------- */
   onMounted(() => {
-    loadMasterItem();
-    loadAssets();
-    loadOwners();
+    onLoadMasterItem();
+    onLoadAssets();
+    onLoadOwners();
   });
 
- /* ------------------------------------------------------*
-   * FUNCTIONS                                            *
-   * ---------------------------------------------------- */
+/* ------------------------------------------------------*
+  * FUNCTIONS                                            *
+  * ---------------------------------------------------- */
+
 const onCreateAsset = async () => {
   try {
     await createAsset(assetData);
     await loadAssets();
     resetAssetForm();
   } catch (e) {
-    validationError(e); 
+   validationError(e);
+  }
+};
+
+const onLoadAssets = async () => {
+  try {
+    await loadAssets();
+  } catch (e) {
+    validationError(e);
+  }
+};
+
+const onLoadOwners = async () => {
+  try {
+    await loadOwners();
+  } catch (e) {
+    validationError(e);
+  }
+};
+
+const onLoadMasterItem = async () => {
+  try {
+    await loadMasterItem();
+  } catch (e) {
+    validationError(e);
   }
 };
 

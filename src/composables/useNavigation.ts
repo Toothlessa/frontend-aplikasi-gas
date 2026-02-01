@@ -11,9 +11,10 @@ export function useNavigation() {
 
     search,
   } = useGlobal();
-  // ================================================================
-  // 📌 STATE (ref, reactive)
-  // ================================================================
+
+  /* ----------------------------------------------------*
+   * CONSTANTS                                           *
+   * ----------------------------------------------------*/
   // UI state
   const DialogLogout = ref<boolean>(false);
 
@@ -22,12 +23,14 @@ export function useNavigation() {
 
   const rail = ref(false);
   const drawer = ref<boolean>(false);
-  //
+
   type DrawerLocation = "left" | "right" | "start" | "end" | "top" | "bottom";
   const savedLocation = localStorage.getItem('drawerLocation') as DrawerLocation | null;
   const drawerLocation = ref<DrawerLocation>(savedLocation ?? "left");
 
-  // Sidebar items
+  /* ----------------------------------------------------*
+   * LOCAL FUNCTIONS                                     *
+   * ----------------------------------------------------*/
   const pages = [
     { icon: 'mdi-basket-fill', text: 'Stock', to: '/stock' },
     { icon: 'mdi-cash', text: 'Debt', to: '/debt' },
@@ -45,10 +48,6 @@ export function useNavigation() {
     localStorage.setItem('drawerLocation', drawerLocation.value);
   };
 
-  // ================================================================
-  // 📌 COMPUTED
-  // ================================================================
-
   const appBarStyles = computed(() => {
     return {
       borderRadius: '24px',
@@ -56,11 +55,7 @@ export function useNavigation() {
     };
   });
 
-  // ================================================================
-  // 📌 ACTIONS
-  // ================================================================
-
-  const logout = () => store.dispatch(`auth/${LOGOUT_ACTION}`);
+  // const logout = () => store.dispatch(`auth/${LOGOUT_ACTION}`);
 
   // ================================================================
   // 📌 RETURN EXPORT
@@ -86,7 +81,7 @@ export function useNavigation() {
     appBarStyles,
 
     toggleDrawerLocation,
-    logout,
+    // logout,
   };
 
 }

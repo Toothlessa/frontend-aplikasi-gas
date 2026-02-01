@@ -9,16 +9,6 @@
             <span class="text-h6 font-weight-bold">Input Debt</span>
           </v-card-title>
           <v-card-text class="pa-2">
-            <v-alert
-              v-if="error"
-              v-model="alert"
-              type="error"
-              closable
-              variant="tonal"
-              class="mb-4"
-            >
-              {{ error }}
-            </v-alert>
             <v-autocomplete
               label="Customer Name"
               v-model="debtData.customer_id"
@@ -187,16 +177,6 @@
           <span class="text-h6 font-weight-bold">Update Debt</span>
         </v-card-title>
         <v-card-text class="pa-4">
-          <v-alert
-            v-if="error"
-            v-model="alert"
-            type="error"
-            closable
-            variant="tonal"
-            class="mb-4"
-          >
-            {{ error }}
-          </v-alert>
           <v-autocomplete
             label="Customer Name"
             v-model="debtUpdateData.customer_id"
@@ -262,17 +242,9 @@
     </v-dialog>
 
     <!-- Snackbar for notifications -->
-    <v-snackbar
-      v-model="hasSaved"
-      :timeout="2000"
-      location="top right"
-      color="success"
-      rounded="xl"
-      elevation="12"
-    >
-      <v-icon start>mdi-check-circle-outline</v-icon>
-      Data saved successfully!
-    </v-snackbar>
+    <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
+
   </v-container>
 </template>
 
@@ -282,6 +254,7 @@ import { useDebt } from '@/composables/useDebt';
 import { useCustomer } from '@/composables/useCustomer';
 import { useGlobal } from '@/composables/useGlobal';
 import { Debt } from '@/types';
+import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
 
   /* -----------------------------------------------------*
    * COMPOSABLES                                          *
@@ -290,9 +263,9 @@ const{
   search,
   formatPrice,
 
-  alert,
-  handleError,
-  error,
+  validationErrorMessages,
+  validationShowError,
+  validationError,
 } = useGlobal();
 
 const {
@@ -337,17 +310,20 @@ const {
    * ---------------------------------------------------- */
 onMounted(() => {
   onLoadSummaryDebt();
-  loadCustomerData();
+  onLoadCustomerData();
 });
 
-  /* -----------------------------------------------------*
-   * METHODS                                              *
-   * ---------------------------------------------------- */
+/* -----------------------------------------------------*
+ * CONSTANTS                                            *
+ * ---------------------------------------------------- */
 const loadingDetailDebt = ref<number | null | undefined>(null);
 const loadingUpdateDebtAction = ref<number | null | undefined>(null);
 const loadingCloseDialogDetail = ref<boolean>(false);
 const loadingCloseUpdateButton = ref<boolean>(false);
 
+  /* -----------------------------------------------------*
+   * METHODS                                              *
+   * ---------------------------------------------------- */
 const closeDialogDetail = () => {
   loadingCloseDialogDetail.value = true;
   setTimeout(() => {
@@ -388,6 +364,13 @@ const editDebt = (item: Partial<Debt>) => {
   }, 500);
 };
 
+const onLoadCustomerData = async() => {
+  try{
+    await loadCustomerData();
+  }catch(e){
+    validationError(e);
+  }
+};
 
 const onSaveDebt = async() => {
   const payload = { ...debtData };
@@ -404,8 +387,7 @@ const onSaveDebt = async() => {
     resetDebtData(debtData);
     isPay.value = false;
   }catch(e){
-    handleError(e);
-    alert.value = true;
+    validationError(e);
   }
 };
 
@@ -413,20 +395,19 @@ const onLoadSummaryDebt = async() => {
   try{
     await loadSummaryDebt();
   }catch(e){
-    handleError(e);
+    validationError(e);
   }
 };
 
 const onLoadDetailDebt = async(item: Partial<Debt>) => {
   loadingDetailDebt.value = item.customer_id;
   Object.assign(debtUpdateData, item);
-  error.value = '';
   try{
     DialogDetail.value  = true;
     await loadDetailDebt();
   }catch(e){
-    handleError(e);
-    alert.value = true;
+    validationError(e);
+    validationShowError.value = true;
   }finally{
     loadingDetailDebt.value = null;
   }
@@ -442,8 +423,7 @@ const onUpdateDebt = async() => {
       resetDebtData(debtUpdateData);
     }, 1000);
   }catch(e){
-    handleError(e);
-    alert.value = true;
+    validationError(e);
   }
 };
 

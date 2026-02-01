@@ -213,17 +213,10 @@
       </v-card>
     </v-dialog>
 
-    <!-- Snackbar for notifications -->
-    <v-snackbar
-      v-model="hasSaved"
-      location="top right"
-      color="success"
-      rounded="xl"
-      elevation="12"
-    >
-      <v-icon start>mdi-check-circle-outline</v-icon>
-      Data saved successfully!
-    </v-snackbar>
+    <!-- Error & Success Snackbars -->
+    <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
+
   </v-container>
 </template>
 
@@ -234,6 +227,7 @@ import { useStock } from '@/composables/useStock';
 import { StockDetail } from '@/types';
 import { useGlobal } from '@/composables/useGlobal';
 import { ref } from 'vue';
+import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
 
  /* ======================================================*
   * COMPOSABLES                                           *
@@ -241,7 +235,9 @@ import { ref } from 'vue';
 const {
   formatPrice,
 
-  handleError,
+  validationError,
+  validationShowError,
+  validationErrorMessages,
 } = useGlobal();
 
 const {
@@ -258,7 +254,6 @@ const {
   stockDetails,
   editedStock,
 
-  loadingButton,
   loading,
   loadingDetail,
   hasSaved,
@@ -334,8 +329,8 @@ const onCreateStock = async() => {
   try {
     await createStock();
     resetEditedStock();
-  } catch(error) {
-    handleError(error);
+  } catch(e) {
+    validationError(e);
   } finally {
     loadingCreateStock.value = false;
   }
@@ -347,7 +342,7 @@ const onLoadDetailStock = async(item_id: number) => {
     await loadDetailStock(item_id);
     DialogDetails.value = true;
   } catch(e) {
-    handleError(e);
+    validationError(e);
   } finally {
     loadingItemId.value = null;
   }
@@ -362,7 +357,7 @@ const onUpdateStock = async() => {
     await onLoadDetailStock(postData.item_id);
     await loadCurrentStock();
   } catch(e) {
-    handleError(e);
+    validationError(e);
   }finally {
     loadingButtonUpdate.value = false;
   }

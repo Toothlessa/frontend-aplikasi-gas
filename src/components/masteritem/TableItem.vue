@@ -68,6 +68,9 @@
 import { computed } from 'vue';
 import type { MasterItem, Header } from '@/types/MasterItem';
 
+/* -----------------------------------------------------*
+ * PROPS                                                *
+ * ---------------------------------------------------- */
 const props = defineProps<{
   headers: Header[];
   items: MasterItem[];
@@ -75,9 +78,14 @@ const props = defineProps<{
   loading: boolean;
 }>();
 
+/* -----------------------------------------------------*
+ * EMITS                                                *
+ * ---------------------------------------------------- */
 defineEmits(['edit', 'deactivate']);
 
-// Manual filtering logic
+/* -----------------------------------------------------*
+ * COMPUTED                                             *
+ * ---------------------------------------------------- */
 const filteredItems = computed(() => {
   if (!props.search) return props.items;
 

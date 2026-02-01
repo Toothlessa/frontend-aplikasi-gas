@@ -19,7 +19,7 @@
           <v-data-table-virtual
             :headers="headerAssetDetail"
             :items="assetDetails"
-            :loading="loadingButtonCreate"
+            :loading="loading"
             item-value="id"
           >
             <template v-slot:[`item.actions`]="{ item }">
@@ -118,43 +118,10 @@
       </v-card>
     </v-dialog>
 
-    <!-- Snackbar for notifications -->
-    <v-snackbar
-      v-model="hasSaved"
-      color="success"
-      location="top right"
-      rounded="xl"
-      elevation="12"
-    >
-      <v-icon start>mdi-check-circle-outline</v-icon>
-      Data has been saved successfully.
-    </v-snackbar>
+    <!-- Snackbar -->
+    <SnackbarError v-model="validationShowError" :messages="validationErrorMessages" :timeout="2000" />
+    <SnackbarSuccess v-model="hasSaved" message= "Action completed successfully!" :timeout="2000" />
 
-    <!-- Snackbar for errors -->
-    <v-snackbar
-      v-model="showError"
-      color="error"
-      location="top right"
-      rounded="xl"
-      elevation="12"
-    >
-      <div class="d-flex align-start">
-        <v-icon start class="mt-1">mdi-alert-circle-outline</v-icon>
-        <div class="d-flex flex-column">
-          <span v-for="(msg, i) in errorMessages" :key="i">
-            {{ msg }}
-          </span>
-        </div>
-      </div>
-      <template v-slot:actions>
-        <v-btn
-          color="white"
-          variant="text"
-          icon="mdi-close"
-          @click="showError = false"
-        />
-      </template>
-    </v-snackbar>
   </v-container>
 </template>
 
@@ -165,16 +132,17 @@ import { useAsset } from '@/composables/useAsset';
 import { useGlobal } from '@/composables/useGlobal';
 import { useMasterItem } from '@/composables/useMasterItem';
 import { useRoute } from 'vue-router';
+import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
 
   /* -----------------------------------------------------*
    * COMPOSABLES                                          *
    * ---------------------------------------------------- */
 const {
-
   formatPrice,
-  handleError,
-  showError,
-  errorMessages,
+  //validation helpers
+  validationErrorMessages,
+  validationShowError,
+  validationError,
 } = useGlobal();
 
 const {
@@ -187,6 +155,7 @@ const {
   headerAssetDetail,
   
   loading,
+  loadingButtonCreate,
   assetToUpdate,
 
   //vuex
@@ -196,14 +165,22 @@ const {
 
   isNavigatingBack,
   goBack,
-
   hasSaved,
-  loadingButtonCreate,
-
   assetOwners,
   assetDetails,
   resetAssetDetail,
 } = useAsset();
+
+
+  /* -----------------------------------------------------*
+   * LIFECYCLE HOOKS                                      *
+   * ---------------------------------------------------- */
+
+onMounted(() => {
+  onLoadAssetDetail();
+  onLoadOwners();
+  onLoadMasterItem();
+});
 
   /* -----------------------------------------------------*
    * CONSTANT                                             *
@@ -214,20 +191,9 @@ const dialogUpdateAssetDetail = ref(false);
 const owner_id = Number(route.params.owner_id);
 const item_id  = Number(route.params.item_id);
 
-  /* -----------------------------------------------------*
-   * LIFECYCLE HOOKS                                      *
-   * ---------------------------------------------------- */
-
-onMounted(() => {
-  loadAssetDetail(owner_id, item_id);
-  loadOwners();
-  loadMasterItem();
-  resetAssetDetail();
-});
-
- /* ------------------------------------------------------*
-   * FUNCTIONS                                            *
-   * ---------------------------------------------------- */
+/* ------------------------------------------------------*
+  * FUNCTIONS                                            *
+  * ---------------------------------------------------- */
 const openEditAssetDialog = (asset: Asset) => {
   dialogUpdateAssetDetail.value = true;
   Object.assign(assetToUpdate, asset);
@@ -240,9 +206,33 @@ const updateAsset = async () => {
     dialogUpdateAssetDetail.value = false;
     
   } catch (e) {
-    console.error('Update failed:', e);
-    handleError(e);
+    validationError(e);
   } 
+};
+
+const onLoadAssetDetail = async () => {
+  resetAssetDetail();
+  try {
+    await loadAssetDetail(owner_id, item_id);
+  } catch (e) {
+    validationError(e);
+  }
+};
+
+const onLoadOwners = async () => {
+  try {
+    await loadOwners();
+  } catch (e) {
+    validationError(e);
+  }
+};
+
+const onLoadMasterItem = async () => {
+  try {
+    await loadMasterItem();
+  } catch (e) {
+    validationError(e);
+  }
 };
 
 </script>

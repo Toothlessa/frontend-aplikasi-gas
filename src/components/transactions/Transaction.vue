@@ -34,17 +34,7 @@
               New Transaction
             </v-card-title>
             <v-card-text class="pa-5">
-              <v-alert
-                v-if="error"
-                v-model="alert"
-                type="error"
-                variant="tonal"
-                closable
-                class="mb-4"
-              >
-                {{ error }}
-              </v-alert>
-
+              
               <v-autocomplete
                 label="Customer"
                 v-model="transactionData.customer_id"
@@ -74,7 +64,7 @@
                 rounded="lg"
                 controlVariant="split"
                 prepend-inner-icon="mdi-counter"
-                @keyup.enter="save"
+                @keyup.enter="onCreateTransaction"
                 class="mb-4"
               />
 
@@ -87,7 +77,7 @@
                 :disabled="!fieldDisabled"
                 prepend-inner-icon="mdi-note-text-outline"
                 class="mb-4"
-                @keyup.enter="save"
+                @keyup.enter="onCreateTransaction"
               />
 
               <v-autocomplete
@@ -131,7 +121,7 @@
                 color="cyan-darken-1"
                 :disabled="isSaveDisabled"
                 :loading="loadingButtonSave"
-                @click="save"
+                @click="onCreateTransaction"
               >
                 <v-icon left>mdi-content-save</v-icon>
                 Save Transaction
@@ -303,7 +293,7 @@
               class="text-white"
               :disabled="isUpdateDisabled"
               :loading="loadingButtonUpdate"
-              @click="save"
+              @click="onCreateTransaction"
               rounded="lg"
             >
               <v-icon left>mdi-content-save-edit</v-icon>
@@ -331,18 +321,12 @@
         </v-card>
       </v-dialog>
 
-      <v-snackbar
-        v-model="hasSaved"
-        :timeout="2500"
-        color="success"
-        location="top right"
-        rounded="xl"
-        elevation="12"
-      >
-        <v-icon start>mdi-check-circle-outline</v-icon>
-        Data has been saved successfully.
-      </v-snackbar>
     </v-container>
+
+    <!-- Error & Success Snackbars -->
+    <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
+  
   </div>
 </template>
 <script setup lang="ts">
@@ -352,17 +336,27 @@ import { useTransaction } from '@/composables/useTransaction';
 import { useCustomer } from '@/composables/useCustomer';
 import { useMasterItem } from '@/composables/useMasterItem';
 import { useGlobal } from '@/composables/useGlobal';
+import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
+import { ref } from 'vue';
 
+
+  /* -----------------------------------------------------*
+   * COMPOSABLES                                          *
+   * ---------------------------------------------------- */
 const {
   formatPrice,
+
+  validationErrorMessages,
+  validationShowError,
+  validationError,
 } = useGlobal();
 
 const {
-  // theme
     theme,
 
     // state
     search,
+    editedIndex,
     transactionData,
     transactionUpdate,
     DialogDate,
@@ -378,9 +372,6 @@ const {
 
     // headers
     headersLocal,
-
-    // error
-    error,
 
     // date filter
     dateTitle,
@@ -398,8 +389,12 @@ const {
     // utility functions
     getColorByDescription,
 
+    resetTransactionData,
+    resetTransactionUpdate,
+    getDateOptions,
+
     // actions
-    save,
+    createTransaction,
     editTransaction,
     close,
     checkIsSend,
@@ -411,8 +406,6 @@ const {
   customers,
   //function
   loadCustomerData,
-  labels,
-  totals,
   loadTopCustomerTransaction,
 } = useCustomer();
 
@@ -421,12 +414,58 @@ const {
   loadMasterItemByType,
 } = useMasterItem();
 
+  /* -----------------------------------------------------*
+   * LIFECYCLE                                            *
+   * ---------------------------------------------------- */
 onMounted(() => {
   loadCustomerData();
   loadMasterItemByType('ITEM');
   getTransactionByDate();
   loadTopCustomerTransaction();
 });
+
+
+  /* -----------------------------------------------------*
+   * CONSTANTS AND API's                                  *
+   * ---------------------------------------------------- */
+  const onCreateTransaction = async () => {
+    try {
+      const isUpdate = editedIndex.value > -1;
+
+      const postData = JSON.parse(
+        JSON.stringify(isUpdate ? transactionUpdate : transactionData)
+      );
+
+      await createTransaction(postData);
+      await onGetTransactionByDate();
+
+      resetTransactionData();
+      DialogUpdate.value = false;
+    } catch (e) {
+      validationError(e);
+    }
+  };
+
+    const onGetTransactionByDate = async () => {
+    try {
+      const formattedDate = getDateOptions(pickDate.value ?? new Date());
+      await getTransactionByDate();
+
+      // Set readable title
+      dateTitle.value = pickDate.value.toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+
+      // Disable fields if selected date is today
+      fieldDisabled.value =
+        getDateOptions(new Date()) === formattedDate;
+
+    } catch (e) {
+      validationError(e);
+    }
+  };
 </script>
 
 <style scoped>

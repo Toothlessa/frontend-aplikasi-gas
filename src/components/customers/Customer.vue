@@ -22,8 +22,8 @@
     />
 
     <!-- Error & Success Snackbars -->
-    <SnackbarError :messages="errorMessages" v-model="showError" :timeout="5000" />
-    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" />
+    <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
 
     <!-- Create/Edit Customer Dialog -->
     <DialogCustomerForm
@@ -75,10 +75,9 @@ import { useGlobal } from '@/composables/useGlobal';
    * ---------------------------------------------------- */
 
 const {
-  error,
-  showError,
-  errorMessages,
-  handleError,
+  validationError,
+  validationShowError,
+  validationErrorMessages,
 } = useGlobal();
 
 const {
@@ -115,18 +114,16 @@ const {
   /* -----------------------------------------------------*
    * HOOKS & LIFECYCLE                                    *
    * ---------------------------------------------------- */
-onMounted(
-  loadCustomerData
-);
+onMounted(() => {
+  onLoadCustomerData();
+});
 
   /* -----------------------------------------------------*
    * METHODS                                              *
    * ---------------------------------------------------- */
-
   const editItem = (item: Customer) => {
     editedIndex.value = customers.value.indexOf(item);
     Object.assign(editedItem, item);
-    error.value = '';
     DialogOpenCreate.value = true;
   };
 
@@ -136,7 +133,7 @@ onMounted(
       await createCustomer();
       DialogClose();
     } catch (e) {
-      handleError(e);
+      validationError(e);
     }
   };
 
@@ -146,11 +143,18 @@ onMounted(
       await updateCustomer();
       DialogClose();
     } catch (e) {
-      handleError(e);
+      validationError(e);
     }
   };
 
-  /* DEACTIVE CUSTOMER------------------------------------*/
+  const onLoadCustomerData = async() => {
+    try {
+      await loadCustomerData();
+    } catch (e) {
+      validationError(e);
+    }
+  };
+
   const deactiveCustomer = (item: Customer) => {
     Object.assign(editedItem, item);
     DialogOpenDeactive.value = true;
@@ -161,20 +165,20 @@ onMounted(
       await deactivateCustomer();
       DialogClose();
     } catch (e) {
-      handleError(e);
+      validationError(e);
     }
   };
 
   const onUploadCustomer = async() => {
     try{
       if(!csvFile.value){
-        handleError('Please select a CSV file to upload.');
+        validationError('Please select a CSV file to upload.');
         return;
       }
       await uploadCustomer();
       DialogClose();
     } catch (e) {
-      handleError(e);
+      validationError(e);
     }
   };
 

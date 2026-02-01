@@ -1,16 +1,14 @@
-import { LOGIN_ACTION, SIGNUP_ACTION } from "@/store/storeconstant";
+import { LOGIN_ACTION, LOGOUT_ACTION, SIGNUP_ACTION } from "@/store/storeconstant";
 import { InitialLoginForm, InitialSignupForm } from "@/types/Auth";
 import { computed, reactive, ref } from "vue";
 import { useStore } from "vuex";
 
 export function useAuth() {
-  /* ----------------------------------------------------
-   * CONSTANTS
-   * ---------------------------------------------------- */
+  /* ----------------------------------------------------*
+   * CONSTANTS                                           *
+   * ----------------------------------------------------*/
   const store = useStore();
   const step = ref(1);
-  const error = ref<string | string[] | undefined>();
-  const showError = ref(false);
 
   const loginForm = reactive<InitialLoginForm>({
     email: '',
@@ -24,12 +22,17 @@ export function useAuth() {
   });
 
   /* -----------------------------------------------------*
-   * VUEX ACTION WRAPPERS                                 *
+   * COMPUTED PROPERTIES                                  *
    * ---------------------------------------------------- */
   const loading = computed(() => store.state.auth.loading);
   const loadingButtonCreate = computed(() => store.state.auth.loadingButtonCreate);
+
+  /* -----------------------------------------------------*
+   * VUEX API's                                           *
+   * ---------------------------------------------------- */
   const signUp = () => store.dispatch(`auth/${SIGNUP_ACTION}`, signupForm);
   const login = () => store.dispatch(`auth/${LOGIN_ACTION}`, loginForm);
+  const logout = () => store.dispatch(`auth/${LOGOUT_ACTION}`);
 
   /* ----------------------------------------------------
    * RETURN
@@ -37,9 +40,6 @@ export function useAuth() {
   return {
     // state
     step,
-    error,
-    showError,
-
     // computed
     loading,
     loadingButtonCreate,
@@ -51,5 +51,6 @@ export function useAuth() {
     // methods
     login,
     signUp,
+    logout,
   };
 }

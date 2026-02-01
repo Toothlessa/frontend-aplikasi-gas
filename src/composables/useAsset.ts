@@ -48,7 +48,7 @@ export function useAsset() {
    * ---------------------------------------------------- */
   const resetAssetForm = () => {
     Object.assign(assetData, {
-      asset_name: "",
+      item_id: "",
       owner_id: "",
       quantity: 0,
       cogs: 0,
@@ -140,8 +140,6 @@ export function useAsset() {
     loading,
     loadingOwner,
     loadingButtonCreate,
-
-    // handleError,
 
     createAsset,
     createOwner,

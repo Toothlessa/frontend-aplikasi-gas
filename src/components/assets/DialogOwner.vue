@@ -169,10 +169,6 @@ const emit = defineEmits<{
   * COMPOSABLE                                              *
   *-------------------------------------------------------*/
 const {
-  handleError,
-  showError,
-  errorMessages,
-
   validationError,
   validationErrorMessages,
   validationShowError,
@@ -222,7 +218,7 @@ watch(
 
 
   /*------------------------------------------------------*
-  * LOCAL FUNCTIONS                                       *
+  * FUNCTIONS                                             *
   *-------------------------------------------------------*/
  const filteredItems = computed(() => {
   if (!search.value) return props.owners;
@@ -249,7 +245,6 @@ watch(
   };
 
   const handleSave = async () => {
-    // errorMessages.value = [];
     try {
       if (localOwner.id) {
         await updateOwner(localOwner as Owner);
@@ -259,9 +254,8 @@ watch(
       setTimeout(() => {
         handleClose();
       }, 300);
-    } catch (e: any) {
-        console.error(e);
-        validationError(e);
+    } catch (e) {
+      validationError(e);
       }
   };
 
@@ -270,7 +264,7 @@ watch(
       try {
         await deactivateOwner(selectedItem.value.id);
         dialogDeactivate.value = false;
-      } catch (e: any) {
+      } catch (e) {
         validationError(e);
       }
     }

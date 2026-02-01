@@ -210,6 +210,11 @@
       </v-card>
     </v-dialog>
   </nav>
+
+    <!-- Error & Success Snackbars -->
+  <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+  <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
+
 </template>
 
 <script setup lang="ts">
@@ -217,46 +222,82 @@ import { onMounted, watch, ref } from 'vue';
 import { useUser } from '@/composables/useUser';
 import { useNavigation } from '@/composables/useNavigation';
 import router from '@/router';
+import { useGlobal } from '@/composables/useGlobal';
+import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
+import { useAuth } from '@/composables/useAuth';
 
   /*================================================================*
   * COMPOSABLES                                                     *
   * ================================================================*/
-const {
-  userData,
-  userLoad,
-} = useUser();
+  const {
+    validationError,
+    validationShowError,
+    validationErrorMessages
+  } = useGlobal();
 
-const {
-  DialogLogout,
+  const {
+    userData,
+    user,
+    hasSaved,
+
+    loadUser,
+  } = useUser();
+
+  const {
+    logout,
+  } = useAuth();
+
+  const {
+    DialogLogout,
+      
+    theme,
+    isDarkTheme,
     
-  theme,
-  isDarkTheme,
-  
-  pages,
-  masterPageChild,
-  
-  search,
-  drawer,
-  rail,
-  drawerLocation,
+    pages,
+    masterPageChild,
+    
+    search,
+    drawer,
+    rail,
+    drawerLocation,
 
-  appBarStyles,
+    appBarStyles,
 
-  toggleDrawerLocation,
-  logout,
-} = useNavigation();
+    toggleDrawerLocation,
+  } = useNavigation();
 
   /*================================================================*
   * LIFECYCLE & HOOKS                                               *
   * ================================================================*/
-onMounted(() => {
-  userLoad();
-});
+  onMounted(() => {
+    onLoadUser();
+  });
+
+  // Watch for theme changes and persist
+  watch(isDarkTheme, (newVal) => {
+    theme.global.name.value = newVal ? 'dark' : 'light';
+    localStorage.setItem('theme', newVal ? 'dark' : 'light');
+  });
+
+  /*================================================================*
+  * CONSTANTS                                                         *
+  * ================================================================*/
+  const loadingPath = ref<string | null>(null);
 
   /*================================================================*
   * METHODS                                                         *
   * ================================================================*/
-  const loadingPath = ref<string | null>(null);
+
+  const onLoadUser = async () => {
+    try {
+      await loadUser();
+
+      userData.username = user.value?.username;
+      userData.email = user.value?.email;
+    } catch (e) {
+      validationError(e);
+    }
+  };
 
   const handleNavigation = async (path: string) => {
     loadingPath.value = path;
@@ -273,17 +314,10 @@ onMounted(() => {
     try {
       await logout();
       router.push(`/login`)
-    }catch(error){
-      console.error('Logout faiiled', error);
+    }catch(e){
+      validationError(e);
     }
   }
-
-
-// Watch for theme changes and persist
-watch(isDarkTheme, (newVal) => {
-  theme.global.name.value = newVal ? 'dark' : 'light';
-  localStorage.setItem('theme', newVal ? 'dark' : 'light');
-});
 
 </script>
 

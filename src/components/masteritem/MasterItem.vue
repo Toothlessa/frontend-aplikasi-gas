@@ -10,7 +10,6 @@
       @create="
         DialogOpenCreate = true;
         resetEditedItem();
-        error = '';
         editedIndex = -1;
       "
     />
@@ -25,12 +24,10 @@
       @submit="onCreateItem"
       @deactivate="deactivateItem"
     />
-      
-    <!-- Error Snackbar -->
-    <SnackbarError :messages="Array.isArray(error) ? error : [error]" v-model="showError" :timeout="4000" />
 
-    <!-- Success Snackbar -->
-    <SnackbarSuccess v-model="hasSaved" message="Item has been saved successfully!" />
+    <!-- Error & Success Snackbars -->
+    <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
 
     <!-- Create/Edit Master Item Dialog -->
     <DialogItemForm
@@ -95,11 +92,12 @@ import { useGlobal } from '@/composables/useGlobal';
    * COMPOSABLES                                           *
    * ======================================================*/
 const{
-  handleError,
+  validationErrorMessages,
+  validationShowError,
+  validationError,
 } = useGlobal();
 
 const {
-  store,
   
   dialogDeactivate,
   dialogDeactivateCategory,
@@ -119,8 +117,6 @@ const {
 
   hasSaved,
   loading,
-  error,
-  showError,
 } = useMasterItem();
 
 const {
@@ -144,8 +140,8 @@ const {
    * LIFECYCLE HOOKS                                       *
    * ======================================================*/
 onMounted(() => {
-  loadMasterItem();
-  loadCategories();
+  onLoadMasterItem();
+  onLoadCategories();
 });
 
   /* ======================================================*
@@ -184,49 +180,56 @@ const deactivateCategory = (item: CategoryItem) => {
   dialogDeactivateCategory.value = true;
 };
 
+const onLoadMasterItem = async () => {
+  try {
+    await loadMasterItem();
+  } catch (e) {
+    validationError(e);
+  }
+};
+
+const onLoadCategories = async () => {
+  try {
+    await loadCategories();
+  } catch (e) {
+    validationError(e);
+  }
+};
+
 const onCreateItem = async () => {
   try {
-    error.value = '';
     await createItem();
     DialogOpenCreate.value = false;
   } catch (e) {
-    handleError(e);
-    showError.value = true;
+    validationError(e);
   }
 };
 
 const onDeactivateItem = async () => {
   try {
-    error.value = '';
     await deactiveItem();
     dialogDeactivate.value = false;
   } catch (e) {
-    handleError(e);
-    showError.value = true;
+    validationError(e);
   }
 };
 
 const onCreateCategory = async (item: Partial<CategoryItem>) => {
   try {
-    error.value = '';
-
     await createCategory(item);
     DialogOpenCategory.value = false;
     newCategory.name = '';
   } catch (e) {
-    handleError(e);
-    showError.value = true;
+    validationError(e);
   }
 };
 
 const onDeactivatedCategory = async () => {
   try {
-    error.value = '';
     await deactiveCategory();
     dialogDeactivateCategory.value = false;
   } catch (e) {
-    handleError(e);
-    showError.value = true;
+    validationError(e);
   }
 };
 </script>

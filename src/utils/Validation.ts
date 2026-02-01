@@ -10,6 +10,12 @@ export default class Validations {
         return "Username already exists.";
       case "EMAIL_EXISTS":
         return "Email already exists.";
+      case "The email field is required.":
+        return "Please enter the email.";
+      case "The password field is required.":
+        return "Please enter the password.";
+      case "The username field is required.":
+        return "Please enter the username.";
       default:
         return "Unexpected error occurred. Please try again.";
     }
@@ -92,6 +98,39 @@ export default class Validations {
         return "Please select an owner.";
       case "The name field is required.":
         return "Please fill in the owner name.";
+      default:
+        return "Unexpected error occurred. Please try again.";
+    }
+  }
+
+  static getErrorMessageCodeFromTransaction(errorCode: string): string {
+    switch (errorCode) {
+      case "The customer id field is required.":
+        return "Please select a customer.";
+      default:
+        return "Unexpected error occurred. Please try again.";
+    }
+  }
+
+  static getErrorMessageCodeFromDebt(errorCode: string): string {
+    switch (errorCode) {
+      case "The owner id field is required.":
+        return "Please select an owner.";
+      case "The name field is required.":
+        return "Please fill in the owner name.";
+      case "The customer id field must be a number.":
+        return "Please select a customer.";
+      default:
+        return "Unexpected error occurred. Please try again.";
+    }
+  }
+
+  static getErrorMessageCodeFromStock(errorCode: string): string {
+    switch (errorCode) {
+      case "The item id field is required.":
+        return "Please select an asset name.";
+      case "The stock field is required.":
+        return "Please fill in the stock.";
       default:
         return "Unexpected error occurred. Please try again.";
     }

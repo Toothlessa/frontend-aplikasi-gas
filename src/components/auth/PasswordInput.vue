@@ -1,7 +1,6 @@
 <template>
   <div>
     <div class="d-flex justify-space-between align-center">
-      <label class="github-label">{{ label }}</label>
       <slot name="forgot-password"></slot>
     </div>
     <v-text-field
@@ -10,6 +9,7 @@
       density="compact"
       variant="outlined"
       :type="visible ? 'text' : 'password'"
+      placeholder="●●●●●●●●"
       class="github-input mb-4"
       hide-details
     >
@@ -27,10 +27,6 @@ defineProps({
   modelValue: {
     type: String,
     required: true,
-  },
-  label: {
-    type: String,
-    default: 'Password',
   },
 });
 

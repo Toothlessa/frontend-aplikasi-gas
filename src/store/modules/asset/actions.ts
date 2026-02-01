@@ -113,7 +113,6 @@ const actions: ActionTree<AssetState, RootState> = {
   async [LOAD_ASSET_DETAILS_BY_SUMMARY]({ commit }, { owner_id, item_id }) {
     commit(SET_LOADING, true);
     try {
-
       const data = await AssetService.fetchAssetDetailSummary(
         owner_id,
         item_id

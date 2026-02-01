@@ -14,14 +14,11 @@ import { computed, reactive, ref } from "vue";
 import { useTheme } from "vuetify/lib/framework.mjs";
 
 export function useTransaction() {
-  /* ----------------------------------------------------
-   * THEME
-   * ---------------------------------------------------- */
   const theme = useTheme();
 
-  /* ----------------------------------------------------
-   * STATE
-   * ---------------------------------------------------- */
+  /* ----------------------------------------------------*
+   * CONSTANTS                                           *
+   * ----------------------------------------------------*/
   const search = ref("");
   const editedIndex = ref(-1);
 
@@ -37,10 +34,6 @@ export function useTransaction() {
   const fieldDisabled = ref(true);
   const alert = ref(false);
 
-  // Error State
-  const showError = ref(false);
-  const error = ref<string | string[] | undefined>();
-
   // Date Filter
   const dateTitle = ref("");
   const pickDate = ref(new Date());
@@ -49,17 +42,11 @@ export function useTransaction() {
   const headersLocal = headerTransaction;
   const headersOutsandingLocal = headerOutstanding;
 
-  // Price Options
-  const price = [
-    { name: "Rp 16.000", value: 16000 },
-    { name: "Rp 17.000", value: 17000 },
-    { name: "Rp 18.000", value: 18000 },
-    { name: "Rp 19.000", value: 19000 },
-    { name: "Rp 20.000", value: 20000 }
-  ];
+  const transactionUpdate = reactive<Partial<Transaction>>({});
+  const transactionUpdateDescription = reactive<Partial<Transaction>>({});
 
   /* -----------------------------------------------------*
-   * REACTIVE OBJECTS                                     *
+   * LOCALS FUNCTIONS                                     *
    * -----------------------------------------------------*/
   const defaultItem: Partial<Transaction> = {
     id: null,
@@ -78,8 +65,14 @@ export function useTransaction() {
     item_id: 61
   });
 
-  const transactionUpdate = reactive<Partial<Transaction>>({});
-  const transactionUpdateDescription = reactive<Partial<Transaction>>({});
+  // Price Options
+  const price = [
+    { name: "Rp 16.000", value: 16000 },
+    { name: "Rp 17.000", value: 17000 },
+    { name: "Rp 18.000", value: 18000 },
+    { name: "Rp 19.000", value: 19000 },
+    { name: "Rp 20.000", value: 20000 }
+  ];
 
   const resetTransactionData = () => {
     Object.assign(transactionData, defaultItem);
@@ -93,9 +86,6 @@ export function useTransaction() {
     isSend.value = false;
   };
 
-  /* ----------------------------------------------------
-   * UTILITIES
-   * ---------------------------------------------------- */
   const getColorByDescription = (description: string | null) => {
     if (!description) return "grey";
 
@@ -114,110 +104,6 @@ export function useTransaction() {
     return date.toISOString().split("T")[0];
   };
 
-  /* ----------------------------------------------------
-   * COMPUTED
-   * ---------------------------------------------------- */
-  const transactions = computed<Transaction[]>(
-    () => store.getters["transaction/transactions"]
-  );
-
-  const outstandingTransaction = computed(
-    () => store.state.transaction.outstandingTransaction
-  );
-
-  const last30DaysTransaction = computed(
-    () => store.state.transaction.dailySaleTransaction
-  );
-
-  const loading = computed(
-    () => store.getters["transaction/loading"]
-  );
-
-  const loadingData = computed(
-    () => store.state.transaction.loadingData
-  );
-
-  const loadingButtonSave = computed(
-    () => store.getters["transaction/loadingButtonCreate"]
-  );
-
-  const loadingButtonUpdate = computed(
-    () => store.getters["transaction/loadingButtonUpdate"]
-  );
-
-  const hasSaved = computed(
-    () => store.getters["transaction/hasSaved"]
-  );
-
-  const isSaveDisabled = computed(
-    () => !(transactionData.customer_id && transactionData.quantity)
-  );
-
-  const isUpdateDisabled = computed(
-    () => !(transactionUpdate.customer_id && transactionUpdate.quantity)
-  );
-
-  /* ----------------------------------------------------
-   * ACTIONS
-   * ---------------------------------------------------- */
-  const fetchLast30DaysSale = () => store.dispatch(`transaction/${LOAD_LAST_30_DAYS_TRANSACTION}`);
-  const fetchOustandingTransaction = () => store.dispatch(`transaction/${LOAD_OUTSTANDING_TRANSACTION}`);
-  const save = async () => {
-    try {
-      error.value = "";
-      const isUpdate = editedIndex.value > -1;
-
-      const postData = JSON.parse(
-        JSON.stringify(isUpdate ? transactionUpdate : transactionData)
-      );
-
-      await store.dispatch(`transaction/${CREATE_TRANSACTION}`, postData);
-      await getTransactionByDate();
-
-      resetTransactionData();
-      DialogUpdate.value = false;
-    } catch (e) {
-      handleError(e);
-    }
-  };
-
-  const updateDescriptionTransaction = async () => {
-    try {
-      error.value = "";
-      await store.dispatch(
-        `transaction/${CREATE_TRANSACTION}`,
-        transactionUpdateDescription
-      );
-      await getTransactionByDate();
-    } catch (e) {
-      handleError(e);
-    }
-  };
-
-  const getTransactionByDate = async () => {
-    try {
-      const formattedDate = getDateOptions(pickDate.value ?? new Date());
-      await store.dispatch(`transaction/${LOAD_TRANSACTION_BY_DATE}`, formattedDate);
-
-      // Set readable title
-      dateTitle.value = pickDate.value.toLocaleDateString("id-ID", {
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      });
-
-      // Disable fields if selected date is today
-      fieldDisabled.value =
-        getDateOptions(new Date()) === formattedDate;
-
-    } catch (e) {
-      handleError(e);
-    }
-  };
-
-  /* ----------------------------------------------------
-   * UI HANDLERS
-   * ---------------------------------------------------- */
   const editTransaction = (item: Transaction) => {
     editedIndex.value = transactions.value.findIndex(t => t.id === item.id);
     Object.assign(transactionUpdate, item);
@@ -237,13 +123,62 @@ export function useTransaction() {
     transactionData.amount = isSend.value ? 19000 : 20000;
   };
 
-  const handleError = (e: unknown) => {
-    showError.value = true;
+  /* ----------------------------------------------------*
+   * STATE - VARIABLE                                    *
+   * ----------------------------------------------------*/
+  const loading = computed(
+    () => store.getters["transaction/loading"]
+  );
 
-    if (Array.isArray(e)) error.value = e;
-    else if (e instanceof Error) error.value = e.message;
-    else error.value = String(e);
-  };
+  const loadingData = computed(
+    () => store.state.transaction.loadingData
+  );
+
+  const loadingButtonSave = computed(
+    () => store.getters["transaction/loadingButtonCreate"]
+  );
+
+  const loadingButtonUpdate = computed(
+    () => store.getters["transaction/loadingButtonUpdate"]
+  );
+
+  /* ---------------------------------------------------*
+  * STATE - DATA                                        *
+  * ----------------------------------------------------*/
+
+  const hasSaved = computed(
+    () => store.getters["transaction/hasSaved"]
+  );
+
+  const isSaveDisabled = computed(
+    () => !(transactionData.customer_id && transactionData.quantity)
+  );
+
+  const isUpdateDisabled = computed(
+    () => !(transactionUpdate.customer_id && transactionUpdate.quantity)
+  );
+
+  const transactions = computed<Transaction[]>(
+    () => store.getters["transaction/transactions"]
+  );
+
+  const outstandingTransaction = computed(
+    () => store.state.transaction.outstandingTransaction
+  );
+
+  const last30DaysTransaction = computed(
+    () => store.state.transaction.dailySaleTransaction
+  );
+
+  /* ----------------------------------------------------
+   * ACTIONS
+   * ---------------------------------------------------- */
+  const fetchLast30DaysSale = () => store.dispatch(`transaction/${LOAD_LAST_30_DAYS_TRANSACTION}`);
+  const fetchOustandingTransaction = () => store.dispatch(`transaction/${LOAD_OUTSTANDING_TRANSACTION}`);
+  const createTransaction = (postData: Transaction) => store.dispatch(`transaction/${CREATE_TRANSACTION}`, postData);
+  const updateDescriptionTransaction = () => store.dispatch(`transaction/${CREATE_TRANSACTION}`, transactionUpdateDescription);
+  const getTransactionByDate = () => store.dispatch(`transaction/${LOAD_TRANSACTION_BY_DATE}`, getDateOptions(pickDate.value ?? new Date()));
+
 
   /* ----------------------------------------------------
    * RETURN API
@@ -277,10 +212,6 @@ export function useTransaction() {
     headersOutsandingLocal,
     price,
 
-    // error
-    showError,
-    error,
-
     // date
     dateTitle,
     pickDate,
@@ -298,14 +229,15 @@ export function useTransaction() {
     getColorByDescription,
     getDateOptions,
 
+    resetTransactionData,
+    resetTransactionUpdate,
+
     // actions
-    save,
+    createTransaction,
     updateDescriptionTransaction,
     editTransaction,
     close,
-    resetTransactionData,
     checkIsSend,
-    handleError,
     getTransactionByDate,
     fetchOustandingTransaction,
     fetchLast30DaysSale

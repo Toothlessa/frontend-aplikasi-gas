@@ -3,6 +3,8 @@ import { Asset } from "@/types";
 import { errorHandler } from "@/utils/ErrorHandler";
 import Validations from "@/utils/Validation";
 
+const FALLBACK_MESSAGE = "unknown error, please contact your support";
+
 export const AssetService = {
 
     async createOrUpdateAsset(asset: Asset): Promise<void> {
@@ -13,7 +15,7 @@ export const AssetService = {
         } catch (e) {
             throw errorHandler.parseError(e,
                 Validations.getErrorMessageCodeFromAsset,
-                "Unknow Error, Please Contact Support");
+                FALLBACK_MESSAGE);
         }
     },
 
@@ -24,7 +26,7 @@ export const AssetService = {
         } catch (error) {
             throw errorHandler.parseError(error,
                 Validations.getErrorMessageCodeFromAsset,
-                "Unknow Error, Please Contact Support");
+                FALLBACK_MESSAGE);
         }
     },
 
@@ -35,7 +37,7 @@ export const AssetService = {
         } catch (error) {
             throw errorHandler.parseError(error,
                 Validations.getErrorMessageCodeFromAsset,
-                "Unknow Error, Please Contact Support");
+                FALLBACK_MESSAGE);
         }
     },
 

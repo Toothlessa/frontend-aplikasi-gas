@@ -39,61 +39,9 @@ export function useDebt() {
   const disableAmountPay = ref(false);
   const disableTotal = ref(false);
 
-  /* Error & Alert State */
-  const alert = ref(false);
-  const showError = ref(false);
-  const error = ref<string | string[] | undefined>();
-
-  /* -----------------------------------------------------*
-   * COMPUTED Derived state from store & local state      *
-   * ---------------------------------------------------- */
-
-  const isSaveDisabled = computed(() => {
-    return !(
-      debtData.customer_id &&
-      debtData.amount_pay &&
-      debtData.description
-    );
-  });
-
-  /* Store State */
-  const debts = computed<Debt[]>(() => store.state.debt.debts);
-  const summaryDebtData = computed<SummaryDebt[]>(
-    () => store.state.debt.summaryDebts
-  );
-  const outstandingDebtData = computed<SummaryDebt[]>(
-    () => store.state.debt.outstandingDebts
-  );
-  const resetDetailDebt = () => store.dispatch(`debt/${RESET_DETAIL_DEBT}`);
-
-  const loadingDataDetail = computed(() => store.state.debt.loading);
-  const loadingData = computed(() => store.state.debt.loadingOne);
-  const loadingButtonCreate = computed(
-    () => store.state.debt.loadingButtonCreate
-  );
-  const loadingButtonUpdate = computed(
-    () => store.state.debt.loadingButtonUpdate
-  );
-  const hasSaved = computed(() => store.state.debt.hasSaved);
-
   /* -----------------------------------------------------*
    * UTILITIES Helper & reusable functions                *
    * ---------------------------------------------------- */
-
-  /**
-   * Global error handler
-   */
-  const handleError = (e: unknown) => {
-    showError.value = true;
-
-    if (Array.isArray(e)) error.value = e;
-    else if (e instanceof Error) error.value = e.message;
-    else error.value = String(e);
-  };
-
-  /**
-   * Default debt form value
-   */
   const defaultDebtData: Partial<Debt> = {
     id: 0,
     customer_id: null,
@@ -103,15 +51,37 @@ export function useDebt() {
     total: 0,
   };
 
-  /**
-   * Reset form data to default state
-   */
   const resetDebtData = (data: Partial<Debt>) => {
     Object.assign(data, defaultDebtData);
   };
 
+  const isSaveDisabled = computed(() => {
+    return !(
+      debtData.customer_id &&
+      debtData.amount_pay &&
+      debtData.description
+    );
+  });
+
   /* -----------------------------------------------------*
-   * ACTIONS Store dispatch & business logic              *
+   * COMPUTED — STORE FLAG                                *
+   * ---------------------------------------------------- */
+  const loadingDataDetail = computed(() => store.state.debt.loading);
+  const loadingData = computed(() => store.state.debt.loadingOne);
+  const loadingButtonCreate = computed(() => store.state.debt.loadingButtonCreate);
+  const loadingButtonUpdate = computed(() => store.state.debt.loadingButtonUpdate);
+  const hasSaved = computed(() => store.state.debt.hasSaved);
+
+  /* -----------------------------------------------------*
+   * COMPUTED — STORE DATA                                *
+   * ---------------------------------------------------- */
+  const debts = computed<Debt[]>(() => store.state.debt.debts);
+  const summaryDebtData = computed<SummaryDebt[]>(() => store.state.debt.summaryDebts);
+  const outstandingDebtData = computed<SummaryDebt[]>(() => store.state.debt.outstandingDebts);
+  const resetDetailDebt = () => store.dispatch(`debt/${RESET_DETAIL_DEBT}`);
+
+  /* -----------------------------------------------------*
+   * COMPUTED - VUEX ACTIONS API's                        *
    * ---------------------------------------------------- */
 
   const fetchOutstandingDebt = () =>
@@ -132,7 +102,6 @@ export function useDebt() {
   /* -----------------------------------------------------*
    * RETURN Public API of this composable                 *
    * ---------------------------------------------------- */
-
   return {
     /* State */
     localHeaderDetailDebt,
@@ -156,17 +125,12 @@ export function useDebt() {
     disableTotal,
     hasSaved,
 
-    /* Error Handling */
-    alert,
-    error,
-
     /* Computed */
     isSaveDisabled,
 
     /* Actions */
     loadSummaryDebt,
     loadDetailDebt,
-    // detailDebt,
     resetDebtData,
     saveDebt,
     updateDebt,

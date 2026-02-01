@@ -58,6 +58,9 @@
 </template>
 
 <script setup lang="ts">
+/* -----------------------------------------------------*
+ * PROPS                                                *
+ * ---------------------------------------------------- */
 defineProps<{
   search: string;
   title: string;
@@ -66,7 +69,11 @@ defineProps<{
   showUploadButton?: boolean;
 }>();
 
+/* -----------------------------------------------------*
+ * EMITS                                                *
+ * ---------------------------------------------------- */
 defineEmits(['update:search', 'create', 'upload-customer']);
+
 </script>
 
 <style scoped>

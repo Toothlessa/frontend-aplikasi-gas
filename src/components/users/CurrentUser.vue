@@ -26,16 +26,6 @@
           </v-fade-transition>
         </v-btn>
       </v-toolbar>
-      <v-alert
-        color="red-lighten-4"
-        v-model="alert"
-        type="error"
-        variant="flat"
-        closable
-        v-if="error"
-      >
-        {{ error }}
-      </v-alert>
       <v-card-text class="pa-6">
         <div class="text-subtitle-1 text-medium-emphasis mb-2">Username</div>
         <v-text-field
@@ -80,11 +70,24 @@
       </v-snackbar>
     </v-card>
   </v-container>
+
+  <!-- Error & Success Snackbars -->
+  <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+  <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
+
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useUser } from '@/composables/useUser';
+import { useGlobal } from '@/composables/useGlobal';
+import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
+
+const{
+  validationError,
+  validationShowError,
+  validationErrorMessages
+} = useGlobal();
 
 const {
   // State
@@ -101,13 +104,33 @@ const {
   user,
 
   // Actions
-  userLoad,
-  onUpdate,
+  loadUser,
+  updateUser,
 } = useUser();
 
 onMounted(() => {
-  userLoad();
+  onLoadUser();
 });
+
+  const onLoadUser = async () => {
+    try {
+      await loadUser();
+
+      userData.username = user.value?.username;
+      userData.email = user.value?.email;
+    } catch (e) {
+      validationError(e);
+    }
+  };
+
+  const onUpdate = async () => {
+    try {
+      await updateUser();
+      isEditing.value = false;
+    } catch (e) {
+      validationError(e);
+    }
+  };
 </script>
 
 <style scoped>

@@ -87,6 +87,11 @@
         </v-card>
       </v-col>
     </v-row>
+
+        <!-- Error & Success Snackbars -->
+    <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
+
   </v-container>
 </template>
 
@@ -97,30 +102,65 @@ import TableDebt from "@/components/chart/TableDebt.vue";
 import TableOutstandingTrx from "@/components/chart/TableOutstandingTrx.vue";
 import TopBuyer from "@/components/chart/TopBuyer.vue";
 import { useStock } from '@/composables/useStock';
-import { useGlobal } from '@/composables/useGlobal';
 import { useDashboard } from '@/composables/useDashboard';
 import { useTheme } from 'vuetify/lib/framework.mjs';
+import { useGlobal } from '@/composables/useGlobal';
+import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
 
+  /* -------------------------------------------------------*
+   * 📌 COMPOSABLES                                         *
+   * -------------------------------------------------------*/
+  const { 
+    validationError,
+    validationShowError,
+    validationErrorMessages,
+  } = useGlobal();
+
+  const {
+    loading,
+    hasSaved,
+
+    loadDisplayStock,
+  } = useStock();
+
+  const {
+    lists,
+  } = useDashboard();
+
+  const{
+      stockDisplay,
+    } = useStock();
+
+  /* ------------------------------------------------------*
+   * 📌 HOOKS                                               *
+   * -------------------------------------------------------*/
 onMounted(async () => {
-  await loadDisplayStock();  // 1️⃣ Ambil data dulu
-  fetchDataDisplayStock();         // 2️⃣ Baru isi UI
+  await onLoadDisplayStock();
+  await fetchDataDisplayStock();
 });
 
-const theme = useTheme();
+  /* -------------------------------------------------------*
+   * 📌 CONSTANTS                                          *
+   * -------------------------------------------------------*/
+  const theme = useTheme();
 
-// const {
-//   theme,
-// } = useGlobal();
+  /* -------------------------------------------------------*
+   * 📌 LOCAL FUNCTIONS                                     *
+   * -------------------------------------------------------*/
+  const onLoadDisplayStock = async () => {
+    try {
+      await loadDisplayStock();
+    } catch (e) {
+      validationError(e);
+    }
+  };
 
-const {
-  loading,
-  loadDisplayStock,
-} = useStock();
-
-const {
-  lists,
-  fetchDataDisplayStock,
-} = useDashboard();
+  const fetchDataDisplayStock = async () => {
+    lists.value[0].count = stockDisplay.value?.running_stock ?? 0;
+    lists.value[1].count = stockDisplay.value?.yesterday_stock ?? 0;
+    lists.value[2].count = stockDisplay.value?.empty_gas ?? 0;
+    lists.value[3].count = stockDisplay.value?.gas_owned ?? 0;
+  };
 
 </script>
 

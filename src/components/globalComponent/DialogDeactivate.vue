@@ -10,7 +10,7 @@
       </v-card-text>
       <v-card-actions class="dialog-actions pa-4">
         <v-spacer />
-        <v-btn text @click="handleCancel" rounded="lg">No</v-btn>
+        <v-btn variant="text" @click="handleCancel" rounded="lg">No</v-btn>
         <v-btn color="red-darken-2" class="text-white" @click="handleConfirm" rounded="lg">Yes</v-btn>
       </v-card-actions>
     </v-card>
@@ -20,6 +20,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
+/* -----------------------------------------------------*
+ * PROPS                                                *
+ * ---------------------------------------------------- */
 const props = defineProps<{
   dialog: boolean;
   title: string;
@@ -32,13 +35,22 @@ const emit = defineEmits<{
   (e: 'update:dialog', val: boolean): void;
 }>();
 
+/* -----------------------------------------------------*
+ * CONSTANTS                                            *
+ * ---------------------------------------------------- */
 const localDialog = ref(props.dialog);
 
+/* -----------------------------------------------------*
+ * WATCH                                                *
+ * ---------------------------------------------------- */
 watch(() => props.dialog, (val) => {
   localDialog.value = val;
   emit('update:dialog', val);
 });
 
+/* -----------------------------------------------------*
+ * METHODS                                              *
+ * ---------------------------------------------------- */
 const handleConfirm = () => {
   emit('confirm');
   localDialog.value = false;

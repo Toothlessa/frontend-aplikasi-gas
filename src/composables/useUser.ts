@@ -5,94 +5,42 @@ import { User } from "@/types";
 
 export function useUser() {
 
-  // ================================================================
-  // 📌 STATE (ref, reactive)
-  // ================================================================
+  /* -----------------------------------------------------*
+   * STATE - VARIABLE                                     *
+   * ---------------------------------------------------- */
 
-
-  // const hasSaved = ref(false);
-  const alert = ref(false);
   const isEditing = ref(false);
   const userData = reactive<Partial<User>>({});
 
-  // Error State
-  const showError = ref(false);
-  const error = ref<string | string[] | undefined>();
-
-  // ================================================================
-  // 📌 COMPUTED
-  // ================================================================
-
-  const user = computed(() => store.state.user.currentUser);
+  /* -----------------------------------------------------*
+  * STATE - COMPUTED                                     *
+  * ---------------------------------------------------- */
   const hasSaved = computed(() => store.state.user.hasSaved);
   const loadingButtonUpdate = computed(() => store.state.user.loadingButtonUpdate);
+  const user = computed(() => store.state.user.currentUser);
 
-  // ================================================================
-  // 📌 UTILITIES
-  // ================================================================
+  /* -----------------------------------------------------*
+  * ACTIONS                                              *
+  * ---------------------------------------------------- */
+  const loadUser = () => store.dispatch(`user/${LOAD_CURRENT_USER}`);
+  const updateUser = () => store.dispatch(`user/${UPDATE_CURRENT_USER}`, userData);
 
-  const handleError = (e: unknown) => {
-    showError.value = true;
-
-    if (Array.isArray(e)) error.value = e;
-    else if (e instanceof Error) error.value = e.message;
-    else error.value = String(e);
-  };
-
-  // ================================================================
-  // 📌 ACTIONS
-  // ================================================================
-
-  const userLoad = async () => {
-    
-    try {
-      await store.dispatch(`user/${LOAD_CURRENT_USER}`);
-
-      userData.username = user.value?.username;
-      userData.email = user.value?.email;
-    } catch (error) {
-      handleError(error);
-      alert.value = true;
-    }
-  };
-
-  const onUpdate = async () => {
-    try {
-      await store.dispatch(`user/${UPDATE_CURRENT_USER}`, userData);
-      isEditing.value = false;
-    } catch (error) {
-      handleError(error);
-      alert.value = true;
-    }
-  };
-
-  // ================================================================
-  // 📌 RETURN EXPORT
-  // ================================================================
+  /* -----------------------------------------------------*
+  * RETURN EXPORT                                         *
+  * ------------------------------------------------------*/
 
   return {
     // State
     hasSaved,
     loadingButtonUpdate,
-    alert,
     isEditing,
     userData,
-
-    // UI
-    // save,
-
-    // Error Handling
-    showError,
-    error,
 
     // Computed
     user,
 
-    // Utilities
-    handleError,
-
     // Actions
-    userLoad,
-    onUpdate,
+    loadUser,
+    updateUser,
   };
 }

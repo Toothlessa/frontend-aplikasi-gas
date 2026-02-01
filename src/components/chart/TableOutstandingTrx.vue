@@ -79,6 +79,11 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Snackbars -->
+    <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
+
   </div>
 </template>
 
@@ -87,6 +92,7 @@ import { onMounted } from "vue";
 import { useTransaction } from "@/composables/useTransaction";
 import { Transaction } from "@/types";
 import { useGlobal } from "@/composables/useGlobal";
+import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
 
   /* -----------------------------------------------------*
    * COMPOSABLES                                          *
@@ -94,7 +100,9 @@ import { useGlobal } from "@/composables/useGlobal";
 const{
   formatPrice,
   //helpers
-  handleError,
+  validationError,
+  validationErrorMessages,
+  validationShowError,
 } = useGlobal();
 
 const{
@@ -107,6 +115,7 @@ const{
   transactionUpdateDescription,
   loading,
   loadingButtonUpdate,
+  hasSaved,
   //function
   fetchOustandingTransaction,
   updateDescriptionTransaction,
@@ -133,7 +142,7 @@ const updateDescriptionTranaction = async() => {
     DialogUpdateDescription.value = false;
     
   }catch(e){
-    handleError(e);
+    validationError(e);
   }
 };
 
@@ -141,7 +150,7 @@ const onFetchOutstandingTransaction = async() => {
   try {
     await fetchOustandingTransaction();
   } catch (e) {
-    handleError(e);
+    validationError(e);
   }
 };
 

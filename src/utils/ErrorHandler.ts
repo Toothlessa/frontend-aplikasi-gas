@@ -1,168 +1,167 @@
-import Validation from "./Validation";
 type ErrorMessageMapper = (message: string) => string;
 
 export class errorHandler {
 
+  // static parseAxiosError(error: any): string[] {
+  //   const axiosError = error as {
+  //     response?: {
+  //       data?: {
+  //         errors?: { [key: string]: string[] };
+  //         error?: string;
+  //         message?: string;
+  //       };
+  //     };
+  //   };
 
-  static parseAxiosError(error: any): string[] {
-    const axiosError = error as {
-      response?: {
-        data?: {
-          errors?: { [key: string]: string[] };
-          error?: string;
-          message?: string;
-        };
-      };
-    };
+  //   // Jika backend kirim errors: { field: [message] }
+  //   const errors = axiosError.response?.data?.errors;
+  //   if (errors) {
+  //     const messages: string[] = [];
+  //     for (const field in errors) {
+  //       if (Array.isArray(errors[field])) {
+  //         const message = errors[field][0];
+  //         messages.push(Validation.getErrorMessageFromCodeCustomer(message));
+  //       }
+  //     }
+  //     return messages;
+  //   }
 
-    // Jika backend kirim errors: { field: [message] }
-    const errors = axiosError.response?.data?.errors;
-    if (errors) {
-      const messages: string[] = [];
-      for (const field in errors) {
-        if (Array.isArray(errors[field])) {
-          const message = errors[field][0];
-          messages.push(Validation.getErrorMessageFromCodeCustomer(message));
-        }
-      }
-      return messages;
-    }
+  //   // Jika backend kirim message langsung
+  //   const message = axiosError.response?.data?.message;
+  //   if (message) {
+  //     return [Validation.getErrorMessageFromCodeCustomer(message)];
+  //   }
 
-    // Jika backend kirim message langsung
-    const message = axiosError.response?.data?.message;
-    if (message) {
-      return [Validation.getErrorMessageFromCodeCustomer(message)];
-    }
+  //   // Fallback: pesan umum
+  //   return ["Terjadi kesalahan yang tidak diketahui."];
+  // }
 
-    // Fallback: pesan umum
-    return ["Terjadi kesalahan yang tidak diketahui."];
-  }
+  // static parseUploadError(error: any): string[] {
+  //   const axiosError = error as { response?: { data?: { message?: string } } };
+  //   const errorMessage: string = axiosError.response?.data?.message ?? "";
 
-  static parseUploadError(error: any): string[] {
-    const axiosError = error as { response?: { data?: { message?: string } } };
-    const errorMessage: string = axiosError.response?.data?.message ?? "";
+  //   if (errorMessage.includes("Duplicate entry")) {
+  //     const fieldMatch = errorMessage.match(/for key '(.+?)'/);
+  //     const fieldKey = fieldMatch ? fieldMatch[1] : null;
 
-    if (errorMessage.includes("Duplicate entry")) {
-      const fieldMatch = errorMessage.match(/for key '(.+?)'/);
-      const fieldKey = fieldMatch ? fieldMatch[1] : null;
+  //     const fieldMap: Record<string, string> = {
+  //       customer_nik_unique: "NIK",
+  //       customers_email_unique: "Email",
+  //     };
 
-      const fieldMap: Record<string, string> = {
-        customer_nik_unique: "NIK",
-        customers_email_unique: "Email",
-      };
+  //     const userFriendlyField = fieldKey ? fieldMap[fieldKey] || "field" : "field";
+  //     return [`Data duplicate on ${userFriendlyField}.`];
+  //   }
 
-      const userFriendlyField = fieldKey ? fieldMap[fieldKey] || "field" : "field";
-      return [`Data duplicate on ${userFriendlyField}.`];
-    }
+  //   return [Validation.getErrorMessageFromCodeCustomer(errorMessage)];
+  // }
 
-    return [Validation.getErrorMessageFromCodeCustomer(errorMessage)];
-  }
+  // static pareseMItemError(error: any): string[] {
+  //   const axiosError = error as {
+  //     response?: {
+  //       data?: {
+  //         errors?: { [key: string]: string[] };
+  //         error?: string;
+  //         message?: string;
+  //       };
+  //     };
+  //   };
 
-  static pareseMItemError(error: any): string[] {
-    const axiosError = error as {
-      response?: {
-        data?: {
-          errors?: { [key: string]: string[] };
-          error?: string;
-          message?: string;
-        };
-      };
-    };
+  //   // Jika backend kirim errors: { field: [message] }
+  //   const errors = axiosError.response?.data?.errors;
+  //   if (errors) {
+  //     const messages: string[] = [];
+  //     for (const field in errors) {
+  //       if (Array.isArray(errors[field])) {
+  //         const message = errors[field][0];
+  //         messages.push(Validation.getErrorMessageFromCodeMasterItem(message));
+  //       }
+  //     }
+  //     return messages;
+  //   }
 
-    // Jika backend kirim errors: { field: [message] }
-    const errors = axiosError.response?.data?.errors;
-    if (errors) {
-      const messages: string[] = [];
-      for (const field in errors) {
-        if (Array.isArray(errors[field])) {
-          const message = errors[field][0];
-          messages.push(Validation.getErrorMessageFromCodeMasterItem(message));
-        }
-      }
-      return messages;
-    }
+  //   // Jika backend kirim message langsung
+  //   const message = axiosError.response?.data?.message;
+  //   if (message) {
+  //     return [Validation.getErrorMessageFromCodeCustomer(message)];
+  //   }
 
-    // Jika backend kirim message langsung
-    const message = axiosError.response?.data?.message;
-    if (message) {
-      return [Validation.getErrorMessageFromCodeCustomer(message)];
-    }
+  //   // Fallback: pesan umum
+  //   return ["Terjadi kesalahan yang tidak diketahui."];
+  // }
 
-    // Fallback: pesan umum
-    return ["Terjadi kesalahan yang tidak diketahui."];
-  }
+  // static pareseCategoryItemError(error: any): string[] {
+  //   const axiosError = error as {
+  //     response?: {
+  //       data?: {
+  //         errors?: { [key: string]: string[] };
+  //         error?: string;
+  //         message?: string;
+  //       };
+  //     };
+  //   };
 
-  static pareseCategoryItemError(error: any): string[] {
-    const axiosError = error as {
-      response?: {
-        data?: {
-          errors?: { [key: string]: string[] };
-          error?: string;
-          message?: string;
-        };
-      };
-    };
+  //   // Jika backend kirim errors: { field: [message] }
+  //   const errors = axiosError.response?.data?.errors;
+  //   if (errors) {
+  //     const messages: string[] = [];
+  //     for (const field in errors) {
+  //       if (Array.isArray(errors[field])) {
+  //         const message = errors[field][0];
+  //         messages.push(Validation.getErrorMessageFromCodeCategoryItem(message));
+  //       }
+  //     }
+  //     return messages;
+  //   }
 
-    // Jika backend kirim errors: { field: [message] }
-    const errors = axiosError.response?.data?.errors;
-    if (errors) {
-      const messages: string[] = [];
-      for (const field in errors) {
-        if (Array.isArray(errors[field])) {
-          const message = errors[field][0];
-          messages.push(Validation.getErrorMessageFromCodeCategoryItem(message));
-        }
-      }
-      return messages;
-    }
+  //   // Jika backend kirim message langsung
+  //   const message = axiosError.response?.data?.message;
+  //   if (message) {
+  //     return [Validation.getErrorMessageFromCodeCategoryItem(message)];
+  //   }
+  //   // Fallback: pesan umum
+  //   return ["Terjadi kesalahan yang tidak diketahui."];
+  // }
 
-    // Jika backend kirim message langsung
-    const message = axiosError.response?.data?.message;
-    if (message) {
-      return [Validation.getErrorMessageFromCodeCategoryItem(message)];
-    }
-    // Fallback: pesan umum
-    return ["Terjadi kesalahan yang tidak diketahui."];
-  }
+  // /* ======================================================*
+  //  * ERROR ASSET OWNER                                       *
+  //  * ======================================================*/
+  // static parseAssetOwnerError(error: any): string[] {
+  //   const axiosError = error as {
+  //     response?: {
+  //       data?: {
+  //         errors?: { [key: string]: string[] };
+  //         error?: string;
+  //         message?: string;
+  //       };
+  //     };
+  //   };
+
+  //   const errors = axiosError.response?.data?.errors;
+  //   if (errors) {
+  //     const messages: string[] = [];
+  //     for (const field in errors) {
+  //       if (Array.isArray(errors[field])) {
+  //         const message = errors[field][0];
+  //         messages.push(Validation.getErrorMessageCodeFromAssetOwner(message));
+  //       }
+  //     }
+  //     return messages;
+  //   }
+
+  //   return ["Unknow Error, Please Contact Support"];
+  // }
 
   /* ======================================================*
-   * ERROR ASSET OWNER                                       *
-   * ======================================================*/
-  static parseAssetOwnerError(error: any): string[] {
-    const axiosError = error as {
-      response?: {
-        data?: {
-          errors?: { [key: string]: string[] };
-          error?: string;
-          message?: string;
-        };
-      };
-    };
-
-    const errors = axiosError.response?.data?.errors;
-    if (errors) {
-      const messages: string[] = [];
-      for (const field in errors) {
-        if (Array.isArray(errors[field])) {
-          const message = errors[field][0];
-          messages.push(Validation.getErrorMessageCodeFromAssetOwner(message));
-        }
-      }
-      return messages;
-    }
-
-    return ["Unknow Error, Please Contact Support"];
-  }
-
-  /* ======================================================*
-  * ERROR ASSET                                            *
+  * ERROR GENERAL                                         *
   * =======================================================*/
 
   static parseError(
-    error: any,
+    error: unknown,
     mapMessage: ErrorMessageMapper,
     fallbackMessage: string,
   ): string[] {
+    const defaultFallback = fallbackMessage ?? "Unknown Error";
     const axiosError = error as {
       response?: {
         data?: {
@@ -173,8 +172,11 @@ export class errorHandler {
     };
 
     const errors = axiosError.response?.data?.errors;
-
     if (errors) {
+      if (typeof errors === 'string') {
+        return [mapMessage(errors)];
+      }
+
       return Object.values(errors)
         .filter(Array.isArray)
         .map(messages => mapMessage(messages[0]));
@@ -185,7 +187,7 @@ export class errorHandler {
       return [mapMessage(message)];
     }
 
-    return [fallbackMessage];
+    return [defaultFallback];
   }
 
 
