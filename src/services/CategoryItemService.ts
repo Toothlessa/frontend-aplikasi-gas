@@ -13,7 +13,7 @@ export const CategoryItemService = {
                 : await CategoryItemApi.create(categoryItem);
         } catch (e) {
             throw errorHandler.parseError(e,
-                Validations.getErrorMessageFromCodeMasterItem,
+                Validations.getErrorMessageCodeFromCategoryItem,
                 FALLBACK_MESSAGE);
         }
     },
@@ -27,7 +27,7 @@ export const CategoryItemService = {
             }));
         } catch (error) {
             throw errorHandler.parseError(error,
-                Validations.getErrorMessageFromCodeMasterItem,
+                Validations.getErrorMessageCodeFromCategoryItem,
                 FALLBACK_MESSAGE);
         }
     },
@@ -38,7 +38,7 @@ export const CategoryItemService = {
 
         } catch (error) {
             throw errorHandler.parseError(error,
-                Validations.getErrorMessageFromCodeMasterItem,
+                Validations.getErrorMessageCodeFromCategoryItem,
                 FALLBACK_MESSAGE);
         }
     }

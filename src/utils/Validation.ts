@@ -1,5 +1,5 @@
 export default class Validations {
-  
+
   /* ======================================================*
   * ERROR CODE USER                                        *
   * =======================================================*/
@@ -43,10 +43,14 @@ export default class Validations {
   /* ======================================================*
   * ERROR CODE CATEGORY ITEM                               *
   * =======================================================*/
-  static getErrorMessageFromCodeCategoryItem(errorCode: string): string {
+  static getErrorMessageCodeFromCategoryItem(errorCode: string): string {
     switch (errorCode) {
       case "NAME_EXISTS":
         return "Category item name already exists.";
+      case "The name field is required.":
+        return "Please fill in the category name.";
+      case "The prefix field is required.":
+        return "Please fill in the prefix name.";
       default:
         return "Unexpected error occurred. Please try again.";
     }

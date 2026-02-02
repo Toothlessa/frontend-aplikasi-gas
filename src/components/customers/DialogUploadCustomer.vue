@@ -54,6 +54,7 @@
           variant="text"
           color="grey-darken-3"
           @click="$emit('close')"
+          :loading="loadingButtonCancel"
           class="font-weight-bold"
         >
           <v-icon start class="mr-1">mdi-close-circle-outline</v-icon>
@@ -86,6 +87,7 @@ const props = defineProps<{
   dialog: boolean;        // kontrol buka / tutup dialog
   csvFile: File | null;   // file CSV terpilih
   loading: boolean;       // status loading dari parent
+  loadingButtonCancel: boolean; 
 }>();
 
 /* -----------------------------------------------------*

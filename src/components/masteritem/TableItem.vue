@@ -1,6 +1,6 @@
 <template>
   <v-data-table-virtual
-    :headers="headers"
+    :headers="tableHeaders as any"
     :items="filteredItems"
     :loading="loading"
     loading-text="Fetching item data..."
@@ -13,24 +13,24 @@
     <!-- In Stock -->
     <template #[`item.in_stock`]="{ item }">
       <v-chip
-        :color="item.in_stock ? '#4CAF50' : '#F44336'" 
+        :color="(item as any).raw?.in_stock || item.in_stock ? '#4CAF50' : '#F44336'" 
         class="status-chip"
         label
         size="small"
       >
-        {{ item.in_stock ? 'In Stock' : 'Out of Stock' }}
+        {{ (item as any).raw?.in_stock || item.in_stock ? 'In Stock' : 'Out of Stock' }}
       </v-chip>
     </template>
 
     <!-- Active Flag -->
     <template #[`item.active_flag`]="{ item }">
       <v-chip
-        :color="item.active_flag ? '#00BCD4' : '#9E9E9E'" 
+        :color="(item as any).raw?.active_flag || item.active_flag ? '#00BCD4' : '#9E9E9E'" 
         class="status-chip"
         label
         size="small"
       >
-        {{ item.active_flag ? 'Active' : 'Inactive' }}
+        {{ (item as any).raw?.active_flag || item.active_flag ? 'Active' : 'Inactive' }}
       </v-chip>
     </template>
 
@@ -39,15 +39,27 @@
       <div class="action-buttons">
         <v-tooltip text="Edit Item" location="top">
           <template #activator="{ props }">
-            <v-btn v-bind="props" icon variant="text" @click="$emit('edit', item)">
+            <v-btn 
+              v-bind="props" 
+              icon 
+              variant="text" 
+              :loading="loadingEditItem === String(item.id || (item as any).raw?.id)"
+              @click="$emit('edit', (item as any).raw || item)"
+            >
               <v-icon size="22">mdi-pencil-outline</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
-        <v-tooltip :text="item.active_flag ? 'Deactivate Item' : 'Activate Item'" location="top">
+        <v-tooltip :text="item.active_flag || (item as any).raw?.active_flag ? 'Deactivate Item' : 'Activate Item'" location="top">
           <template #activator="{ props }">
-            <v-btn v-bind="props" icon variant="text" @click="$emit('deactivate', item)">
-              <v-icon size="22">{{ item.active_flag ? 'mdi-toggle-switch-off-outline' : 'mdi-toggle-switch-outline' }}</v-icon>
+            <v-btn 
+              v-bind="props" 
+              icon 
+              variant="text" 
+              :loading="loadingDeactivateItem === String(item.id || (item as any).raw?.id)"
+              @click="$emit('deactivate', (item as any).raw || item)"
+            >
+              <v-icon size="22">{{ item.active_flag || (item as any).raw?.active_flag ? 'mdi-toggle-switch-off-outline' : 'mdi-toggle-switch-outline' }}</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
@@ -72,10 +84,12 @@ import type { MasterItem, Header } from '@/types/MasterItem';
  * PROPS                                                *
  * ---------------------------------------------------- */
 const props = defineProps<{
-  headers: Header[];
+  headers: Header<MasterItem>[];
   items: MasterItem[];
   search: string;
   loading: boolean;
+  loadingEditItem: string | null;
+  loadingDeactivateItem: string | null;
 }>();
 
 /* -----------------------------------------------------*
@@ -86,6 +100,12 @@ defineEmits(['edit', 'deactivate']);
 /* -----------------------------------------------------*
  * COMPUTED                                             *
  * ---------------------------------------------------- */
+const tableHeaders = computed(() => {
+  // Casting to strict any to satisfy Vuetify's complex header types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return props.headers as any[];
+});
+
 const filteredItems = computed(() => {
   if (!props.search) return props.items;
 

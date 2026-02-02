@@ -17,6 +17,8 @@
       :items="customers"
       :search="search"
       :loading="loading"
+      :loadingDetailCustomer="loadingDetailKey"
+      :loadingDeactivateCustomer="loadingDeactivateKey"
       @edit="editItem"
       @deactivate="deactiveCustomer"
     />
@@ -32,6 +34,7 @@
       :edited-item="editedItem"
       :all-fields="allFields"
       :loading-button-create="loadingButtonCreate"
+      :loading-button-cancel="loadingButtonCancel"
       @close="DialogClose"
       @submit="onCreateCustomer"
       @update="onUpdateCustomer"
@@ -41,6 +44,7 @@
     <DialogDeactivate
       :dialog="DialogOpenDeactive"
       :loading="loading"
+      :loading-button-cancel="loadingButtonCancel"
       title="Confirm Status Change"
       message="Are you sure you want to change this customer's status?"
       @confirm="onDeactivateCustomer"
@@ -52,6 +56,7 @@
       v-model:csvFile="csvFile"
       :dialog="DialogOpenUploadCustomer"
       :loading="uploading"
+      :loading-button-cancel="loadingButtonCancel"
       @confirm="onUploadCustomer"
       @close="DialogClose"
     />
@@ -98,8 +103,13 @@ const {
 
     allFields,
     customers,
+
     loading,
     loadingButtonCreate,
+    loadingButtonCancel,
+    loadingDetailKey,
+    loadingDeactivateKey,
+
     hasSaved,
     isEditMode,
 
@@ -122,6 +132,10 @@ onMounted(() => {
    * METHODS                                              *
    * ---------------------------------------------------- */
   const editItem = (item: Customer) => {
+    loadingDetailKey.value = `${item.id}`;
+    setTimeout(() => {
+      loadingDetailKey.value = null;
+    }, 400);
     editedIndex.value = customers.value.indexOf(item);
     Object.assign(editedItem, item);
     DialogOpenCreate.value = true;
@@ -156,6 +170,10 @@ onMounted(() => {
   };
 
   const deactiveCustomer = (item: Customer) => {
+    loadingDeactivateKey.value = `${item.id}`;
+    setTimeout(() => {
+      loadingDeactivateKey.value = null;
+    }, 400);
     Object.assign(editedItem, item);
     DialogOpenDeactive.value = true;
   };

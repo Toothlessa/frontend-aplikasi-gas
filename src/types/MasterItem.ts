@@ -1,6 +1,6 @@
 export interface MasterItemState {
   mItems: MasterItem[];
-  categories : CategoryItem[];
+  categories: CategoryItem[];
   loading: boolean;
   hasSaved: boolean;
   headers: Header[];
@@ -17,7 +17,7 @@ export interface MasterItem {
   cost_of_goods_sold: number | string;
   selling_price: number | string;
   in_stock: boolean | string;
-  active_flag: boolean | string; 
+  active_flag: boolean | string;
 }
 
 export interface RawMasterItem {
@@ -71,9 +71,9 @@ type MasterItemKey = keyof MasterItem;
 export interface Field<TItem = unknown> {
   model: MasterItemKey;
   label: string;
-  items?: TItem[];         
-  itemTitle?: keyof TItem | string;    
-  itemValue?: keyof TItem | string;    
+  items?: TItem[];
+  itemTitle?: keyof TItem | string;
+  itemValue?: keyof TItem | string;
   onEnterSubmit?: boolean;
 }
 
@@ -106,7 +106,7 @@ export const headers: Header<MasterItem>[] = [
 
 export const headerscategory: HeaderCategory[] = [
   { title: 'Category Name', align: 'start', key: 'name' },
-  { title: 'Prefix', align: 'center', key: 'prefix'},
+  { title: 'Prefix', align: 'center', key: 'prefix' },
   { title: 'Status', align: 'start', key: 'active_flag' },
   { title: 'Last Active', align: 'start', key: 'inactive_date' },
   { title: 'Actions', key: 'actions', align: 'center', sortable: false },

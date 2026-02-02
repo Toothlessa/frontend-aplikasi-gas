@@ -15,6 +15,7 @@
           color="grey-darken-2"
           variant="text"
           class="text-white px-4"
+          :loading="loadingButtonCancel"
           @click="$emit('cancel')"
         >
           <v-icon class="mr-1">mdi-cancel</v-icon>
@@ -51,6 +52,7 @@ const props = defineProps<{
   title?: string;   // judul dialog (optional)
   message?: string; // pesan dialog (optional)
   loading: boolean; // kontrol loading dialog (optional)
+  loadingButtonCancel: boolean; // kontrol loading button cancel
 }>();
 
 /* -----------------------------------------------------*

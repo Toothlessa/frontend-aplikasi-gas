@@ -8,7 +8,7 @@ import {
     LOAD_MASTER_ITEM_BY_TYPE,
     SET_HASSAVED,
 } from "@/store/storeconstant";
-import { CategoryItem, Field, headers, MasterItem } from "@/types";
+import { CategoryItem, Field, MasterItem } from "@/types";
 import { useCategoryItem } from "./useCategoryItem";
 
 export function useMasterItem() {
@@ -24,7 +24,6 @@ export function useMasterItem() {
     const search = ref<string>("");
     const itemType = [{ name: "ASSET" }, { name: "ITEM" }];
 
-    const localHeaders = headers;
     const editedIndex = ref<number>(-1);
     const editedItem = reactive<Partial<MasterItem>>({});
     const selectedCategory = ref<Partial<CategoryItem>>({});
@@ -119,7 +118,6 @@ export function useMasterItem() {
         // state
         search,
         itemType,
-        localHeaders,
         editedIndex,
         editedItem,
         defaultItem,

@@ -15,6 +15,7 @@
           color="grey-darken-1"
           variant="outlined"
           class="rounded-pill"
+          :loading="loadingCancel"
           @click="$emit('cancel')"
         >
           <v-icon start>mdi-cancel</v-icon>
@@ -25,6 +26,7 @@
           color="cyan-darken-1"
           variant="elevated"
           class="text-white rounded-pill"
+          :loading="loadingSave"
           @click="$emit('confirm')"
         >
           <v-icon start>mdi-check-circle-outline</v-icon>
@@ -45,6 +47,8 @@ const props = defineProps<{
   dialog: boolean;
   title?: string;
   message?: string;
+  loadingSave: boolean;
+  loadingCancel: boolean;
 }>();
 
 /* ======================================================*

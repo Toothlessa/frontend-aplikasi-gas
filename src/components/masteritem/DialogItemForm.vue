@@ -69,11 +69,13 @@
         <v-btn
           variant="text"
           class="cancel-btn"
+          :loading="loadingCancel"
           @click="$emit('close')"
         >
           Cancel
         </v-btn>
         <v-btn
+          :loading="loadingSave"
           color="cyan-darken-1"
           variant="elevated"
           class="save-btn"
@@ -98,6 +100,8 @@ const props = defineProps<{
   isEdit: boolean;
   editedItem: Partial<MasterItem>;
   allFields: Field[];
+  loadingSave: boolean;
+  loadingCancel: boolean;
 }>();
 
 /* ======================================================*

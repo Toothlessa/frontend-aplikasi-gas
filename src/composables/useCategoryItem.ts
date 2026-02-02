@@ -59,11 +59,11 @@ export function useCategoryItem() {
      * VUEX API's                                            *
      * ======================================================*/
     const createCategory = (item: Partial<CategoryItem>) => {
-        store.dispatch(`masteritem/${CREATE_CATEGORY_ITEM}`, item);
+        return store.dispatch(`masteritem/${CREATE_CATEGORY_ITEM}`, item);
     };
 
     const deactiveCategory = () => {
-        store.dispatch(`masteritem/${DEACTIVATE_ITEM_CATEGORY}`, newCategory.id);
+        return store.dispatch(`masteritem/${DEACTIVATE_ITEM_CATEGORY}`, newCategory.id);
     };
 
     /* ======================================================*

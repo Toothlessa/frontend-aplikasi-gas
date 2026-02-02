@@ -39,14 +39,26 @@
       <div class="action-buttons">
         <v-tooltip text="Edit Customer" location="top">
           <template #activator="{ props }">
-            <v-btn v-bind="props" icon variant="text" @click="$emit('edit', item)">
+            <v-btn 
+              v-bind="props" 
+              icon 
+              variant="text"
+              :loading="loadingDetailCustomer === String(item.id || (item as any).raw?.id)" 
+              @click="$emit('edit', item)"
+            >
               <v-icon size="22">mdi-pencil-outline</v-icon>
             </v-btn>
           </template>
         </v-tooltip>
         <v-tooltip :text="item.active_flag ? 'Deactivate Customer' : 'Activate Customer'" location="top">
           <template #activator="{ props }">
-            <v-btn v-bind="props" icon variant="text" @click="$emit('deactivate', item)">
+            <v-btn 
+              v-bind="props" 
+              icon 
+              variant="text" 
+              @click="$emit('deactivate', item)"
+              :loading="loadingDeactivateCustomer === String(item.id || (item as any).raw?.id)"
+            >
               <v-icon size="22">{{ item.active_flag ? 'mdi-toggle-switch-off-outline' : 'mdi-toggle-switch-outline' }}</v-icon>
             </v-btn>
           </template>
@@ -73,6 +85,8 @@ const props = defineProps<{
   items: Customer[];
   search: string;
   loading: boolean;
+  loadingDetailCustomer: string | null;
+  loadingDeactivateCustomer: string | null;
 }>();
 
 defineEmits(['edit', 'deactivate']);

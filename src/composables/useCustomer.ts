@@ -27,10 +27,22 @@ export function useCustomer() {
   };
 
   const DialogClose = () => {
-    DialogOpenCreate.value = false;
-    DialogOpenDeactive.value = false;
-    DialogOpenUploadCustomer.value = false;
+    loadingButtonCancel.value = true;
+    setTimeout(() => {
+      loadingButtonCancel.value = false;
+      DialogOpenCreate.value = false;
+      DialogOpenDeactive.value = false;
+      DialogOpenUploadCustomer.value = false;
+    }, 1000);
+
   };
+
+  /* -----------------------------------------------------*
+   * STATE - LOADING                                      *
+   * -----------------------------------------------------*/
+  const loadingButtonCancel = ref(false);
+  const loadingDetailKey = ref<string | null>(null);
+  const loadingDeactivateKey = ref<string | null>(null);
 
   /* -----------------------------------------------------*
    * STATE — SEARCH & FORM                                *
@@ -159,8 +171,13 @@ export function useCustomer() {
     labels,
     totals,
     customers,
+
     loading,
     loadingButtonCreate,
+    loadingButtonCancel,
+    loadingDetailKey,
+    loadingDeactivateKey,
+
     hasSaved,
     isEditMode,
 

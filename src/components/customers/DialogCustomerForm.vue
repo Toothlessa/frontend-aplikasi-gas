@@ -34,6 +34,7 @@
         <v-btn
           variant="text"
           class="cancel-btn"
+          :loading="props.loadingButtonCancel"
           @click="$emit('close')"
         >
           Cancel
@@ -65,6 +66,7 @@ const props = defineProps<{
   editedItem: Partial<Customer>;   // data customer yang diedit
   allFields: CustomerField[];      // konfigurasi field form
   loadingButtonCreate: boolean;    // kontrol loading button create
+  loadingButtonCancel: boolean;    // kontrol loading button cancel
 }>();
 
 /* =========================================================

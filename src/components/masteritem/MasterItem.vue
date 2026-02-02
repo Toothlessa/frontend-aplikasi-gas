@@ -16,10 +16,12 @@
 
     <!-- Master Item Table -->
     <TableItem
-      :headers="localHeaders"
+      :headers="headers"
       :items="mItems"
       :search="search"
       :loading="loading"
+      :loadingEditItem="loadingDetailKey"
+      :loadingDeactivateItem="loadingDeactivateKey"
       @edit="editItem"
       @submit="onCreateItem"
       @deactivate="deactivateItem"
@@ -31,6 +33,8 @@
 
     <!-- Create/Edit Master Item Dialog -->
     <DialogItemForm
+      :loadingSave="loadingSaveButton"
+      :loadingCancel="loadingCancelButton"
       :dialog="DialogOpenCreate"
       :isEdit="editedIndex !== -1"
       :editedItem="editedItem"
@@ -42,6 +46,8 @@
 
     <!-- Add New Category Dialog -->
     <DialogCategory
+      :loadingSave="loadingSaveButton"
+      :loadingCancel="loadingCancelButton"
       :dialog="DialogOpenCategory"
       :newCategory="selectedCategory"
       :search="searchCategory"
@@ -49,7 +55,7 @@
       :categories="categories"
       :headers="localHCategory"
       :loading="loading"
-      @close="onClose"
+      @close="onCloseCategory"
       @submit="onCreateCategory"
       @deactivate="deactivateCategory"
       @updateCategory="onUpdateCategory"
@@ -57,6 +63,8 @@
 
     <!-- Deactivate Dialog -->
     <DialogDeactivate
+      :loadingSave="loadingSaveButton"
+      :loadingCancel="loadingCancelButton"
       :dialog="dialogDeactivate"
       title="Change Item Status?"
       message="Are you sure you want to deactivate this item?"
@@ -66,6 +74,8 @@
 
     <!-- Deactivate Category Dialog -->
     <DialogDeactivate
+      :loadingSave="loadingSaveButton"
+      :loadingCancel="loadingCancelButton"
       :dialog="dialogDeactivateCategory"
       title="Change Category Item Status?"
       message="Are you sure you want to deactivate this category item?"
@@ -81,9 +91,8 @@ import TableItem from './TableItem.vue';
 import DialogItemForm from './DialogItemForm.vue';
 import DialogCategory from './DialogCategory.vue';
 import DialogDeactivate from './DialogDeactivate.vue';
-import type { CategoryItem, MasterItem } from '@/types/MasterItem'; // ✅ type-only
-
-import { onMounted } from 'vue';
+import { headers, type CategoryItem, type MasterItem } from '@/types/MasterItem'; 
+import { onMounted, ref } from 'vue';
 import { useMasterItem } from '@/composables/useMasterItem';
 import { useCategoryItem } from '@/composables/useCategoryItem';
 import { useGlobal } from '@/composables/useGlobal';
@@ -106,7 +115,6 @@ const {
   editedIndex,
   editedItem,
   defaultItem,
-  localHeaders,
   allFields,
 
   mItems,
@@ -145,20 +153,37 @@ onMounted(() => {
 });
 
   /* ======================================================*
-   * METHODS                                             *
+   * CONSTANTS                                             *
+   * ======================================================*/
+const loadingSaveButton = ref<boolean>(false);
+const loadingCancelButton = ref<boolean>(false);
+const loadingDetailKey = ref<string | null>(null);
+const loadingDeactivateKey = ref<string | null>(null);
+
+  /* ======================================================*
+   * METHODS                                               *
    * ======================================================*/
 
 const editItem = (item: MasterItem) => {
+  loadingDetailKey.value = `${item.id}`;
+  setTimeout(() => {
+    loadingDetailKey.value = null;
+  }, 400);
   editedIndex.value = mItems.value.indexOf(item);
   Object.assign(editedItem, item);
   DialogOpenCreate.value = true;
 };
 
 const close = () => {
-  DialogOpenCreate.value = false;
-  dialogDeactivate.value = false;
-  dialogDeactivateCategory.value = false;
-  editedIndex.value = -1;
+
+  loadingCancelButton.value = true;
+  setTimeout(() => {
+    loadingCancelButton.value = false;
+    DialogOpenCreate.value = false;
+    dialogDeactivate.value = false;
+    dialogDeactivateCategory.value = false;
+    editedIndex.value = -1;
+  }, 500);
 }
 
 const resetEditedItem = () => {
@@ -171,6 +196,10 @@ const onSubmit = (item: Partial<MasterItem>) => {
 };
 
 const deactivateItem = (item: MasterItem) => {
+  loadingDeactivateKey.value = `${item.id}`;
+  setTimeout(() => {
+    loadingDeactivateKey.value = null;
+  }, 400);
   Object.assign(editedItem, item);
   dialogDeactivate.value = true;
 };
@@ -197,39 +226,61 @@ const onLoadCategories = async () => {
 };
 
 const onCreateItem = async () => {
+  loadingSaveButton.value = true;
   try {
     await createItem();
     DialogOpenCreate.value = false;
   } catch (e) {
     validationError(e);
+  } finally {
+    loadingSaveButton.value = false;
   }
 };
 
 const onDeactivateItem = async () => {
+  loadingSaveButton.value = true;
   try {
     await deactiveItem();
     dialogDeactivate.value = false;
   } catch (e) {
     validationError(e);
+  } finally {
+    loadingSaveButton.value = false;
   }
 };
 
 const onCreateCategory = async (item: Partial<CategoryItem>) => {
+  loadingSaveButton.value = true;
   try {
     await createCategory(item);
-    DialogOpenCategory.value = false;
+    
+    //reset only when succed
     newCategory.name = '';
+    DialogOpenCategory.value = false;
   } catch (e) {
     validationError(e);
+  } finally {
+    loadingSaveButton.value = false;
   }
 };
 
 const onDeactivatedCategory = async () => {
+  loadingSaveButton.value = true;
   try {
     await deactiveCategory();
     dialogDeactivateCategory.value = false;
   } catch (e) {
     validationError(e);
+  } finally {
+    loadingSaveButton.value = false;
   }
+};
+
+const onCloseCategory = () => {
+  loadingCancelButton.value = true;
+  setTimeout(() => {
+    loadingCancelButton.value = false;
+    onClose();
+  }, 500);
 };
 </script>

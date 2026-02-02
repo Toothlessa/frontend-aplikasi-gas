@@ -36,6 +36,7 @@
         <v-btn
           variant="text"
           class="cancel-btn"
+          :loading="loadingCancel"
           @click="handleClose"
         >
           Close
@@ -44,6 +45,7 @@
           color="cyan-darken-1"
           variant="elevated"
           class="save-btn"
+          :loading="loadingSave"
           @click="handleSave"
         >
           Save Category
@@ -141,6 +143,8 @@ const props = defineProps<{
   categories: CategoryItem[];
   headers: HeaderCategory[];
   loading: boolean;
+  loadingSave: boolean;
+  loadingCancel: boolean;
 }>();
 
 /* ======================================================*
@@ -212,13 +216,14 @@ const filteredItems = computed(() => {
  * METHODS — ACTION HANDLERS                               *
  * ======================================================*/
 const handleClose = () => {
+  emit('update:dialog', false);
   emit('close'); // Let parent clear state
   Object.assign(localCategory, defaultCategory);
 };
 
 const handleSave = () => {
   emit('submit', localCategory);
-  Object.assign(localCategory, defaultCategory);
+  // Object.assign(localCategory, defaultCategory);
 };
 </script>
 
