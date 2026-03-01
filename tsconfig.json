@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    // "target": "esnext",
     "module": "esnext",
     "strict": true,
     "jsx": "preserve",
     "moduleResolution": "node",
+    // "moduleResolution": "bundler",
     "experimentalDecorators": true,
     "allowJs": true,
     "skipLibCheck": true,
@@ -17,8 +18,14 @@
     "types": [
       "webpack-env"
     ],
-     "paths": {
-      "@/*": ["*"]
+    // "types": [
+    //   "vitest/globals",
+    //   "node"
+    // ],
+    "paths": {
+      "@/*": [
+        "*"
+      ]
     },
     "lib": [
       "esnext",
@@ -32,8 +39,11 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
-, "src/router/index1.js"  ],
+    "tests/**/*.tsx",
+    "src/router/index1.js",
+    "vite.config.ts",
+    // "vitest.config.ts"
+  ],
   "exclude": [
     "node_modules"
   ]

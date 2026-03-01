@@ -33,7 +33,7 @@ export function useCustomer() {
       DialogOpenCreate.value = false;
       DialogOpenDeactive.value = false;
       DialogOpenUploadCustomer.value = false;
-    }, 1000);
+    }, 400);
 
   };
 

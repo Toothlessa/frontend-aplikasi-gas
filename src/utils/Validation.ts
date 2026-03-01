@@ -25,7 +25,7 @@ export default class Validations {
   /*======================================================*
   * ERROR CODE MASTER ITEM                                  *
   * =======================================================*/
-  static getErrorMessageFromCodeMasterItem(errorCode: string): string {
+  static getErrorMessageCodeFromMasterItem(errorCode: string): string {
     switch (errorCode) {
       case "The item name field is required.":
         return "Please fill in the item name.";
@@ -35,6 +35,8 @@ export default class Validations {
         return "Please fill in the cost of goods.";
       case "The selling price field is required.":
         return "Please fill in the selling price.";
+      case "ITEM_NAME_EXISTS":
+        return "Item name already exists.";
       default:
         return "Unexpected error occurred. Please try again.";
     }

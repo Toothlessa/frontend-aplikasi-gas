@@ -6,7 +6,7 @@ import {
     LOAD_CATEGORY_ITEM,
     LOAD_MASTER_ITEM,
     LOAD_MASTER_ITEM_BY_TYPE,
-    SET_HASSAVED,
+    // SET_HASSAVED,
 } from "@/store/storeconstant";
 import { CategoryItem, Field, MasterItem } from "@/types";
 import { useCategoryItem } from "./useCategoryItem";
@@ -76,11 +76,12 @@ export function useMasterItem() {
      * COMPUTED — STORE STATE                                *
      * ======================================================*/
     const loading = computed<boolean>(() => store.state.masteritem.loading);
-    const hasSaved = computed<boolean>({
-        get: () => store.state.masteritem.hasSaved,
-        set: (val: boolean) =>
-            store.commit(`masteritem/${SET_HASSAVED}`, val),
-    });
+    // const hasSaved = computed<boolean>({
+    //     get: () => store.state.masteritem.hasSaved,
+    //     set: (val: boolean) =>
+    //         store.commit(`masteritem/${SET_HASSAVED}`, val),
+    // });
+    const hasSaved = computed(() => store.state.masteritem.hasSaved);
 
     /* ======================================================*
      * COMPUTED — STORE DATA                                 *

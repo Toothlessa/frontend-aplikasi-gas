@@ -14,7 +14,7 @@ export const MasterItemService = {
 
     } catch (e) {
       throw errorHandler.parseError(e,
-        Validations.getErrorMessageFromCodeMasterItem,
+        Validations.getErrorMessageCodeFromMasterItem,
         FALLBACK_MESSAGE
       );
     }
@@ -31,7 +31,7 @@ export const MasterItemService = {
       }));
     } catch (e) {
       throw errorHandler.parseError(e,
-        Validations.getErrorMessageFromCodeMasterItem,
+        Validations.getErrorMessageCodeFromMasterItem,
         FALLBACK_MESSAGE
       );
     }
@@ -47,7 +47,7 @@ export const MasterItemService = {
       }));
     } catch (e) {
       throw errorHandler.parseError(e,
-        Validations.getErrorMessageFromCodeMasterItem,
+        Validations.getErrorMessageCodeFromMasterItem,
         FALLBACK_MESSAGE
       );
     }
@@ -59,7 +59,7 @@ export const MasterItemService = {
       await MasterItemApi.deactive(id);
     } catch (e) {
       throw errorHandler.parseError(e,
-        Validations.getErrorMessageFromCodeMasterItem,
+        Validations.getErrorMessageCodeFromMasterItem,
         FALLBACK_MESSAGE
       );
     }

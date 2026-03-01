@@ -29,7 +29,7 @@
 
     <!-- Error & Success Snackbars -->
     <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
-    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
+    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" />
 
     <!-- Create/Edit Master Item Dialog -->
     <DialogItemForm
@@ -183,7 +183,7 @@ const close = () => {
     dialogDeactivate.value = false;
     dialogDeactivateCategory.value = false;
     editedIndex.value = -1;
-  }, 500);
+  }, 400);
 }
 
 const resetEditedItem = () => {

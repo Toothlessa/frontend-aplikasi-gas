@@ -33,8 +33,6 @@ const actions: ActionTree<MasterItemState, RootState> = {
     } catch (e) {
       console.error('Failed to create master item : ', e);
       throw e;
-    } finally {
-      commit(SET_HASSAVED, false);
     }
   },
 
@@ -77,8 +75,6 @@ const actions: ActionTree<MasterItemState, RootState> = {
     } catch (e) {
       console.error('Failed to deactive the item', e);
       throw e;
-    } finally {
-      commit(SET_HASSAVED, false);
     }
   },
 
@@ -94,8 +90,6 @@ const actions: ActionTree<MasterItemState, RootState> = {
     } catch (e) {
       console.error('Failed to create the customer', e);
       throw e;
-    } finally {
-      commit(SET_HASSAVED, false);
     }
   },
 
@@ -126,8 +120,6 @@ const actions: ActionTree<MasterItemState, RootState> = {
     } catch (e) {
       console.error('Failed to deactive the master item', e);
       throw e;
-    } finally {
-      commit(SET_HASSAVED, false);
     }
   }
 
