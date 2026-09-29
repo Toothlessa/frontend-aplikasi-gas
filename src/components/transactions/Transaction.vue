@@ -1,24 +1,24 @@
 <template>
-  <div :class="theme.global.current.value.dark ? 'modern-layout-dark' : 'modern-layout-light'">
+  <div :class="isDark ? 'modern-layout-dark' : 'modern-layout-light'">
     <v-container fluid>
       <!-- Header -->
       <v-sheet
         class="page-header"
-        elevation="4"
+        elevation="3"
         rounded="xl"
-        :class="theme.global.current.value.dark ? 'page-header-dark' : 'page-header-light'"
+        :class="isDark ? 'page-header-dark' : 'page-header-light'"
       >
         <v-row align="center" class="pa-2">
           <v-col cols="auto">
             <v-avatar color="white" size="48">
-              <v-icon icon="mdi-swap-horizontal-bold" color="cyan-darken-2" size="40" />
+              <v-icon icon="mdi-swap-horizontal-bold" color="cyan-darken-2" size="36" />
             </v-avatar>
           </v-col>
           <v-col>
-            <h1 :class="theme.global.current.value.dark ? 'text-h6 font-weight-bold text-white' : 'text-h6 font-weight-bold text-white'">
+            <h1 class="text-h6 font-weight-bold text-white">
               Transactions
             </h1>
-            <p :class="theme.global.current.value.dark ? 'text-body-2 text-white mt-1' : 'text-body-2 text-white mt-1'" style="opacity: 0.9;">
+            <p class="text-body-2 text-white mt-1" style="opacity: 0.9;">
               Manage and track all your financial transactions
             </p>
           </v-col>
@@ -28,8 +28,8 @@
       <v-row class="mt-8">
         <!-- Left Column: Input Form -->
         <v-col cols="12" md="3">
-          <v-card class="form-card rounded-xl elevation-2" :class="theme.global.current.value.dark ? 'form-card-dark' : 'form-card-light'">
-            <v-card-title :class="theme.global.current.value.dark ? 'card-header-dark' : 'card-header-light'">
+          <v-card class="form-card rounded-xl elevation-2" :class="isDark ? 'form-card-dark' : 'form-card-light'">
+            <v-card-title :class="isDark ? 'card-header-dark' : 'card-header-light'">
               <v-icon start>mdi-cash-register</v-icon>
               New Transaction
             </v-card-title>
@@ -129,8 +129,8 @@
             </v-card-text>
           </v-card>
 
-          <v-card class="form-card mt-6" elevation="2" rounded="xl">
-            <v-card-title :class="theme.global.current.value.dark ? 'card-header-dark' : 'card-header-light'">
+          <v-card class="form-card rounded-xl mt-6" elevation="2" :class="isDark ? 'form-card-dark' : 'form-card-light'">
+            <v-card-title :class="isDark ? 'card-header-dark' : 'card-header-light'">
               <v-icon start>mdi-package-variant-closed</v-icon>
               Select Item
             </v-card-title>
@@ -163,8 +163,8 @@
 
         <!-- Right Column: Data Table -->
         <v-col cols="12" md="8">
-          <v-card class="list-card" elevation="2" rounded="xl">
-            <v-card-title :class="theme.global.current.value.dark ? 'card-header-dark' : 'card-header-light'" class="d-flex align-center">
+          <v-card class="list-card rounded-xl" elevation="2" :class="isDark ? 'list-card-dark' : 'list-card-light'">
+            <v-card-title :class="isDark ? 'card-header-dark' : 'card-header-light'" class="d-flex align-center">
               <v-icon start>mdi-format-list-bulleted</v-icon>
               Transaction History
               <v-spacer />
@@ -187,9 +187,9 @@
                 />
               </div>
             </v-card-title>
-            <v-divider />
+            <v-divider :style="isDark ? 'border-color: rgba(255,255,255,0.08);' : ''" />
             <v-data-table-virtual
-              class="modern-table"
+              :class="isDark ? 'modern-table-dark' : 'modern-table-light'"
               v-model:search="search"
               :headers="headersLocal"
               :items="transactions"
@@ -197,19 +197,22 @@
               loading-text="Loading data..."
               hover
             >
+              <template v-slot:[`item.customer_name`]="{ item }">
+                {{ item.raw?.customer?.name || item.raw?.name || '' }}
+              </template>
               <template v-slot:[`item.description`]="{ value }">
                 <v-chip :color="getColorByDescription(value)" size="small" class="font-weight-bold">
                   {{ value }}
                 </v-chip>
               </template>
               <template v-slot:[`item.actions`]="{ item }">
-                <v-btn icon="mdi-pencil-outline" variant="text" color="blue-grey" @click="editTransaction(item)" />
+                <v-btn icon="mdi-pencil-outline" variant="text" :color="isDark ? 'cyan-accent-2' : 'blue-grey'" @click="editTransaction(item.raw || item)" />
               </template>
               <template v-slot:[`item.amount`]="{ item }">
-                {{ formatPrice(item.amount) }}
+                {{ formatPrice(item.raw?.amount ?? item.amount) }}
               </template>
               <template v-slot:[`item.total`]="{ item }">
-                {{ formatPrice(item.total) }}
+                {{ formatPrice(item.raw?.total ?? item.total) }}
               </template>
             </v-data-table-virtual>
           </v-card>
@@ -217,8 +220,8 @@
       </v-row>
       
       <v-dialog v-model="DialogUpdate" max-width="600px" persistent>
-        <v-card rounded="xl">
-          <v-card-title :class="theme.global.current.value.dark ? 'dialog-header-dark' : 'dialog-header-light'">
+        <v-card rounded="xl" :class="isDark ? 'dialog-card-dark' : 'dialog-card-light'">
+          <v-card-title :class="isDark ? 'dialog-header-dark' : 'dialog-header-light'">
             <v-icon start>mdi-update</v-icon>
             Update Transaction
           </v-card-title>
@@ -304,8 +307,8 @@
       </v-dialog>
 
       <v-dialog v-model="DialogDate" max-width="400px" persistent>
-        <v-card rounded="xl">
-          <v-card-title :class="theme.global.current.value.dark ? 'dialog-header-dark' : 'dialog-header-light'">
+        <v-card rounded="xl" :class="isDark ? 'dialog-card-dark' : 'dialog-card-light'">
+          <v-card-title :class="isDark ? 'dialog-header-dark' : 'dialog-header-light'">
             <v-icon start>mdi-calendar-search</v-icon>
             Select Date
           </v-card-title>
@@ -330,7 +333,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import {  onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { VNumberInput } from 'vuetify/lib/labs/components.mjs';
 import { useTransaction } from '@/composables/useTransaction';
 import { useCustomer } from '@/composables/useCustomer';
@@ -396,6 +399,8 @@ const {
     checkIsSend,
     getTransactionByDate
 } = useTransaction();
+
+const isDark = computed(() => theme.global.current.value.dark);
 
 const {
   //computed
@@ -490,63 +495,66 @@ onMounted(() => {
 
 <style scoped>
 .modern-layout-light {
-  background-color: #f4f6f8;
+  background-color: #f8fafc;
   min-height: 100vh;
 }
 
 .modern-layout-dark {
-  background-color: #282828;
+  background-color: #121214;
   min-height: 100vh;
 }
 
 .page-header-light {
-  background: linear-gradient(45deg, #00BCD4 0%, #4DD0E1 100%);
+  background: linear-gradient(135deg, #00BCD4 0%, #26C6DA 100%);
   color: white;
 }
 
 .page-header-dark {
-  background: linear-gradient(45deg, #00838F 0%, #00ACC1 100%);
+  background: linear-gradient(135deg, #00838F 0%, #0097A7 100%);
   color: white;
 }
 
-.form-card-light, .list-card, .v-dialog .v-card {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  transition: box-shadow 0.3s ease-in-out;
+/* Card Styles */
+.form-card-light, .list-card-light, .dialog-card-light {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  transition: box-shadow 0.25s ease;
 }
 
-.form-card-dark {
-  background-color: #333333;
-  border: 1px solid #444444;
-  transition: box-shadow 0.3s ease-in-out;
+.form-card-dark, .list-card-dark, .dialog-card-dark {
+  background-color: #1e1e24 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+  transition: box-shadow 0.25s ease;
 }
 
-.form-card-light:hover, .list-card:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+.form-card-light:hover, .list-card-light:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
 }
 
-.form-card-dark:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+.form-card-dark:hover, .list-card-dark:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
 }
 
 .card-header-light {
   background-color: #00BCD4 !important;
   color: white !important;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 600;
 }
 
 .card-header-dark {
   background-color: #00838F !important;
   color: white !important;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 600;
 }
 
 .dialog-header-light {
   background-color: #00BCD4 !important;
   color: white !important;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 600;
   padding: 16px 24px;
 }
@@ -554,99 +562,101 @@ onMounted(() => {
 .dialog-header-dark {
   background-color: #00838F !important;
   color: white !important;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 600;
   padding: 16px 24px;
 }
 
-.search-field {
-  /* max-width: 600px; */
-}
-
-.modern-table {
+/* Modern Table Light */
+.modern-table-light {
   border-radius: 12px;
   overflow: hidden;
 }
-
-.modern-table .v-data-table-header {
-  background-color: #f9fafb;
-  color: #37474f;
-  font-weight: 600;
+.modern-table-light :deep(.v-table__wrapper) {
+  background-color: transparent !important;
+}
+.modern-table-light :deep(thead) {
+  background-color: #f8fafc;
+}
+.modern-table-light :deep(th) {
+  color: #475569 !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 12px 16px !important;
+}
+.modern-table-light :deep(td) {
+  color: #1e293b !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+.modern-table-light :deep(tbody tr:hover td) {
+  background-color: #f0fdfa !important;
 }
 
-.modern-table .v-data-table__tr:hover {
-  background-color: #f0f7ff !important;
+/* Modern Table Dark */
+.modern-table-dark {
+  border-radius: 12px;
+  overflow: hidden;
+}
+.modern-table-dark :deep(.v-table__wrapper) {
+  background-color: transparent !important;
+}
+.modern-table-dark :deep(thead) {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+.modern-table-dark :deep(th) {
+  color: #cbd5e1 !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 12px 16px !important;
+}
+.modern-table-dark :deep(td) {
+  color: #f1f5f9 !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+.modern-table-dark :deep(tbody tr:hover td) {
+  background-color: rgba(0, 188, 212, 0.12) !important;
 }
 
-/* Text field adjustments for dark theme */
-.v-autocomplete.v-input--filled .v-field__input,
-.v-number-input.v-input--filled .v-field__input,
-.v-textarea.v-input--filled .v-field__input {
-  color: #333333; /* Default text color for light theme */
-}
-
-.modern-layout-dark .v-autocomplete.v-input--filled .v-field__input,
-.modern-layout-dark .v-number-input.v-input--filled .v-field__input,
-.modern-layout-dark .v-textarea.v-input--filled .v-field__input {
-  color: #ffffff; /* White text color for dark theme */
-}
-
-.v-autocomplete.v-input--filled .v-label,
-.v-number-input.v-input--filled .v-label,
-.v-textarea.v-input--filled .v-label {
-  color: #757575; /* Default label color for light theme */
-}
-
-.modern-layout-dark .v-autocomplete.v-input--filled .v-label,
-.modern-layout-dark .v-number-input.v-input--filled .v-label,
-.modern-layout-dark .v-textarea.v-input--filled .v-label {
-  color: #bbbbbb; /* Lighter label color for dark theme */
-}
-
-.modern-layout-dark .v-autocomplete.v-input--filled .v-field__overlay,
-.modern-layout-dark .v-number-input.v-input--filled .v-field__overlay,
-.modern-layout-dark .v-textarea.v-input--filled .v-field__overlay {
-  background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent white for dark theme input background */
-}
-
-.modern-layout-dark .v-data-table-virtual :deep(th),
-.modern-layout-dark .v-data-table-virtual :deep(td) {
-  color: #ffffff !important; /* White text for table headers and cells in dark mode */
-}
-
-.modern-layout-dark .modern-table .v-data-table-header {
-  background-color: #424242 !important;
-}
-
-.modern-layout-dark .modern-table .v-data-table__tr:hover {
-  background-color: #333333 !important;
-}
-
-.modern-layout-dark .search-field .v-field__input,
-.modern-layout-dark .search-field .v-label {
+/* Form Controls Adjustments for Dark Mode */
+.modern-layout-dark :deep(.v-field__input) {
   color: #ffffff !important;
 }
-
-.modern-layout-dark .search-field .v-icon {
-  color: #bbbbbb !important;
+.modern-layout-dark :deep(.v-field__outline) {
+  color: rgba(255, 255, 255, 0.18) !important;
+}
+.modern-layout-dark :deep(.v-field--focused .v-field__outline) {
+  color: #00bcd4 !important;
+}
+.modern-layout-dark :deep(.v-field--variant-filled .v-field__overlay) {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+.modern-layout-dark :deep(.v-label) {
+  color: #94a3b8 !important;
+}
+.modern-layout-dark :deep(.v-checkbox .v-label) {
+  color: #e2e8f0 !important;
+}
+.modern-layout-dark :deep(.v-messages) {
+  color: #94a3b8 !important;
 }
 
 .modern-layout-dark .search-field {
   background-color: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 24px;
 }
-
-.modern-layout-dark .search-field:focus-within {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-}
-
-.modern-layout-dark .v-btn.v-btn--variant-tonal {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+.modern-layout-dark .search-field :deep(.v-field__input),
+.modern-layout-dark .search-field :deep(.v-label) {
   color: #ffffff !important;
 }
-
-.modern-layout-dark .v-btn.v-btn--variant-tonal:hover {
-  background-color: rgba(255, 255, 255, 0.2) !important;
+.modern-layout-dark .search-field :deep(.v-icon) {
+  color: #94a3b8 !important;
 }
 </style>

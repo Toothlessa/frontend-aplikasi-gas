@@ -1,28 +1,28 @@
 <template>
-  <v-toolbar color="transparent" class="mt-n5" rounded-t-xl>
-    <v-toolbar-title class="text-teal text-lg-h5 font-weight-bold">
-      Gas Sales data
-    </v-toolbar-title>
-  </v-toolbar>
+  <div>
+    <v-toolbar color="transparent" density="compact" class="px-0">
+      <v-toolbar-title :class="isDark ? 'text-teal-accent-3 text-h6 font-weight-bold' : 'text-teal text-h6 font-weight-bold'">
+        <v-icon start size="22" :color="isDark ? 'teal-accent-3' : 'teal'">mdi-chart-line</v-icon>
+        Gas Sales Data
+      </v-toolbar-title>
+    </v-toolbar>
 
-  <v-divider></v-divider>
+    <v-divider class="my-2" :style="isDark ? 'border-color: rgba(255,255,255,0.08);' : ''" />
 
-  <v-card rounded="xl" elevation="4" class="mt-n5">
-    <Line
-      :data="data"
-      :options="options"
-      width="100px"
-      height="200px"
-      :css-classes="cssClasses"
-      :styles="styles"
-      :plugins="plugins"
-    />
-  </v-card>
+    <div class="chart-wrapper mt-3">
+      <Line
+        :data="data"
+        :options="chartOptions"
+        :css-classes="cssClasses"
+        :styles="styles"
+        :plugins="plugins"
+      />
+    </div>
 
-  <!-- Snackbars -->
-  <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
-  <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
-
+    <!-- Snackbars -->
+    <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+   <!-- <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />-->
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -37,7 +37,8 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler,
 } from "chart.js";
 import { Line } from "vue-chartjs";
 
@@ -48,21 +49,28 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
   /* -----------------------------------------------------*
   * IMPORT LOGIC                                         *
   * ---------------------------------------------------- */
-import { onMounted, watch } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { useTransaction } from "@/composables/useTransaction";
 import { useLineChart } from "@/composables/chart/useLineChart";
 import { useGlobal } from "@/composables/useGlobal";
-import { SnackbarError, SnackbarSuccess } from "@/components/globalComponent";
+import { useTheme } from "vuetify/lib/framework.mjs";
+import { 
+        SnackbarError, 
+        //SnackbarSuccess 
+      } from "@/components/globalComponent";
 
   /* -----------------------------------------------------*
   * COMPOSABLE                                           *
   * ---------------------------------------------------- */
+const theme = useTheme();
+const isDark = computed(() => theme.global.current.value.dark);
 
 const {
   //validation helpers
@@ -72,7 +80,7 @@ const {
 } = useGlobal();
 
 const {
-  hasSaved,
+  //hasSaved,
 
   last30DaysTransaction, 
   fetchLast30DaysSale 
@@ -80,11 +88,52 @@ const {
 
 const {
   data,
-  options,
   cssClasses,
   styles,
   plugins,
 } = useLineChart();
+
+const chartOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      labels: {
+        color: isDark.value ? '#cbd5e1' : '#334155',
+        font: {
+          family: 'inherit',
+          weight: 500,
+        },
+      },
+    },
+    tooltip: {
+      backgroundColor: isDark.value ? '#2a2a32' : '#ffffff',
+      titleColor: isDark.value ? '#ffffff' : '#0f172a',
+      bodyColor: isDark.value ? '#cbd5e1' : '#334155',
+      borderColor: isDark.value ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
+      borderWidth: 1,
+      padding: 10,
+    },
+  },
+  scales: {
+    x: {
+      grid: {
+        color: isDark.value ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)',
+      },
+      ticks: {
+        color: isDark.value ? '#94a3b8' : '#64748b',
+      },
+    },
+    y: {
+      grid: {
+        color: isDark.value ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)',
+      },
+      ticks: {
+        color: isDark.value ? '#94a3b8' : '#64748b',
+      },
+    },
+  },
+}));
 
   /* -----------------------------------------------------*
    * ON MOUNTED                                           *
@@ -96,28 +145,41 @@ onMounted(() => {
   /* -----------------------------------------------------*
    * WATCHERS                                             *
    * ---------------------------------------------------- */
+const updateChartData = (val: typeof last30DaysTransaction.value) => {
+  if (!Array.isArray(val) || val.length === 0) {
+    data.value = { labels: [], datasets: [] };
+    return;
+  }
+
+  const labels = val.map((d) => d.day);
+  const totals = val.map((d) => Number(d.total));
+  const monthLabel = val[0]?.month || "Sales";
+
+  data.value = {
+    labels,
+    datasets: [
+      {
+        label: monthLabel,
+        backgroundColor: isDark.value ? "rgba(46, 191, 175, 0.2)" : "#2EBFAF",
+        borderColor: "#2EBFAF",
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.35,
+        pointBackgroundColor: "#2EBFAF",
+        pointBorderColor: isDark.value ? "#1e1e24" : "#ffffff",
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        data: totals,
+      },
+    ],
+  };
+};
+
 watch(
-  last30DaysTransaction,
-  (val) => {
-    if (!Array.isArray(val) || val.length === 0) {
-      data.value = { labels: [], datasets: [] };
-      return;
-    }
-
-    const labels = val.map((d) => d.day);
-    const totals = val.map((d) => Number(d.total));
-    const monthLabel = val[0]?.month || "Sales";
-
-    data.value = {
-      labels,
-      datasets: [
-        {
-          label: monthLabel,
-          backgroundColor: "#2EBFAF",
-          data: totals,
-        },
-      ],
-    };
+  [last30DaysTransaction, isDark],
+  () => {
+    updateChartData(last30DaysTransaction.value);
   },
   { immediate: true }
 );
@@ -134,3 +196,11 @@ watch(
    };
 
 </script>
+
+<style scoped>
+.chart-wrapper {
+  position: relative;
+  height: 250px;
+  width: 100%;
+}
+</style>

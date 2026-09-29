@@ -8,13 +8,21 @@ import vuetify from './plugins/vuetify'
 import {
   loadFonts
 } from './plugins/webfontloader'
+import { AUTO_LOGIN_ACTION } from './store/storeconstant'
 
 loadFonts()
 
-createApp(App)
+// Pastikan state auth terisi dari localStorage sebelum router guard dievaluasi
+store.dispatch(`auth/${AUTO_LOGIN_ACTION}`)
+
+const app = createApp(App)
   .use(router)
   .use(store)
   .use(vuetify)
-  .mount('#app')
+
+router.isReady().then(() => {
+  app.mount('#app')
+})
 
 export default {}
+

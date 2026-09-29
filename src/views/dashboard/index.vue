@@ -1,10 +1,11 @@
 <template>
   <v-container fluid
-    :class="theme.global.current.value.dark ? 'pa-4 dashboard-container-dark' : 'pa-4 dashboard-container-light'">
+    :class="isDark ? 'pa-4 dashboard-container-dark' : 'pa-4 dashboard-container-light'">
     <v-toolbar flat color="transparent" class="mt-n2 mb-4">
       <v-toolbar-title
-        :class="theme.global.current.value.dark ? 'text-h5 font-weight-bold text-white' : 'text-h5 font-weight-bold text-grey-darken-4'">Dashboard
-        Overview</v-toolbar-title>
+        :class="isDark ? 'text-h5 font-weight-bold text-white' : 'text-h5 font-weight-bold text-grey-darken-4'">
+        Dashboard Overview
+      </v-toolbar-title>
       <v-spacer></v-spacer>
     </v-toolbar>
 
@@ -13,7 +14,7 @@
 
         <!-- LOADING -->
         <template v-if="loading">
-          <v-card class="rounded-xl pa-4">
+          <v-card class="rounded-xl pa-4" :class="isDark ? 'dashboard-metric-card-dark' : 'dashboard-metric-card'">
             <v-skeleton-loader type="heading, text" />
           </v-card>
         </template>
@@ -21,20 +22,23 @@
         <!-- NORMAL CARD -->
         <template v-else>
           <v-card
-            :class="theme.global.current.value.dark ? 'dashboard-metric-card-dark rounded-xl' : 'dashboard-metric-card rounded-xl'">
-            <v-card-text class="d-flex align-center justify-space-between">
+            :class="isDark ? 'dashboard-metric-card-dark rounded-xl' : 'dashboard-metric-card rounded-xl'">
+            <v-card-text class="d-flex align-center justify-space-between pa-5">
               <div>
                 <div
-                  :class="theme.global.current.value.dark ? 'text-subtitle-1 text-teal' : 'text-subtitle-1 text-grey-darken-1'">
-                  {{ list.title }}</div>
+                  :class="isDark ? 'text-subtitle-2 text-grey-lighten-1 font-weight-medium' : 'text-subtitle-2 text-grey-darken-1 font-weight-medium'">
+                  {{ list.title }}
+                </div>
                 <div
-                  :class="theme.global.current.value.dark ? 'text-h4 font-weight-bold text-teal mt-1' : 'text-h4 font-weight-bold text-teal-darken-1 mt-1'">
+                  :class="isDark ? 'text-h4 font-weight-bold text-teal-accent-3 mt-2' : 'text-h4 font-weight-bold text-teal-darken-1 mt-2'">
                   {{ list.count }}
                 </div>
               </div>
-              <v-icon :color="theme.global.current.value.dark ? 'teal' : 'teal-lighten-1'" size="48">
-                {{ list.icon }}
-              </v-icon>
+              <div :class="isDark ? 'icon-badge-dark' : 'icon-badge-light'">
+                <v-icon :color="isDark ? 'teal-accent-3' : 'teal-darken-1'" size="32">
+                  {{ list.icon }}
+                </v-icon>
+              </div>
             </v-card-text>
           </v-card>
         </template>
@@ -44,7 +48,7 @@
 
     <v-row>
       <v-col cols="12" sm="8">
-        <v-card class="dashboard-card rounded-xl pa-4">
+        <v-card :class="isDark ? 'dashboard-card-dark rounded-xl pa-4' : 'dashboard-card rounded-xl pa-4'">
           <template v-if="loading">
             <v-skeleton-loader type="heading, text" />
           </template>
@@ -54,7 +58,7 @@
         </v-card>
       </v-col>
       <v-col cols="12" sm="4">
-        <v-card class="dashboard-card rounded-xl pa-4 transparent-dashboard-card">
+        <v-card :class="isDark ? 'dashboard-card-dark rounded-xl pa-4' : 'dashboard-card rounded-xl pa-4'">
           <template v-if="loading">
             <v-skeleton-loader type="heading, text" />
           </template>
@@ -67,7 +71,7 @@
 
     <v-row class="mt-4">
       <v-col cols="12" sm="7">
-        <v-card class="dashboard-card rounded-xl pa-4">
+        <v-card :class="isDark ? 'dashboard-card-dark rounded-xl pa-4' : 'dashboard-card rounded-xl pa-4'">
           <template v-if="loading">
             <v-skeleton-loader type="heading, text" />
           </template>
@@ -77,7 +81,7 @@
         </v-card>
       </v-col>
       <v-col cols="12" sm="5">
-        <v-card class="dashboard-card rounded-xl pa-4">
+        <v-card :class="isDark ? 'dashboard-card-dark rounded-xl pa-4' : 'dashboard-card rounded-xl pa-4'">
           <template v-if="loading">
             <v-skeleton-loader type="heading, text" />
           </template>
@@ -88,7 +92,7 @@
       </v-col>
     </v-row>
 
-        <!-- Error & Success Snackbars -->
+    <!-- Error & Success Snackbars -->
     <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
     <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
 
@@ -96,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import SalesData from "@/components/chart/SalesData.vue";
 import TableDebt from "@/components/chart/TableDebt.vue";
 import TableOutstandingTrx from "@/components/chart/TableOutstandingTrx.vue";
@@ -143,6 +147,7 @@ onMounted(async () => {
    * 📌 CONSTANTS                                          *
    * -------------------------------------------------------*/
   const theme = useTheme();
+  const isDark = computed(() => theme.global.current.value.dark);
 
   /* -------------------------------------------------------*
    * 📌 LOCAL FUNCTIONS                                     *
@@ -166,71 +171,74 @@ onMounted(async () => {
 
 <style scoped>
 .dashboard-container-light {
-  background-color: #f0f2f5;
+  background-color: #f8fafc;
   min-height: 100vh;
 }
 
 .dashboard-container-dark {
-  background-color: #282828;
+  background-color: #121214;
   min-height: 100vh;
 }
 
+/* Metric Cards */
 .dashboard-metric-card {
   background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .dashboard-metric-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
 }
 
 .dashboard-metric-card-dark {
-  background-color: #1a1a1a;
-  border: 1px solid #424242;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #1e1e24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .dashboard-metric-card-dark:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  border-color: rgba(46, 191, 175, 0.3);
 }
 
+/* Icon Badges */
+.icon-badge-light {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background-color: #e6fffa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-badge-dark {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background-color: rgba(46, 191, 175, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Main Dashboard Cards */
 .dashboard-card {
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.25s ease;
 }
 
-.text-grey-darken-4 {
-  color: #424242 !important;
-}
-
-.text-teal-darken-1 {
-  color: #00897B !important;
-}
-
-.text-grey-darken-1 {
-  color: #757575 !important;
-}
-
-.text-teal-lighten-1 {
-  color: #26A69A !important;
-}
-
-.text-white {
-  color: #ffffff !important;
-}
-
-.text-grey-lighten-1 {
-  color: #bdbdbd !important;
-}
-
-.transparent-dashboard-card {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  /* White with 80% opacity */
+.dashboard-card-dark {
+  background-color: #1e1e24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: box-shadow 0.25s ease;
 }
 </style>

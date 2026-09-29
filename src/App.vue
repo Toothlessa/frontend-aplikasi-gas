@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <TheNavigation v-if="!$route.meta.hideTheNavigation" />
+    <TheNavigation v-if="showNavigation" />
     <v-main>
       <router-view />
     </v-main>
@@ -8,11 +8,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from 'vue';
+import { computed, defineComponent, watch } from 'vue';
 import TheNavigation from '@/components/sidebar/TheNavigation.vue';
 import { AUTO_LOGIN_ACTION } from './store/storeconstant';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { RootState } from './store/types';
 
 export default defineComponent({
@@ -25,6 +25,7 @@ export default defineComponent({
   setup() {
     const store = useStore<RootState>();
     const router = useRouter();
+    const route = useRoute();
 
     const autoLogout = store.state.auth.autoLogout;
 
@@ -40,8 +41,13 @@ export default defineComponent({
     // auto login
     store.dispatch(`auth/${AUTO_LOGIN_ACTION}`);
 
+    const showNavigation = computed(() => {
+      return route.path !== '/login' && !route.meta?.hideTheNavigation;
+    });
+
     return {
       autoLogout,
+      showNavigation,
     };
   },
 });

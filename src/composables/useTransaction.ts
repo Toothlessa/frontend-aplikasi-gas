@@ -55,14 +55,14 @@ export function useTransaction() {
     amount: 19000,
     total: 0,
     description: "",
-    item_id: 61,
+    item_id: 1902,
     stockId: 0,
     customer_id: null
   };
 
   const transactionData = reactive<Partial<Transaction>>({
     amount: 19000,
-    item_id: 61
+    item_id: 1902
   });
 
   // Price Options
@@ -105,8 +105,22 @@ export function useTransaction() {
   };
 
   const editTransaction = (item: Transaction) => {
+    console.log("ITEM DATA:", item);
     editedIndex.value = transactions.value.findIndex(t => t.id === item.id);
     Object.assign(transactionUpdate, item);
+    
+    // Ensure customer_id is assigned as a number, as backend might return string
+    if (item.customer_id) {
+      transactionUpdate.customer_id = Number(item.customer_id);
+    } else if (!transactionUpdate.customer_id && item.customer?.id) {
+      transactionUpdate.customer_id = Number(item.customer.id);
+    }
+    
+    if (item.item_id) {
+      transactionUpdate.item_id = Number(item.item_id);
+    }
+    
+    console.log("transactionUpdate.customer_id:", transactionUpdate.customer_id);
     DialogUpdate.value = true;
   };
 

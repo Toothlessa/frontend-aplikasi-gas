@@ -1,16 +1,21 @@
 <template>
-    <div>
-      <v-toolbar color="transparent" class="mt-n5" rounded-t-xl>
-        <v-toolbar-title class=" text-teal text-lg-h5 font-weight-bold">Outstanding Debt</v-toolbar-title>
-      </v-toolbar>
-      <v-divider></v-divider>
-      <v-card rounded="xl" elevation="4" class="mt-n5">
-        <v-data-table-virtual
-          :headers="headerOutstandingDebt"
-          :items="outstandingDebtData"
-          :loading="loadingData"
-          class="modern-table text-black mt-n2"
-        > 
+  <div>
+    <v-toolbar color="transparent" density="compact" class="px-0">
+      <v-toolbar-title :class="isDark ? 'text-amber-lighten-3 text-h6 font-weight-bold' : 'text-amber-darken-1 text-h6 font-weight-bold'">
+        <v-icon start size="22" :color="isDark ? 'amber-lighten-3' : 'amber-darken-1'">mdi-cash-remove</v-icon>
+        Outstanding Debt
+      </v-toolbar-title>
+    </v-toolbar>
+
+    <v-divider class="my-2" :style="isDark ? 'border-color: rgba(255,255,255,0.08);' : ''" />
+
+    <div class="table-wrapper mt-3">
+      <v-data-table-virtual
+        :headers="headerOutstandingDebt"
+        :items="outstandingDebtData"
+        :loading="loadingData"
+        :class="isDark ? 'modern-table-dark' : 'modern-table-light'"
+      > 
         <template #[`item.total_debt`]="{ item }">
           {{ formatPrice(item.total_debt) }}
         </template>
@@ -18,27 +23,34 @@
           {{ formatPrice(item.total_pay) }}
         </template>
         <template #[`item.debt_left`]="{ item }">
-          {{ formatPrice(item.debt_left) }}
+          <span class="text-error font-weight-bold">{{ formatPrice(item.debt_left) }}</span>
         </template>
-        </v-data-table-virtual>
-      </v-card>
+      </v-data-table-virtual>
     </div>
-    
+
     <!-- Snackbars -->
     <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
-    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
-    
-  </template>
-  
+    <!-- <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" /> -->
+
+  </div>
+</template>
+
 <script setup lang="ts">
+import { computed, onMounted } from 'vue';
 import { useDebt } from '@/composables/useDebt';
 import { useGlobal } from '@/composables/useGlobal';
-import { onMounted } from 'vue';
-import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
+import { useTheme } from 'vuetify/lib/framework.mjs';
+import { 
+          SnackbarError, 
+          //SnackbarSuccess 
+        } from '@/components/globalComponent';
 
   /* -----------------------------------------------------*
    * COMPOSABLES                                          *
    * ---------------------------------------------------- */
+const theme = useTheme();
+const isDark = computed(() => theme.global.current.value.dark);
+
 const {
   formatPrice,
   validationError,
@@ -47,7 +59,7 @@ const {
 } = useGlobal();
 
 const {
-  hasSaved,
+  //hasSaved,
   
   outstandingDebtData,
   loadingData,
@@ -75,37 +87,62 @@ const onFetchOutstandingDebt = async () => {
 };
 
 </script>
-  
-  <style scoped>
-.modern-table {
-  border-radius: 12px; /* Inherit from card, but good to be explicit */
-  overflow: hidden; /* Ensures rounded corners are applied to content */
+
+<style scoped>
+.table-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.modern-table .v-data-table-header {
-  background-color: #f5f5f5; /* Light grey header */
-  color: #333;
-  font-weight: 600;
+/* Light Mode Table */
+.modern-table-light :deep(.v-table__wrapper) {
+  background-color: transparent !important;
+}
+.modern-table-light :deep(thead) {
+  background-color: #f8fafc;
+}
+.modern-table-light :deep(th) {
+  color: #475569 !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 12px 16px !important;
+}
+.modern-table-light :deep(td) {
+  color: #1e293b !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  background-color: transparent !important;
+}
+.modern-table-light :deep(tbody tr:hover td) {
+  background-color: #f0fdfa !important;
 }
 
-.modern-table .v-data-table__tr:hover {
-  background-color: #e0f7fa !important; /* Light cyan on hover */
+/* Dark Mode Table */
+.modern-table-dark :deep(.v-table__wrapper) {
+  background-color: transparent !important;
 }
-
-/* General table cell padding */
-.modern-table .v-data-table-header th,
-.modern-table .v-data-table__td {
-  padding: 12px 16px;
+.modern-table-dark :deep(thead) {
+  background-color: rgba(255, 255, 255, 0.04);
 }
-
-/* Make the table rows slightly rounded if possible, though v-data-table-virtual might not fully support this directly on rows */
-.modern-table .v-data-table__tr {
-  border-bottom: 1px solid #eee; /* Subtle row divider */
+.modern-table-dark :deep(th) {
+  color: #cbd5e1 !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 12px 16px !important;
 }
-
-.modern-table .v-data-table__tr:last-child {
-  border-bottom: none; /* No border on the last row */
+.modern-table-dark :deep(td) {
+  color: #f1f5f9 !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background-color: transparent !important;
 }
-  </style>
+.modern-table-dark :deep(tbody tr:hover td) {
+  background-color: rgba(46, 191, 175, 0.12) !important;
+}
+</style>

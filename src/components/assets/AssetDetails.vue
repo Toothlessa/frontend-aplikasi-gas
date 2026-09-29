@@ -1,15 +1,15 @@
 <template>
   <v-container class="modern-container">
-    <v-card class="modern-card" rounded="xl" elevation="8">
-      <v-card-title class="modern-header">
+    <v-card class="modern-card" rounded="xl" elevation="8" :class="isDark ? 'modern-card-dark' : 'modern-card-light'">
+      <v-card-title class="modern-header" :class="isDark ? 'modern-header-dark' : 'modern-header-light'">
         <v-icon start size="32">mdi-information-outline</v-icon>
         <span class="text-h5 font-weight-bold">Asset Details</span>
       </v-card-title>
-      <v-divider class="my-4 border-opacity-100" color="teal-lighten-3" />
+      <v-divider class="my-4" :style="isDark ? 'border-color: rgba(255,255,255,0.08);' : ''" :color="isDark ? undefined : 'teal-lighten-3'" />
 
       <!-- LOADING -->
       <template v-if="loading">
-        <v-card class="rounded-xl pa-4">
+        <v-card class="rounded-xl pa-4" :class="isDark ? 'modern-card-dark' : 'modern-card-light'">
           <v-skeleton-loader type="heading, text" />
         </v-card>
       </template>
@@ -20,6 +20,7 @@
             :headers="headerAssetDetail"
             :items="assetDetails"
             :loading="loading"
+            :class="isDark ? 'modern-table-dark' : 'modern-table-light'"
             item-value="id"
           >
             <template v-slot:[`item.actions`]="{ item }">
@@ -27,7 +28,7 @@
                 icon="mdi-pencil"
                 size="small"
                 variant="text"
-                color="blue-grey"
+                :color="isDark ? 'teal-accent-3' : 'blue-grey'"
                 @click="openEditAssetDialog(item)"
               />
             </template>
@@ -61,8 +62,8 @@
 
     <!-- Update Asset Dialog -->
     <v-dialog v-model="dialogUpdateAssetDetail" max-width="600px" persistent>
-      <v-card rounded="xl">
-        <v-card-title class="dialog-header bg-teal text-white">
+      <v-card rounded="xl" :class="isDark ? 'dialog-card-dark' : 'dialog-card-light'">
+        <v-card-title class="dialog-header text-white" :class="isDark ? 'bg-teal-darken-2' : 'bg-teal'">
           <v-icon start>mdi-pencil-box-outline</v-icon>
           Update Asset
         </v-card-title>
@@ -126,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { Asset } from '@/types/Asset';
 import { useAsset } from '@/composables/useAsset';
 import { useGlobal } from '@/composables/useGlobal';
@@ -138,12 +139,15 @@ import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
    * COMPOSABLES                                          *
    * ---------------------------------------------------- */
 const {
+  theme,
   formatPrice,
   //validation helpers
   validationErrorMessages,
   validationShowError,
   validationError,
 } = useGlobal();
+
+const isDark = computed(() => theme.global.current.value.dark);
 
 const {
   mItems,
@@ -242,36 +246,103 @@ const onLoadMasterItem = async () => {
   padding: 24px;
 }
 
-.modern-card {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+.modern-card-light {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
 }
 
-.modern-header {
-  background: linear-gradient(45deg, #009688 0%, #4DB6AC 100%);
+.modern-card-dark {
+  background-color: #1e1e24 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+.modern-header-light {
+  background: linear-gradient(135deg, #009688 0%, #26A69A 100%);
   color: white;
   padding: 20px 24px;
   text-align: center;
   justify-content: center;
 }
 
-.modern-table {
+.modern-header-dark {
+  background: linear-gradient(135deg, #00695C 0%, #00897B 100%);
+  color: white;
+  padding: 20px 24px;
+  text-align: center;
+  justify-content: center;
+}
+
+/* Table Light */
+.modern-table-light {
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e2e8f0;
 }
-
-.modern-table .v-data-table-header {
-  background-color: #f9fafb;
-  color: #37474f;
-  font-weight: 600;
+.modern-table-light :deep(.v-table__wrapper) {
+  background-color: transparent !important;
+}
+.modern-table-light :deep(thead) {
+  background-color: #f8fafc;
+}
+.modern-table-light :deep(th) {
+  color: #475569 !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+.modern-table-light :deep(td) {
+  color: #1e293b !important;
+  border-bottom: 1px solid #f1f5f9 !important;
 }
 
-.modern-table .v-data-table__tr:hover {
-  background-color: #f0f4f8 !important;
+/* Table Dark */
+.modern-table-dark {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.modern-table-dark :deep(.v-table__wrapper) {
+  background-color: transparent !important;
+}
+.modern-table-dark :deep(thead) {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+.modern-table-dark :deep(th) {
+  color: #cbd5e1 !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+.modern-table-dark :deep(td) {
+  color: #f1f5f9 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+.modern-table-dark :deep(tbody tr:hover td) {
+  background-color: rgba(0, 150, 136, 0.12) !important;
+}
+
+/* Dialog Dark & Light */
+.dialog-card-dark {
+  background-color: #1e1e24 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+.dialog-card-light {
+  background-color: #ffffff !important;
+}
+.dialog-card-dark :deep(.v-field__input) {
+  color: #ffffff !important;
+}
+.dialog-card-dark :deep(.v-field--variant-filled .v-field__overlay) {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+.dialog-card-dark :deep(.v-label) {
+  color: #94a3b8 !important;
 }
 
 .back-btn {

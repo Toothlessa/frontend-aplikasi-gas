@@ -62,7 +62,7 @@ export const CustomerService = {
   async fetchDataTopCustomer(): Promise<TopCustomerTransaction[]> {
     try {
       const response = await CustomerAPI.fetchDataTop10Customer();
-      return response.data;
+      return response.data.data;
     } catch (e) {
       throw errorHandler.parseError(e,
         Validations.getErrorMessageFromCodeCustomer,

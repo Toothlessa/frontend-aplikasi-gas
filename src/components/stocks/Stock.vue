@@ -1,17 +1,156 @@
 <template>
-  <v-container fluid class="stock-page-container">
-    <v-row>
-      <!-- Input Stock Card -->
-      <v-col cols="12" md="3" class="pa-3">
-        <v-card class="stock-card" rounded="xl" elevation="6">
-          <v-card-title class="stock-card-header">
-            <v-icon start>mdi-basket-fill</v-icon>
-            <span class="text-h6 font-weight-bold">Input Stock</span>
+  <div :class="isDark ? 'stock-page-dark' : 'stock-page-light'">
+    <v-container fluid class="stock-page-container">
+      <v-row>
+        <!-- Input Stock Card -->
+        <v-col cols="12" md="3" class="pa-3">
+          <v-card class="stock-card rounded-xl" elevation="6" :class="isDark ? 'stock-card-dark' : 'stock-card-light'">
+            <v-card-title :class="isDark ? 'card-header-dark' : 'card-header-light'">
+              <v-icon start>mdi-basket-fill</v-icon>
+              <span class="text-h6 font-weight-bold">Input Stock</span>
+            </v-card-title>
+            <v-card-text class="pa-4">
+              <v-autocomplete
+                label="Item"
+                v-model="selectedItem"
+                :items="mItems"
+                item-title="item_name"
+                item-value="id"
+                variant="outlined"
+                rounded="lg"
+                prepend-inner-icon="mdi-cube-outline"
+                class="mb-3"
+              />
+              <v-text-field
+                v-model.number="input"
+                label="Stock Quantity"
+                type="number"
+                variant="outlined"
+                rounded="lg"
+                prepend-inner-icon="mdi-numeric"
+                @keyup.enter="onCreateStock"
+                class="mb-3"
+              />
+              <v-btn
+                block
+                class="stock-action-btn text-white"
+                variant="elevated"
+                size="large"
+                rounded="lg"
+                color="teal-darken-1"
+                :disabled="isSaveDisabled"
+                :loading="loadingCreateStock"
+                @click="onCreateStock"
+              >
+                <v-icon start>mdi-plus</v-icon>
+                Add Stock
+              </v-btn>
+            </v-card-text>
+          </v-card>
+        </v-col>
+
+        <!-- Current Stock Summary Card -->
+        <v-col cols="12" md="8" class="pa-4">
+          <v-card class="stock-card rounded-xl" elevation="6" :class="isDark ? 'stock-card-dark' : 'stock-card-light'">
+            <v-card-title :class="isDark ? 'card-header-dark' : 'card-header-light'">
+              <v-icon start>mdi-chart-bar</v-icon>
+              <span class="text-h6 font-weight-bold">Current Stock Summary</span>
+            </v-card-title>
+            <v-card-text class="pa-4">
+              <v-data-table-virtual
+                :headers="headersStock"
+                :items="stocks"
+                :search="search"
+                :loading="loading"
+                loading-text="Loading stock data..."
+                :class="isDark ? 'modern-table-dark' : 'modern-table-light'"
+                fixed-header
+                height="400px"
+                hover
+              >
+                <template v-slot:[`item.no`]="{ index }">
+                  {{ index + 1 }}
+                </template>
+                <template v-slot:[`item.cogs`]="{ item }">
+                  {{ formatPrice(item.cogs) }}
+                </template>
+                <template v-slot:[`item.selling_price`]="{ item }">
+                  {{ formatPrice(item.selling_price) }}
+                </template>
+                <template v-slot:[`item.actions`]="{ item }">
+                  <v-btn
+                    icon="mdi-information-outline"
+                    size="small"
+                    variant="text"
+                    :color="isDark ? 'cyan-accent-2' : 'blue-grey'"
+                    :loading="loadingItemId === item.item_id"
+                    @click="onLoadDetailStock(item.item_id)"
+                  />
+                </template>
+              </v-data-table-virtual>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <!-- Stock Details Dialog -->
+      <v-dialog v-model="DialogDetails" max-width="900px" persistent>
+        <v-card class="stock-card rounded-xl" elevation="6" :class="isDark ? 'stock-card-dark' : 'stock-card-light'">
+          <v-card-title :class="isDark ? 'card-header-dark' : 'card-header-light'">
+            <v-icon start>mdi-format-list-bulleted</v-icon>
+            <span class="text-h6 font-weight-bold">Stock Details</span>
+          </v-card-title>
+          <v-card-text class="pa-4">
+            <v-data-table-virtual
+              :headers="detailHeaders"
+              :items="stockDetails.slice(0, 3)"
+              :loading="loadingDetail"
+              loading-text="Loading detail stock data..."
+              :class="isDark ? 'modern-table-dark' : 'modern-table-light'"
+              fixed-header
+              height="300px"
+              hover
+            >
+              <template v-slot:[`item.no`]="{ index }">
+                {{ index + 1 }}
+              </template>
+              <template v-slot:[`item.actions`]="{ item }">
+                <v-btn
+                  icon="mdi-pencil"
+                  size="small"
+                  variant="text"
+                  :color="isDark ? 'cyan-accent-2' : 'blue-grey'"
+                  :loading="loadingActionUpdate === item.id"
+                  @click="editStock(item)"
+                />
+              </template>
+            </v-data-table-virtual>
+          </v-card-text>
+          <v-card-actions class="justify-end pa-4">
+            <v-btn
+              :color="isDark ? 'grey-lighten-1' : 'grey-darken-1'"
+              variant="text"
+              @click="closeStockDetail"
+              rounded="lg"
+              :loading="loadingCloseStockDetail"
+            >
+              Close
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <!-- Stock Update Dialog -->
+      <v-dialog v-model="DialogUpdate" max-width="600px" persistent>
+        <v-card class="stock-card rounded-xl" elevation="6" :class="isDark ? 'stock-card-dark' : 'stock-card-light'">
+          <v-card-title :class="isDark ? 'card-header-dark' : 'card-header-light'">
+            <v-icon start>mdi-update</v-icon>
+            <span class="text-h6 font-weight-bold">Update Stock</span>
           </v-card-title>
           <v-card-text class="pa-4">
             <v-autocomplete
               label="Item"
-              v-model="selectedItem"
+              v-model="editedStock.item_id"
               :items="mItems"
               item-title="item_name"
               item-value="id"
@@ -21,197 +160,61 @@
               class="mb-3"
             />
             <v-text-field
-              v-model.number="input"
+              v-model.number="editedStock.stock"
               label="Stock Quantity"
               type="number"
               variant="outlined"
               rounded="lg"
               prepend-inner-icon="mdi-numeric"
-              @keyup.enter="onCreateStock"
+              @keyup.enter="onUpdateStock"
               class="mb-3"
             />
+          </v-card-text>
+          <v-card-actions class="justify-end pa-4">
             <v-btn
-              block
-              class="stock-action-btn text-white"
-              variant="elevated"
-              size="large"
+              :color="isDark ? 'grey-lighten-1' : 'grey-darken-1'"
+              variant="text"
               rounded="lg"
-              color="teal-darken-1"
-              :disabled="isSaveDisabled"
-              :loading="loadingCreateStock"
-              @click="onCreateStock"
+              :loading="loadingCloseUpdate"
+              @click="closeUpdateStock"
             >
-              <v-icon start>mdi-plus</v-icon>
-              Add Stock
+              Cancel
             </v-btn>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
-      <!-- Current Stock Summary Card -->
-      <v-col cols="12" md="8" class="pa-4">
-        <v-card class="stock-card" rounded="xl" elevation="6">
-          <v-card-title class="stock-card-header">
-            <v-icon start>mdi-chart-bar</v-icon>
-            <span class="text-h6 font-weight-bold">Current Stock Summary</span>
-          </v-card-title>
-          <v-card-text class="pa-4">
-            <v-data-table-virtual
-              :headers="headersStock"
-              :items="stocks"
-              :search="search"
-              :loading="loading"
-              loading-text="Loading stock data..."
-              class="modern-data-table"
-              fixed-header
-              height="400px"
-              hover
+            <v-btn
+              color="teal-darken-1"
+              variant="elevated"
+              class="text-white"
+              @click="onUpdateStock"
+              rounded="lg"
+              :loading="loadingButtonUpdate"
             >
-              <template v-slot:[`item.no`]="{ index }">
-                {{ index + 1 }}
-              </template>
-              <template v-slot:[`item.cogs`]="{ item }">
-                {{ formatPrice(item.cogs) }}
-              </template>
-              <template v-slot:[`item.selling_price`]="{ item }">
-                {{ formatPrice(item.selling_price) }}
-              </template>
-              <template v-slot:[`item.actions`]="{ item }">
-                <v-btn
-                  icon="mdi-information-outline"
-                  size="small"
-                  variant="text"
-                  color="blue-grey"
-                  :loading="loadingItemId === item.item_id"
-                  @click="onLoadDetailStock(item.item_id)"
-                />
-              </template>
-            </v-data-table-virtual>
-          </v-card-text>
+              <v-icon start>mdi-content-save</v-icon>
+              Update Stock
+            </v-btn>
+          </v-card-actions>
         </v-card>
-      </v-col>
-    </v-row>
+      </v-dialog>
 
-    <!-- Stock Details Dialog -->
-    <v-dialog v-model="DialogDetails" max-width="900px" rounded="xl" persistent>
-      <v-card class="stock-card" rounded="xl" elevation="6">
-        <v-card-title class="stock-card-header">
-          <v-icon start>mdi-format-list-bulleted</v-icon>
-          <span class="text-h6 font-weight-bold">Stock Details</span>
-        </v-card-title>
-        <v-card-text class="pa-4">
-          <v-data-table-virtual
-            :headers="detailHeaders"
-            :items="stockDetails.slice(0, 3)"
-            :loading="loadingDetail"
-            loading-text="Loading detail stock data..."
-            class="modern-data-table"
-            fixed-header
-            height="300px"
-            hover
-          >
-            <template v-slot:[`item.no`]="{ index }">
-              {{ index + 1 }}
-            </template>
-            <template v-slot:[`item.actions`]="{ item }">
-              <v-btn
-                icon="mdi-pencil"
-                size="small"
-                variant="text"
-                color="blue-grey"
-                :loading="loadingActionUpdate === item.id"
-                @click="editStock(item)"
-              />
-            </template>
-          </v-data-table-virtual>
-        </v-card-text>
-        <v-card-actions class="justify-end pa-4">
-          <v-btn 
-            color="grey-darken-1" 
-            variant="text" 
-            @click="closeStockDetail" 
-            rounded="lg"
-            :loading="loadingCloseStockDetail"
-          >
-            Close
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+      <!-- Error & Success Snackbars -->
+      <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
+      <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
 
-    <!-- Stock Update Dialog -->
-    <v-dialog v-model="DialogUpdate" max-width="600px" rounded="xl" persistent>
-      <v-card class="stock-card" rounded="xl" elevation="6">
-        <v-card-title class="stock-card-header">
-          <v-icon start>mdi-update</v-icon>
-          <span class="text-h6 font-weight-bold">Update Stock</span>
-        </v-card-title>
-        <v-card-text class="pa-4">
-          <v-autocomplete
-            label="Item"
-            v-model="editedStock.item_id"
-            :items="mItems"
-            item-title="item_name"
-            item-value="id"
-            variant="outlined"
-            rounded="lg"
-            prepend-inner-icon="mdi-cube-outline"
-            class="mb-3"
-          />
-          <v-text-field
-            v-model.number="editedStock.stock"
-            label="Stock Quantity"
-            type="number"
-            variant="outlined"
-            rounded="lg"
-            prepend-inner-icon="mdi-numeric"
-            @keyup.enter="onUpdateStock"
-            class="mb-3"
-          />
-        </v-card-text>
-        <v-card-actions class="justify-end pa-4">
-          <v-btn 
-            color="grey-darken-1" 
-            variant="text"
-            rounded="lg"
-            :loading="loadingCloseUpdate"
-            @click="closeUpdateStock" 
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            color="teal-darken-1"
-            variant="elevated"
-            @click="onUpdateStock"
-            rounded="lg"
-            :loading="loadingButtonUpdate"
-          >
-            <v-icon start>mdi-content-save</v-icon>
-            Update Stock
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Error & Success Snackbars -->
-    <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
-    <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
-
-  </v-container>
+    </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useTheme } from 'vuetify';
 import { useMasterItem } from '@/composables/useMasterItem';
 import { useStock } from '@/composables/useStock';
 import { StockDetail } from '@/types';
 import { useGlobal } from '@/composables/useGlobal';
-import { ref } from 'vue';
 import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
 
- /* ======================================================*
-  * COMPOSABLES                                           *
-  * ======================================================*/
+  /* ======================================================*
+   * COMPOSABLES                                           *
+   * ======================================================*/
 const {
   formatPrice,
 
@@ -251,11 +254,17 @@ const {
   loadMasterItem,
 } = useMasterItem();
 
+  /* ======================================================*
+   * THEME                                                 *
+   * ======================================================*/
+const theme = useTheme();
+const isDark = computed(() => theme.global.current.value.dark);
+
 const isSaveDisabled = computed(() => !(selectedItem.value && input.value));
 
- /* ======================================================*
-  * HOOKS                                                 *
-  * ======================================================*/
+  /* ======================================================*
+   * HOOKS                                                 *
+   * ======================================================*/
 const loadingCreateStock = ref<boolean>(false);
 const loadingItemId = ref<number | null>(null);
 const loadingCloseStockDetail = ref<boolean>(false);
@@ -268,9 +277,9 @@ onMounted(() => {
   onLoadMasterItem();
 });
 
- /* ======================================================*
-  * METHODS                                               *
-  * ======================================================*/
+  /* ======================================================*
+   * METHODS                                               *
+   * ======================================================*/
 
 const editStock = (item: StockDetail) => {
   Object.assign(editedStock, item);
@@ -284,7 +293,7 @@ const editStock = (item: StockDetail) => {
 
 const closeStockDetail = () => {
   loadingCloseStockDetail.value = true;
-  
+
   setTimeout(() => {
     DialogDetails.value = false;
     loadingCloseStockDetail.value = false;
@@ -300,48 +309,48 @@ const closeUpdateStock = () => {
   }, 250);
 };
 
-const onCreateStock = async() => {
+const onCreateStock = async () => {
   loadingCreateStock.value = true;
   try {
     await createStock();
     resetEditedStock();
-  } catch(e) {
+  } catch (e) {
     validationError(e);
   } finally {
     loadingCreateStock.value = false;
   }
-}
+};
 
-const onLoadCurrentStock = async() => {
+const onLoadCurrentStock = async () => {
   resetStockDetail();
   try {
     await loadCurrentStock();
-  } catch(e) {
+  } catch (e) {
     validationError(e);
   }
 };
 
-const onLoadMasterItem = async() => {
-  try{
+const onLoadMasterItem = async () => {
+  try {
     await loadMasterItem();
-  } catch(e) {
+  } catch (e) {
     validationError(e);
   }
 };
 
-const onLoadDetailStock = async(item_id: number) => {
+const onLoadDetailStock = async (item_id: number) => {
   loadingItemId.value = item_id;
   try {
     await loadDetailStock(item_id);
     DialogDetails.value = true;
-  } catch(e) {
+  } catch (e) {
     validationError(e);
   } finally {
     loadingItemId.value = null;
   }
 };
 
-const onUpdateStock = async() => {
+const onUpdateStock = async () => {
   loadingButtonUpdate.value = true;
   const postData = editedStock;
   try {
@@ -349,9 +358,9 @@ const onUpdateStock = async() => {
     DialogUpdate.value = false;
     await onLoadDetailStock(postData.item_id);
     await loadCurrentStock();
-  } catch(e) {
+  } catch (e) {
     validationError(e);
-  }finally {
+  } finally {
     loadingButtonUpdate.value = false;
   }
 };
@@ -360,37 +369,129 @@ const onUpdateStock = async() => {
 <style scoped>
 .stock-page-container {
   padding: 24px;
-  background-color: #f0f2f5; /* Light gray background for the page */
+}
+
+.stock-page-light {
+  background-color: #f8fafc;
   min-height: 100vh;
 }
 
-.stock-card {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+.stock-page-dark {
+  background-color: #121214;
+  min-height: 100vh;
+}
+
+/* Cards */
+.stock-card-light {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.stock-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+.stock-card-dark {
+  background-color: #1e1e24 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.stock-card-header {
-  background: linear-gradient(45deg, #009688 0%, #4DB6AC 100%); /* Teal gradient */
-  color: white;
+.stock-card-light:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+}
+
+.stock-card-dark:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Card Headers */
+.card-header-light {
+  background: linear-gradient(45deg, #009688 0%, #4DB6AC 100%);
+  color: white !important;
   padding: 16px 24px;
-  font-size: 1.25rem;
-  font-weight: bold;
+  font-size: 1.15rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
-.stock-card-header .v-icon {
+.card-header-dark {
+  background: linear-gradient(45deg, #00695C 0%, #00897B 100%);
+  color: white !important;
+  padding: 16px 24px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-header-light .v-icon,
+.card-header-dark .v-icon {
   margin-right: 8px;
 }
 
+/* Data Table Light */
+.modern-table-light {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+.modern-table-light :deep(.v-table__wrapper) {
+  background-color: transparent !important;
+}
+.modern-table-light :deep(thead) {
+  background-color: #f8fafc;
+}
+.modern-table-light :deep(th) {
+  color: #475569 !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+.modern-table-light :deep(td) {
+  color: #1e293b !important;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+.modern-table-light :deep(tbody tr:hover td) {
+  background-color: #e0f2f7 !important;
+}
+
+/* Data Table Dark */
+.modern-table-dark {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.modern-table-dark :deep(.v-table__wrapper) {
+  background-color: transparent !important;
+}
+.modern-table-dark :deep(thead) {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+.modern-table-dark :deep(th) {
+  color: #cbd5e1 !important;
+  font-weight: 600 !important;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+.modern-table-dark :deep(td) {
+  color: #f1f5f9 !important;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+.modern-table-dark :deep(tbody tr:hover td) {
+  background-color: rgba(0, 188, 212, 0.12) !important;
+}
+
+/* Buttons */
 .stock-action-btn {
   font-weight: bold;
   letter-spacing: 0.5px;
@@ -401,60 +502,20 @@ const onUpdateStock = async() => {
   transform: translateY(-2px);
 }
 
-.modern-data-table {
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #e0e0e0;
+/* Form Controls Adjustments for Dark Mode */
+.stock-page-dark :deep(.v-field__input) {
+  color: #ffffff !important;
 }
-
-.modern-data-table :deep(th) {
-  background-color: #f5f5f5 !important; /* Light grey header background */
-  color: #37474f !important; /* Darker text for contrast */
-  font-weight: bold !important;
-  text-transform: uppercase;
-  font-size: 0.85rem;
+.stock-page-dark :deep(.v-field__outline) {
+  color: rgba(255, 255, 255, 0.18) !important;
 }
-
-.modern-data-table :deep(td) {
-  font-size: 0.9rem;
-  color: #424242;
+.stock-page-dark :deep(.v-field--focused .v-field__outline) {
+  color: #00bcd4 !important;
 }
-
-.modern-data-table :deep(tr:hover) {
-  background-color: #e0f2f7 !important; /* Light cyan on hover */
+.stock-page-dark :deep(.v-label) {
+  color: #94a3b8 !important;
 }
-
-.stock-dialog-card {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-}
-
-.v-alert {
-  border-radius: 8px;
-}
-
-.v-text-field .v-input__control {
-  border-radius: 8px;
-}
-
-.v-autocomplete .v-input__control {
-  border-radius: 8px;
-}
-
-.v-btn.stock-action-btn {
-  background-color: #00BFA5 !important; /* Accent teal for buttons */
-}
-
-.v-btn.stock-action-btn:hover {
-  background-color: #00897B !important;
-}
-
-.v-btn.back-btn {
-  background-color: #607D8B !important; /* Blue-grey for back button */
-}
-
-.v-btn.back-btn:hover {
-  background-color: #455A64 !important;
+.stock-page-dark :deep(.v-messages) {
+  color: #94a3b8 !important;
 }
 </style>

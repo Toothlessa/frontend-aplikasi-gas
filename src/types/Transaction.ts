@@ -18,11 +18,15 @@ export interface Transaction {
   amount: number;
   total: number;
   description: string;
-  item_id: number;
+  item_id: number | string;
   stockId: number;
-  customer_id: number | null;
+  customer_id: number | string | null;
+  customer?: { id?: number | string; name?: string; customer_name?: string } | null;
   createdBy: string;
   createdDate: Date;
+
+  payment_method: 'CASH' | 'PARTIAL';
+  paid_amount: number;
 }
 
 export interface DailySale {
@@ -41,7 +45,7 @@ export interface HeaderTransaction {
 
 // ⚡ header harus SEDERHANA. Tidak boleh ada formatter.
 export const headerTransaction: HeaderTransaction[] = [
-  { title: "Customer", align: "start", key: "customer_name", class: "text-subtitle-1" },
+  { title: "Customer", align: "start", key: "customer.name", class: "text-subtitle-1" },
   { title: "Description", align: "center", key: "description", class: "text-subtitle-1" },
   { title: "Qty", align: "center", key: "quantity", class: "text-subtitle-1" },
   { title: "Price", align: "start", key: "amount", class: "text-subtitle-1" },
@@ -51,8 +55,17 @@ export const headerTransaction: HeaderTransaction[] = [
 ];
 
 // Dashboard header → hanya ambil kolom tertentu
-export const headerOutstanding = headerTransaction.filter((h) =>
-  [
-    "customer_name",  "description", "quantity", "total", "created_at", "actions"
-  ].includes(h.key)
-);
+// export const headerOutstanding = headerTransaction.filter((h) =>
+//   [
+//     "customer.name", "description", "quantity", "total", "created_at", "actions"
+//   ].includes(h.key)
+export const headerOutstanding: HeaderTransaction[] = [
+  { title: "Customer", align: "start", key: "customer_name", class: "text-subtitle-1" },
+  { title: "Description", align: "center", key: "description", class: "text-subtitle-1" },
+  { title: "Qty", align: "center", key: "quantity", class: "text-subtitle-1" },
+  // { title: "Price", align: "start", key: "amount", class: "text-subtitle-1" },
+  { title: "Total", align: "start", key: "total", class: "text-subtitle-1" },
+  { title: "Created", align: "start", key: "created_at", class: "text-subtitle-1" },
+  { title: "Actions", align: "center", key: "actions", class: "text-subtitle-1", sortable: false },
+];
+// );

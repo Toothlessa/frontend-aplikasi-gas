@@ -1,8 +1,8 @@
 <template>
   <v-dialog v-model="localDialog" max-width="600px" persistent>
-    <v-card class="dialog-card" rounded="xl">
+    <v-card class="dialog-card" rounded="xl" :class="isDark ? 'dialog-card-dark' : 'dialog-card-light'">
       <!-- Header -->
-      <v-card-title class="dialog-header">
+      <v-card-title class="dialog-header" :class="isDark ? 'dialog-header-dark' : 'dialog-header-light'">
         <v-icon size="26" class="mr-3">{{ 'mdi-account-plus-outline' }}</v-icon>
         <span class="text-h6 font-weight-medium">
              Add New Owner
@@ -22,7 +22,7 @@
       </v-card-text>
 
       <!-- Actions -->
-      <v-card-actions class="dialog-actions">
+      <v-card-actions class="dialog-actions" :class="isDark ? 'dialog-actions-dark' : 'dialog-actions-light'">
         <v-btn
           variant="text"
           class="cancel-btn"
@@ -43,7 +43,7 @@
       </v-card-actions>
 
       <!-- Search Bar -->
-      <v-toolbar flat class="bg-grey-lighten-4 pa-2" density="comfortable">
+      <v-toolbar flat :class="isDark ? 'search-toolbar-dark pa-2' : 'bg-grey-lighten-4 pa-2'" density="comfortable">
         <v-text-field
           v-model="search"
           label="Search Owners"
@@ -61,7 +61,7 @@
       <v-data-table-virtual
         :headers="headers"
         :items="filteredItems"
-        class="modern-table"
+        :class="isDark ? 'modern-table-dark' : 'modern-table-light'"
         :loading="loadingOwner"
         loading-text="Loading owners..."
         density="comfortable"
@@ -169,10 +169,13 @@ const emit = defineEmits<{
   * COMPOSABLE                                              *
   *-------------------------------------------------------*/
 const {
+  theme,
   validationError,
   validationErrorMessages,
   validationShowError,
 } = useGlobal();
+
+const isDark = computed(() => theme.global.current.value.dark);
 
 const {
   loadingOwner,
@@ -273,13 +276,29 @@ watch(
 </script>
 
 <style scoped>
-.dialog-card {
+.dialog-card-light {
   box-shadow: 0 10px 30px -5px rgba(0,0,0,0.2) !important;
-  background: #FFFFFF;
+  background: #FFFFFF !important;
 }
 
-.dialog-header {
-  background: linear-gradient(45deg, #009688 0%, #4DB6AC 100%);
+.dialog-card-dark {
+  box-shadow: 0 10px 30px -5px rgba(0,0,0,0.5) !important;
+  background: #1e1e24 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dialog-header-light {
+  background: linear-gradient(135deg, #009688 0%, #26A69A 100%);
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.dialog-header-dark {
+  background: linear-gradient(135deg, #00695C 0%, #00897B 100%);
   color: white;
   padding: 16px 24px;
   display: flex;
@@ -292,15 +311,25 @@ watch(
   margin-bottom: 16px;
 }
 
-.dialog-actions {
+.dialog-actions-light {
   padding: 16px 24px;
   background-color: #f7f9fa;
   border-top: 1px solid #e0e0e0;
   justify-content: flex-end;
 }
 
+.dialog-actions-dark {
+  padding: 16px 24px;
+  background-color: #1a1a20;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  justify-content: flex-end;
+}
+
+.search-toolbar-dark {
+  background-color: #1a1a20 !important;
+}
+
 .cancel-btn {
-  color: #555;
   margin-right: 8px;
 }
 
@@ -310,21 +339,56 @@ watch(
   font-weight: 500;
 }
 
-.modern-table {
+/* Table Light */
+.modern-table-light {
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e2e8f0;
 }
-
-.modern-table .v-data-table-header {
-  background-color: #f9fafb;
-  color: #37474f;
-  font-weight: 600;
+.modern-table-light :deep(.v-table__wrapper) {
+  background-color: transparent !important;
+}
+.modern-table-light :deep(thead) {
+  background-color: #f8fafc;
+}
+.modern-table-light :deep(th) {
+  color: #475569 !important;
+  font-weight: 600 !important;
   text-transform: uppercase;
+  font-size: 0.8rem;
   letter-spacing: 0.5px;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+.modern-table-light :deep(td) {
+  color: #1e293b !important;
+  border-bottom: 1px solid #f1f5f9 !important;
 }
 
-.modern-table .v-data-table__tr:hover {
-  background-color: #f0f4f8 !important;
+/* Table Dark */
+.modern-table-dark {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.modern-table-dark :deep(.v-table__wrapper) {
+  background-color: transparent !important;
+}
+.modern-table-dark :deep(thead) {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+.modern-table-dark :deep(th) {
+  color: #cbd5e1 !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+.modern-table-dark :deep(td) {
+  color: #f1f5f9 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+.modern-table-dark :deep(tbody tr:hover td) {
+  background-color: rgba(0, 150, 136, 0.12) !important;
 }
 </style>

@@ -10,6 +10,8 @@ export const TransactionService = {
         try {
             transaction.stock = -(transaction.quantity || 1)
             transaction.total = (transaction.amount) * (transaction.quantity || 1);
+            transaction.payment_method = 'CASH';
+            transaction.paid_amount = transaction.amount;
 
             transaction.id
                 ? await TransactionApi.updateTransaction(transaction.id, transaction)

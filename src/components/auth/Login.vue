@@ -1,443 +1,897 @@
 <template>
-  <div class="modern-login">
-    <!-- Animated Background Shapes -->
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
+  <div class="login-page">
+
+    <!-- Background Decoration -->
+    <div class="bg-glow glow-1"></div>
+    <div class="bg-glow glow-2"></div>
+    <div class="grid-pattern"></div>
 
     <v-container class="fill-height position-relative">
-      <v-row justify="center" align="center">
-        <v-col cols="12" sm="8" md="6" lg="4">
-          
-          <!-- Animated Logo -->
-          <div class="text-center mb-8 logo-container">
-            <div class="logo-wrapper">
+      <v-row
+        justify="center"
+        align="center"
+      >
+        <v-col
+          cols="12"
+          sm="8"
+          md="5"
+          lg="4"  
+          xl="3"
+        >
+
+          <!-- BRAND -->
+          <div class="brand">
+            <div class="logo">
               <v-icon
-                icon="mdi-rocket-launch-outline"
-                size="60"
-                class="logo-icon"
-                color="white"
-              ></v-icon>
+                icon="mdi-gas-cylinder"
+                size="30"
+              />
             </div>
-            <h1 class="text-h4 font-weight-bold text-white mt-4 title-shadow">Aplikasi Gas</h1>
+
+            <div class="brand-name">
+              Aplikasi Gas
+            </div>
+
+            <div class="brand-tagline">
+              Manage your business smarter
+            </div>
           </div>
 
-          <v-card class="glass-card rounded-xl overflow-hidden" elevation="10">
-            <v-window v-model="step" class="window-container">
-              
-              <!-- Sign In Form -->
-              <v-window-item :value="1">
-                <v-card-text class="pa-8">
-                  <h2 class="text-center text-h5 font-weight-bold mb-2 card-title">Welcome Back!</h2>
-                  <p class="text-center text-subtitle-1 text-medium-emphasis mb-8">Sign in to your account</p>
 
-                  <v-expand-transition>
-                    <div v-if="validationShowError" class="mb-6">
-                      <v-alert
-                        class="aesthetic-error glass-error"
-                        density="comfortable"
-                        rounded="lg"
-                        closable
-                        elevation="0"
-                        @click:close="validationShowError = false"
-                      >
-                        <template v-slot:prepend>
-                          <div class="error-icon-wrapper mr-3">
-                            <v-icon icon="mdi-alert-octagon-outline" color="#EF4444" size="24"></v-icon>
-                          </div>
-                        </template>
-                        
-                        <div class="text-subtitle-2 font-weight-bold text-red-darken-3 mb-1">
-                          Authentication Failed
-                        </div>
-                        
-                        <div class="text-body-2 text-red-darken-2" style="line-height: 1.4;">
-                          <ul v-if="validationErrorMessages.length > 1" class="pl-4">
-                            <li v-for="(msg, i) in validationErrorMessages" :key="i">{{ msg }}</li>
-                          </ul>
-                          <span v-else>{{ validationErrorMessages[0] }}</span>
-                        </div>
-                      </v-alert>
+          <!-- LOGIN CARD -->
+          <v-card
+            class="login-card"
+            elevation="0"
+          >
+
+            <v-window
+              v-model="step"
+              class="auth-window"
+            >
+
+              <!-- ================= LOGIN ================= -->
+              <v-window-item :value="1">
+
+                <v-card-text class="auth-content">
+
+                  <div class="heading">
+                    <h2>Welcome back</h2>
+
+                    <p>
+                      Sign in to continue to your account
+                    </p>
+                  </div>
+
+
+                  <!-- ERROR -->
+                  <v-alert
+                    v-if="validationShowError"
+                    type="error"
+                    variant="tonal"
+                    density="comfortable"
+                    rounded="lg"
+                    closable
+                    class="error-alert"
+                    @click:close="validationShowError = false"
+                  >
+                    <div
+                      v-if="validationErrorMessages.length > 1"
+                    >
+                      <ul class="pl-4">
+                        <li
+                          v-for="(msg, i) in validationErrorMessages"
+                          :key="i"
+                        >
+                          {{ msg }}
+                        </li>
+                      </ul>
                     </div>
-                  </v-expand-transition>
+
+                    <div v-else>
+                      {{ validationErrorMessages[0] }}
+                    </div>
+                  </v-alert>
+
 
                   <v-form @submit.prevent="onLogin">
-                    <label class="form-label">Email address</label>
-                    <v-text-field
-                      v-model="loginForm.email"
-                      density="comfortable"
-                      variant="outlined"
-                      class="mb-4 aesthetic-input"
-                      hide-details="auto"
-                      placeholder="name@example.com"
-                      prepend-inner-icon="mdi-email-outline"
-                    ></v-text-field>
 
-                    <label class="form-label">Password</label>
-                    <password-input v-model="loginForm.password" class="aesthetic-input" placeholder="••••••••">
-                    </password-input>
-                    
-                    <div class="d-flex justify-end mt-2">
-                        <a class="text-caption text-decoration-none form-link" href="#" rel="noopener noreferrer">
-                          Forgot password?
-                        </a>
+                    <!-- EMAIL -->
+                    <div class="field">
+                      <label>Email address</label>
+
+                      <v-text-field
+                        v-model="loginForm.email"
+                        variant="outlined"
+                        density="comfortable"
+                        placeholder="name@example.com"
+                        prepend-inner-icon="mdi-email-outline"
+                        hide-details="auto"
+                        class="modern-input"
+                      />
                     </div>
+
+
+                    <!-- PASSWORD -->
+                    <div class="field password-field">
+                      <label>Password</label>
+
+                      <password-input
+                        v-model="loginForm.password"
+                        placeholder="Enter your password"
+                        class="modern-input"
+                      />
+                    </div>
+
+
+                    <div class="forgot-row">
+                      <a
+                        href="#"
+                        @click.prevent
+                      >
+                        Forgot password?
+                      </a>
+                    </div>
+
 
                     <v-btn
                       block
                       size="large"
-                      class="form-button mt-8"
-                      :loading="loading"
                       type="submit"
-                      elevation="4"
+                      :loading="loading"
+                      class="submit-button"
                     >
-                      Sign in
+                      <span>Sign in</span>
+
+                      <v-icon
+                        icon="mdi-arrow-right"
+                        size="20"
+                      />
                     </v-btn>
+
                   </v-form>
+
                 </v-card-text>
+
               </v-window-item>
 
-              <!-- Sign Up Form -->
-              <v-window-item :value="2">
-                <v-card-text class="pa-8">
-                  <h2 class="text-center text-h5 font-weight-bold mb-2 card-title">Create Account</h2>
-                  <p class="text-center text-subtitle-1 text-medium-emphasis mb-8">Sign up for new account</p>
 
-                  <v-expand-transition>
-                    <div v-if="validationShowError" class="mb-6">
-                      <v-alert
-                        class="aesthetic-error glass-error"
-                        density="comfortable"
-                        rounded="lg"
-                        closable
-                        elevation="0"
-                        @click:close="validationShowError = false"
-                      >
-                        <template v-slot:prepend>
-                          <div class="error-icon-wrapper mr-3">
-                            <v-icon icon="mdi-alert-circle-outline" color="#EF4444" size="24"></v-icon>
-                          </div>
-                        </template>
-                        
-                        <div class="text-subtitle-2 font-weight-bold text-red-darken-3 mb-1">
-                          Registration failed
-                        </div>
-                        
-                        <div class="text-body-2 text-red-darken-2" style="line-height: 1.4;">
-                          <ul v-if="validationErrorMessages.length > 1" class="pl-4">
-                            <li v-for="(msg, i) in validationErrorMessages" :key="i">{{ msg }}</li>
-                          </ul>
-                          <span v-else>{{ validationErrorMessages[0] }}</span>
-                        </div>
-                      </v-alert>
+              <!-- ================= REGISTER ================= -->
+              <v-window-item :value="2">
+
+                <v-card-text class="auth-content">
+
+                  <div class="heading">
+                    <h2>Create account</h2>
+
+                    <p>
+                      Get started with your new account
+                    </p>
+                  </div>
+
+
+                  <!-- ERROR -->
+                  <v-alert
+                    v-if="validationShowError"
+                    type="error"
+                    variant="tonal"
+                    density="comfortable"
+                    rounded="lg"
+                    closable
+                    class="error-alert"
+                    @click:close="validationShowError = false"
+                  >
+                    <div
+                      v-if="validationErrorMessages.length > 1"
+                    >
+                      <ul class="pl-4">
+                        <li
+                          v-for="(msg, i) in validationErrorMessages"
+                          :key="i"
+                        >
+                          {{ msg }}
+                        </li>
+                      </ul>
                     </div>
-                  </v-expand-transition>
+
+                    <div v-else>
+                      {{ validationErrorMessages[0] }}
+                    </div>
+                  </v-alert>
+
 
                   <v-form @submit.prevent="onSignUp">
-                    <label class="form-label">Username</label>
-                    <v-text-field
-                      v-model="signupForm.username"
-                      density="comfortable"
-                      variant="outlined"
-                      class="mb-4 aesthetic-input"
-                      hide-details="auto"
-                      placeholder="spacewalker"
-                      prepend-inner-icon="mdi-account-outline"
-                    ></v-text-field>
 
-                    <label class="form-label">Email address</label>
-                    <v-text-field
-                      v-model="signupForm.email"
-                      density="comfortable"
-                      variant="outlined"
-                      class="mb-4 aesthetic-input"
-                      hide-details="auto"
-                      placeholder="name@example.com"
-                      prepend-inner-icon="mdi-email-outline"
-                    ></v-text-field>
+                    <!-- USERNAME -->
+                    <div class="field">
+                      <label>Username</label>
 
-                    <label class="form-label">Password</label>
-                    <password-input v-model="signupForm.password" class="mb-4 aesthetic-input" placeholder="••••••••" />
-                    
-                    <label class="form-label">Confirm Password</label>
-                    <password-input v-model="signupForm.confirmPassword" class="aesthetic-input" placeholder="••••••••" />
+                      <v-text-field
+                        v-model="signupForm.username"
+                        variant="outlined"
+                        density="comfortable"
+                        placeholder="spacewalker"
+                        prepend-inner-icon="mdi-account-outline"
+                        hide-details="auto"
+                        class="modern-input"
+                      />
+                    </div>
+
+
+                    <!-- EMAIL -->
+                    <div class="field">
+                      <label>Email address</label>
+
+                      <v-text-field
+                        v-model="signupForm.email"
+                        variant="outlined"
+                        density="comfortable"
+                        placeholder="name@example.com"
+                        prepend-inner-icon="mdi-email-outline"
+                        hide-details="auto"
+                        class="modern-input"
+                      />
+                    </div>
+
+
+                    <!-- PASSWORD -->
+                    <div class="field">
+                      <label>Password</label>
+
+                      <password-input
+                        v-model="signupForm.password"
+                        placeholder="Create a password"
+                        class="modern-input"
+                      />
+                    </div>
+
+
+                    <!-- CONFIRM PASSWORD -->
+                    <div class="field">
+                      <label>Confirm password</label>
+
+                      <password-input
+                        v-model="signupForm.confirmPassword"
+                        placeholder="Confirm your password"
+                        class="modern-input"
+                      />
+                    </div>
+
 
                     <v-btn
                       block
                       size="large"
-                      class="form-button mt-8"
-                      :loading="loading"
                       type="submit"
-                      elevation="4"
+                      :loading="loading"
+                      class="submit-button"
                     >
-                      Sign up
+                      <span>Create account</span>
+
+                      <v-icon
+                        icon="mdi-arrow-right"
+                        size="20"
+                      />
                     </v-btn>
+
                   </v-form>
+
                 </v-card-text>
+
               </v-window-item>
+
             </v-window>
-            
-            <div class="py-6 bg-grey-lighten-4 text-center">
-                <v-fade-transition mode="out-in">
-                    <div v-if="step === 1" key="signup">
-                        <span class="text-body-2 text-medium-emphasis">New here? </span>
-                        <a class="text-body-2 font-weight-bold text-decoration-none form-link ml-1" @click="switchView(2)">Create an account</a>
-                    </div>
-                    <div v-else key="signin">
-                         <span class="text-body-2 text-medium-emphasis">Already have an account? </span>
-                        <a class="text-body-2 font-weight-bold text-decoration-none form-link ml-1" @click="switchView(1)">Sign in</a>
-                    </div>
-                </v-fade-transition>
+
+
+            <!-- SWITCH LOGIN / REGISTER -->
+            <div class="switch-area">
+
+              <template v-if="step === 1">
+
+                <span>
+                  Don't have an account?
+                </span>
+
+                <button
+                  type="button"
+                  @click="switchView(2)"
+                >
+                  Create account
+                </button>
+
+              </template>
+
+
+              <template v-else>
+
+                <span>
+                  Already have an account?
+                </span>
+
+                <button
+                  type="button"
+                  @click="switchView(1)"
+                >
+                  Sign in
+                </button>
+
+              </template>
+
             </div>
 
           </v-card>
+
+
+          <!-- FOOTER -->
+          <div class="footer">
+            <span>© {{ new Date().getFullYear() }} Aplikasi Gas</span>
+
+            <span class="dot">•</span>
+
+            <span>All rights reserved</span>
+          </div>
+
         </v-col>
       </v-row>
     </v-container>
+
   </div>
 </template>
 
+
 <script setup lang="ts">
+
 import { useGlobal } from '@/composables/useGlobal';
 import PasswordInput from './PasswordInput.vue';
 import { useAuth } from '@/composables/useAuth';
 import { useRouter } from 'vue-router';
 
-  /* -----------------------------------------------------*
-   * CONSTANTS                                          *
-   * ---------------------------------------------------- */
-  const router = useRouter();
+const router = useRouter();
 
-  /* -----------------------------------------------------*
-   * COMPOSABLES                                          *
-   * ---------------------------------------------------- */
-  const {
-    //validation helpers
-    validationErrorMessages,
-    validationShowError,
-    validationError,
-  } = useGlobal();
+const {
+  validationErrorMessages,
+  validationShowError,
+  validationError,
+} = useGlobal();
 
-  const {
-    // state
-      step,
+const {
+  step,
+  loading,
+  loginForm,
+  signupForm,
+  login,
+  signUp,
+} = useAuth();
 
-      // computed
-      loading,
 
-      // forms
-      loginForm,
-      signupForm,
+const switchView = (newStep: number) => {
+  validationShowError.value = false;
+  validationErrorMessages.value = [];
+  step.value = newStep;
+};
 
-      // methods
-      login,
-      signUp,
-  } = useAuth();
 
-  /* -----------------------------------------------------*
-   * FUNCTIONS                                            *
-   * ---------------------------------------------------- */
-  const switchView = (newStep: number) => {
-    validationShowError.value = false;
-    validationErrorMessages.value = [];
-    step.value = newStep;
-  };
+const onLogin = async () => {
+  try {
+    await login();
+    router.push("/");
+  } catch (e) {
+    validationError(e);
+  }
+};
 
-  const onLogin = async () => {
-    try {
-      await login();
-      router.push("/");
-    }catch(e) {
-      validationError(e);
-    }
-  };
 
-  const onSignUp = async () => {
-    try {
-      await signUp();
-      router.push("/");
-    }catch(e) {
-      validationError(e);
-    }
-  };
+const onSignUp = async () => {
+  try {
+    await signUp();
+    router.push("/");
+  } catch (e) {
+    validationError(e);
+  }
+};
+
 </script>
 
+
 <style scoped>
-.modern-login {
+
+/* =====================================================
+   PAGE
+===================================================== */
+
+.login-page {
   min-height: 100vh;
+
   position: relative;
-  background-color: #0f172a;
+
   overflow: hidden;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f8fafc 0%,
+      #f1f5f9 100%
+    );
+
+  color: #0f172a;
 }
 
-/* Animated Background Shapes */
-.shape {
-    position: absolute;
-    filter: blur(100px);
-    opacity: 0.6;
-    animation-duration: 20s;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
+
+/* =====================================================
+   BACKGROUND
+===================================================== */
+
+.bg-glow {
+  position: absolute;
+
+  width: 420px;
+  height: 420px;
+
+  border-radius: 50%;
+
+  filter: blur(90px);
+
+  pointer-events: none;
 }
 
-.shape-1 {
-    top: -10%;
-    left: -10%;
-    width: 600px;
-    height: 600px;
-    background: #10B981;
-    animation-name: float-1;
+
+.glow-1 {
+  top: -220px;
+  left: -180px;
+
+  background: rgba(16, 185, 129, 0.16);
 }
 
-.shape-2 {
-    bottom: -10%;
-    right: -10%;
-    width: 500px;
-    height: 500px;
-    background: #3B82F6;
-    animation-name: float-2;
-    animation-duration: 25s;
+
+.glow-2 {
+  right: -220px;
+  bottom: -220px;
+
+  background: rgba(59, 130, 246, 0.10);
 }
 
-.shape-3 {
-    top: 40%;
-    left: 40%;
-    width: 300px;
-    height: 300px;
-    background: #8B5CF6;
-    animation-name: float-3;
-    animation-duration: 18s;
+
+.grid-pattern {
+  position: absolute;
+
+  inset: 0;
+
+  opacity: 0.35;
+
+  background-image:
+    linear-gradient(
+      rgba(148, 163, 184, 0.08) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.08) 1px,
+      transparent 1px
+    );
+
+  background-size: 32px 32px;
+
+  mask-image:
+    linear-gradient(
+      to bottom,
+      black,
+      transparent 70%
+    );
+
+  pointer-events: none;
 }
 
-@keyframes float-1 {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    100% { transform: translate(100px, 100px) rotate(20deg); }
+
+/* =====================================================
+   BRAND
+===================================================== */
+
+.brand {
+  text-align: center;
+
+  margin-bottom: 28px;
+
+  animation: fade-up 0.6s ease;
 }
 
-@keyframes float-2 {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    100% { transform: translate(-100px, -50px) rotate(-15deg); }
-}
 
-@keyframes float-3 {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(50px, -50px) scale(1.2); }
-    100% { transform: translate(0, 0) scale(1); }
-}
+.logo {
+  width: 58px;
+  height: 58px;
 
-/* Glass Card */
-.glass-card {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important;
-}
+  margin: 0 auto;
 
-/* Logo Animation */
-.logo-container {
-    perspective: 1000px;
-}
-
-.logo-wrapper {
-    display: inline-flex;
-    padding: 20px;
-    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-    border-radius: 24px;
-    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
-    animation: float-logo 6s ease-in-out infinite;
-}
-
-@keyframes float-logo {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
-
-.title-shadow {
-    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-}
-
-.card-title {
-  color: #1E293B;
-  letter-spacing: -0.5px;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: #334155;
-  margin-left: 2px;
-}
-
-.form-link {
-  color: #10B981;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.form-link:hover {
-  color: #059669;
-}
-
-.form-button {
-  background: linear-gradient(135deg, #10B981 0%, #047857 100%);
-  color: white !important;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  border-radius: 12px !important;
-  box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.5) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  text-transform: none;
-  font-size: 1rem;
-}
-
-.form-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 30px -5px rgba(16, 185, 129, 0.6) !important;
-}
-
-/* Input Styles */
-:deep(.v-field) {
-    border-radius: 12px !important;
-    transition: all 0.3s ease;
-}
-
-:deep(.v-field__outline) {
-    --v-field-border-opacity: 0.15;
-}
-
-:deep(.v-field--focused) {
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-}
-
-:deep(.v-text-field .v-input__control .v-field) {
-  background-color: rgba(241, 245, 249, 0.5) !important;
-}
-
-:deep(.v-field:hover) {
-    background-color: rgba(241, 245, 249, 0.8) !important;
-}
-
-/* Error Alert Styles */
-.aesthetic-error {
-  border: 1px solid rgba(239, 68, 68, 0.2) !important;
-  background: linear-gradient(to right, rgba(254, 242, 242, 0.95), rgba(255, 245, 245, 0.9)) !important;
-}
-
-.glass-error {
-  backdrop-filter: blur(8px);
-}
-
-.error-icon-wrapper {
-  background: white;
-  border-radius: 12px;
-  padding: 8px;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
+
+  color: white;
+
+  border-radius: 17px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #34d399,
+      #059669
+    );
+
+  box-shadow:
+    0 12px 25px rgba(16, 185, 129, 0.25);
+
+  transition: all 0.3s ease;
 }
+
+
+.logo:hover {
+  transform: translateY(-3px) rotate(-3deg);
+
+  box-shadow:
+    0 16px 30px rgba(16, 185, 129, 0.30);
+}
+
+
+.brand-name {
+  margin-top: 14px;
+
+  font-size: 1.45rem;
+
+  font-weight: 750;
+
+  letter-spacing: -0.6px;
+}
+
+
+.brand-tagline {
+  margin-top: 4px;
+
+  font-size: 0.82rem;
+
+  color: #64748b;
+}
+
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.login-card {
+  overflow: hidden;
+
+  border: 1px solid rgba(226, 232, 240, 0.9);
+
+  border-radius: 20px !important;
+
+  background: rgba(255, 255, 255, 0.94) !important;
+
+  box-shadow:
+    0 25px 50px -15px rgba(15, 23, 42, 0.12) !important;
+
+  backdrop-filter: blur(12px);
+
+  animation: fade-up 0.7s ease;
+}
+
+
+.auth-window {
+  overflow: hidden;
+}
+
+
+.auth-content {
+  padding: 30px !important;
+}
+
+
+/* =====================================================
+   HEADING
+===================================================== */
+
+.heading {
+  margin-bottom: 26px;
+}
+
+
+.heading h2 {
+  margin: 0;
+
+  font-size: 1.45rem;
+
+  font-weight: 750;
+
+  letter-spacing: -0.7px;
+
+  color: #0f172a;
+}
+
+
+.heading p {
+  margin-top: 6px;
+
+  font-size: 0.87rem;
+
+  color: #64748b;
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.error-alert {
+  margin-bottom: 20px;
+
+  font-size: 0.82rem;
+}
+
+
+/* =====================================================
+   FORM
+===================================================== */
+
+.field {
+  margin-bottom: 18px;
+}
+
+
+.field label {
+  display: block;
+
+  margin-bottom: 7px;
+  margin-left: 2px;
+
+  font-size: 0.82rem;
+
+  font-weight: 650;
+
+  color: #334155;
+}
+
+
+.password-field {
+  margin-bottom: 0;
+}
+
+
+/* =====================================================
+   INPUT
+===================================================== */
+
+:deep(.modern-input .v-field) {
+  min-height: 46px;
+
+  border-radius: 11px !important;
+
+  background: #ffffff;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+:deep(.modern-input .v-field:hover) {
+  border-color: #94a3b8;
+}
+
+
+:deep(.modern-input .v-field--focused) {
+  border-color: #10b981;
+
+  box-shadow:
+    0 0 0 3px rgba(16, 185, 129, 0.10);
+}
+
+
+:deep(.modern-input .v-field__input) {
+  font-size: 0.9rem;
+}
+
+
+/* =====================================================
+   FORGOT
+===================================================== */
+
+.forgot-row {
+  display: flex;
+
+  justify-content: flex-end;
+
+  margin-top: 9px;
+}
+
+
+.forgot-row a {
+  font-size: 0.78rem;
+
+  font-weight: 650;
+
+  color: #059669;
+
+  text-decoration: none;
+
+  transition: color 0.2s ease;
+}
+
+
+.forgot-row a:hover {
+  color: #047857;
+
+  text-decoration: underline;
+}
+
+
+/* =====================================================
+   BUTTON
+===================================================== */
+
+.submit-button {
+  height: 47px !important;
+
+  margin-top: 26px;
+
+  border-radius: 11px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #10b981,
+      #059669
+    );
+
+  color: white !important;
+
+  font-size: 0.9rem;
+
+  font-weight: 700;
+
+  text-transform: none;
+
+  letter-spacing: 0;
+
+  box-shadow:
+    0 8px 18px rgba(16, 185, 129, 0.22) !important;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.submit-button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 24px rgba(16, 185, 129, 0.30) !important;
+}
+
+
+.submit-button :deep(.v-icon) {
+  margin-left: 8px;
+
+  transition: transform 0.2s ease;
+}
+
+
+.submit-button:hover :deep(.v-icon) {
+  transform: translateX(3px);
+}
+
+
+/* =====================================================
+   SWITCH
+===================================================== */
+
+.switch-area {
+  padding: 17px 20px;
+
+  border-top: 1px solid #f1f5f9;
+
+  background: #fafafa;
+
+  text-align: center;
+
+  font-size: 0.8rem;
+
+  color: #64748b;
+}
+
+
+.switch-area button {
+  margin-left: 5px;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: #059669;
+
+  font-size: 0.8rem;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: color 0.2s ease;
+}
+
+
+.switch-area button:hover {
+  color: #047857;
+
+  text-decoration: underline;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer {
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 20px;
+
+  font-size: 0.7rem;
+
+  color: #94a3b8;
+}
+
+
+.dot {
+  color: #cbd5e1;
+}
+
+
+/* =====================================================
+   ANIMATION
+===================================================== */
+
+@keyframes fade-up {
+
+  from {
+    opacity: 0;
+
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+  .auth-content {
+    padding: 25px !important;
+  }
+
+  .login-card {
+    border-radius: 17px !important;
+  }
+
+  .brand {
+    margin-bottom: 22px;
+  }
+
+  .footer {
+    margin-bottom: 10px;
+  }
+
+}
+
 </style>
