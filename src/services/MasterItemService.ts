@@ -53,6 +53,23 @@ export const MasterItemService = {
     }
   },
 
+  async fetchItemGasIsi(): Promise<MasterItem[]> {
+    try {
+
+      const response = await MasterItemApi.getMItemGasIsi();
+      return response.data.data.map((item: MasterItem) => ({
+        ...item,
+        active_flag: item.active_flag == 'Y',
+        in_stock: item.in_stock == 'Y',
+      }));
+    } catch (e) {
+      throw errorHandler.parseError(e,
+        Validations.getErrorMessageCodeFromMasterItem,
+        FALLBACK_MESSAGE
+      );
+    }
+  },
+
   async deactive(id: number): Promise<void> {
     try {
 

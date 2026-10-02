@@ -34,7 +34,7 @@
               New Transaction
             </v-card-title>
             <v-card-text class="pa-5">
-              
+
               <v-autocomplete
                 label="Customer"
                 v-model="transactionData.customer_id"
@@ -218,7 +218,7 @@
           </v-card>
         </v-col>
       </v-row>
-      
+
       <v-dialog v-model="DialogUpdate" max-width="600px" persistent>
         <v-card rounded="xl" :class="isDark ? 'dialog-card-dark' : 'dialog-card-light'">
           <v-card-title :class="isDark ? 'dialog-header-dark' : 'dialog-header-light'">
@@ -329,7 +329,7 @@
     <!-- Error & Success Snackbars -->
     <SnackbarError :messages="validationErrorMessages" v-model="validationShowError" :timeout="2000" />
     <SnackbarSuccess v-model="hasSaved" message="Action completed successfully!" :timeout="2000" />
-  
+
   </div>
 </template>
 <script setup lang="ts">
@@ -412,7 +412,8 @@ const {
 
 const {
   mItems,
-  loadMasterItemByType,
+  //loadMasterItemByType,
+  loadMitemGasIsi,
 } = useMasterItem();
 
   /* -----------------------------------------------------*
@@ -421,7 +422,8 @@ const {
 onMounted(() => {
   onLoadCustomerData();
   onLoadTopCustomerTransaction();
-  onLoadMasterItemByType('ITEM');
+ // onLoadMasterItemByType('ITEM');
+  onLoadMasterItemGasIsi();
   onGetTransactionByDate();
 });
 
@@ -475,9 +477,16 @@ onMounted(() => {
     }
   };
 
-  const onLoadMasterItemByType = async (type: string) => {
+  // const onLoadMasterItemByType = async (type: string) => {
+  //   try {
+  //     await loadMasterItemByType(type);
+  //   } catch (e) {
+  //     validationError(e);
+  //   }
+  // };
+  const onLoadMasterItemGasIsi = async () => {
     try {
-      await loadMasterItemByType(type);
+      await loadMitemGasIsi();
     } catch (e) {
       validationError(e);
     }

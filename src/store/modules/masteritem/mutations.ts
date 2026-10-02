@@ -3,7 +3,8 @@ import {
   SET_DATA_CATEGORY,
   SET_LOADING,
   SET_HASSAVED,
-  SET_DATA_MITEM_BY_TYPE
+  SET_DATA_MITEM_BY_TYPE,
+  SET_DATA_MITEM_GASISI,
 } from '@/store/storeconstant';
 
 import type { MutationTree } from 'vuex';
@@ -18,6 +19,9 @@ const mutations: MutationTree<MasterItemState> = {
   },
   [SET_DATA_CATEGORY](state, payload: CategoryItem[]) {
     state.categories = payload;
+  },
+  [SET_DATA_MITEM_GASISI](state, payload: MasterItem[]) {
+    state.mItems = payload;
   },
   [SET_LOADING](state, loading: boolean) {
     state.loading = loading;

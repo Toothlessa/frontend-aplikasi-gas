@@ -6,6 +6,7 @@ import {
     LOAD_CATEGORY_ITEM,
     LOAD_MASTER_ITEM,
     LOAD_MASTER_ITEM_BY_TYPE,
+    LOAD_MITEM_GASISI,
     // SET_HASSAVED,
 } from "@/store/storeconstant";
 import { CategoryItem, Field, MasterItem } from "@/types";
@@ -103,7 +104,10 @@ export function useMasterItem() {
     const loadCategories = () =>
         store.dispatch(`masteritem/${LOAD_CATEGORY_ITEM}`);
 
-    const deactiveItem = () =>
+    const loadMitemGasIsi = () =>
+        store.dispatch(`masteritem/${LOAD_MITEM_GASISI}`);
+
+  const deactiveItem = () =>
         store.dispatch(`masteritem/${DEACTIVATE_ITEM}`, editedItem.id);
 
     /* ======================================================*
@@ -134,6 +138,7 @@ export function useMasterItem() {
         createItem,
         loadMasterItem,
         loadMasterItemByType,
+        loadMitemGasIsi,
         loadCategories,
         deactiveItem,
         // createCategory,

@@ -36,6 +36,7 @@ export const CREATE_CATEGORY_ITEM = '[actions] create category item'
 export const LOAD_MASTER_ITEM = '[actions] load master item data'
 export const LOAD_MASTER_ITEM_BY_TYPE = '[actions] load master item data by item type'
 export const LOAD_CATEGORY_ITEM = '[actions] load category item data'
+export const LOAD_MITEM_GASISI = '[actions] load master item for gas isi only'
 export const DEACTIVATE_ITEM = '[actions] deactivate item data'
 export const DEACTIVATE_ITEM_CATEGORY = '[actions] deactivate item category data'
 /* getters */
@@ -43,6 +44,7 @@ export const DEACTIVATE_ITEM_CATEGORY = '[actions] deactivate item category data
 export const SET_DATA_MITEM = '[mutations] set master item data'
 export const SET_DATA_MITEM_BY_TYPE = '[mutations] set master item data by item type'
 export const SET_DATA_CATEGORY = '[mutations] set category item data'
+export const SET_DATA_MITEM_GASISI = '[mutations] set data for master item gas isi only'
 
 /*-----------------------------------------------------*
  * CUSTOMER                                            *

@@ -11,12 +11,15 @@ import {
   DEACTIVATE_ITEM_CATEGORY,
   LOAD_MASTER_ITEM_BY_TYPE,
   SET_DATA_MITEM_BY_TYPE,
+  LOAD_MITEM_GASISI,
+  SET_DATA_MITEM_GASISI,
 } from '@/store/storeconstant';
 import { ActionTree } from 'vuex';
 import { MasterItemState } from '@/types/MasterItem';
 import { RootState } from '@/store/types';
 import { MasterItemService } from '@/services/MasterItemService';
 import { CategoryItemService } from '@/services/CategoryItemService';
+import MasterItem from '@/components/masteritem/MasterItem.vue';
 
 const actions: ActionTree<MasterItemState, RootState> = {
 
@@ -57,6 +60,17 @@ const actions: ActionTree<MasterItemState, RootState> = {
       commit(SET_DATA_MITEM_BY_TYPE, data);
     } catch (e) {
       console.error('failed to load data masteritem by item type');
+      throw e;
+    }
+  },
+
+  async [LOAD_MITEM_GASISI]({ commit }) {
+    try {
+      const data = await MasterItemService.fetchItemGasIsi();
+      commit(SET_DATA_MITEM_GASISI, data);
+    } catch (e) {
+
+      console.error('failed to load data masteritem gas isi');
       throw e;
     }
   },
