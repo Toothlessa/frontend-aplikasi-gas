@@ -1,5 +1,5 @@
 import { StockApi } from "@/api/StockApi";
-import { Stock, StockDetail, StockDisplay } from "@/types";
+import { Stock, StockDetail, StockDisplay, UpdateStockPayload } from "@/types";
 import { errorHandler } from "@/utils/ErrorHandler";
 import Validations from "@/utils/Validation";
 
@@ -18,7 +18,7 @@ export const StockService = {
         }
     },
 
-    async update(id: number, stock: Stock): Promise<void> {
+    async update(id: number, stock: Stock | UpdateStockPayload): Promise<void> {
         try {
             await StockApi.update(id, stock);
         } catch (e) {

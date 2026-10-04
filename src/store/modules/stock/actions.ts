@@ -15,7 +15,7 @@ import {
 import { ActionTree } from "vuex";
 import { RootState } from "@/store/types";
 import { StockService } from "@/services/StockService";
-import { CreateStockPayload, Stock, StockState } from "@/types";
+import { CreateStockPayload, Stock, StockState, UpdateStockPayload } from "@/types";
 
 const actions: ActionTree<StockState, RootState> = {
 
@@ -46,7 +46,7 @@ const actions: ActionTree<StockState, RootState> = {
         }
     },
 
-    async [UPDATE_STOCK]({ commit, dispatch }, payload: { id: number, stock: Stock }) {
+    async [UPDATE_STOCK]({ commit, dispatch }, payload: { id: number, stock: Stock | UpdateStockPayload }) {
         try {
             await StockService.update(payload.id, payload.stock);
             dispatch(LOAD_STOCK);

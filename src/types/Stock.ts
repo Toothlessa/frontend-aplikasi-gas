@@ -16,6 +16,11 @@ export interface CreateStockPayload {
     stock: number;
 }
 
+export interface UpdateStockPayload {
+    item_id: number;
+    stock: number;
+}
+
 export interface StockField {
     model: keyof Stock;
     label: string;

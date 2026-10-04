@@ -83,8 +83,8 @@
                     size="small"
                     variant="text"
                     :color="isDark ? 'cyan-accent-2' : 'blue-grey'"
-                    :loading="loadingItemId === item.item_id"
-                    @click="onLoadDetailStock(item.item_id)"
+                    :loading="loadingItemId === (item.item_id || item.raw?.item_id)"
+                    @click="onLoadDetailStock(item.item_id || item.raw?.item_id)"
                   />
                 </template>
               </v-data-table-virtual>
@@ -120,7 +120,7 @@
                   size="small"
                   variant="text"
                   :color="isDark ? 'cyan-accent-2' : 'blue-grey'"
-                  :loading="loadingActionUpdate === item.id"
+                  :loading="loadingActionUpdate === (item.id || item.raw?.id)"
                   @click="editStock(item)"
                 />
               </template>
@@ -251,7 +251,7 @@ const {
 
 const {
   mItems,
-  loadMasterItem,
+  loadMasterItemByType,
 } = useMasterItem();
 
   /* ======================================================*
@@ -274,16 +274,25 @@ const loadingButtonUpdate = ref<boolean>(false);
 
 onMounted(() => {
   onLoadCurrentStock();
-  onLoadMasterItem();
+  //onLoadMasterItem();
+  onLoadMasterItemByType('ITEM')
 });
 
   /* ======================================================*
    * METHODS                                               *
    * ======================================================*/
 
-const editStock = (item: StockDetail) => {
-  Object.assign(editedStock, item);
-  loadingActionUpdate.value = item.id;
+interface DataTableRowItem<T> {
+  raw?: T;
+}
+
+const editStock = (item: StockDetail | DataTableRowItem<StockDetail>) => {
+  const rawItem = 'raw' in item && item.raw ? item.raw : (item as StockDetail);
+  Object.assign(editedStock, rawItem);
+  editedStock.id = Number(rawItem.id);
+  editedStock.item_id = Number(rawItem.item_id);
+  editedStock.stock = Number(rawItem.stock);
+  loadingActionUpdate.value = rawItem.id;
   DialogUpdate.value = true;
 
   setTimeout(() => {
@@ -306,6 +315,7 @@ const closeUpdateStock = () => {
   setTimeout(() => {
     DialogUpdate.value = false;
     loadingCloseUpdate.value = false;
+    resetEditedStock();
   }, 250);
 };
 
@@ -330,9 +340,9 @@ const onLoadCurrentStock = async () => {
   }
 };
 
-const onLoadMasterItem = async () => {
+const onLoadMasterItemByType = async (itemType: string) => {
   try {
-    await loadMasterItem();
+    await loadMasterItemByType(itemType);
   } catch (e) {
     validationError(e);
   }
@@ -354,7 +364,11 @@ const onUpdateStock = async () => {
   loadingButtonUpdate.value = true;
   const postData = editedStock;
   try {
-    await updateStock(postData.id, postData.stock);
+    console.log('start updating the stock');
+    await updateStock(postData.id, {
+      item_id: Number(postData.item_id),
+      stock: Number(postData.stock),
+    });
     DialogUpdate.value = false;
     await onLoadDetailStock(postData.item_id);
     await loadCurrentStock();
