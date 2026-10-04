@@ -19,7 +19,6 @@ import { MasterItemState } from '@/types/MasterItem';
 import { RootState } from '@/store/types';
 import { MasterItemService } from '@/services/MasterItemService';
 import { CategoryItemService } from '@/services/CategoryItemService';
-import MasterItem from '@/components/masteritem/MasterItem.vue';
 
 const actions: ActionTree<MasterItemState, RootState> = {
 
@@ -68,8 +67,8 @@ const actions: ActionTree<MasterItemState, RootState> = {
     try {
       const data = await MasterItemService.fetchItemGasIsi();
       commit(SET_DATA_MITEM_GASISI, data);
+      return data;
     } catch (e) {
-
       console.error('failed to load data masteritem gas isi');
       throw e;
     }

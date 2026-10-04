@@ -55,14 +55,21 @@ export const MasterItemService = {
 
   async fetchItemGasIsi(): Promise<MasterItem[]> {
     try {
-
       const response = await MasterItemApi.getMItemGasIsi();
-      return response.data.data.map((item: MasterItem) => ({
+      const rawData = response.data?.data;
+
+      if (!rawData) return [];
+
+      const rawItems: MasterItem[] = Array.isArray(rawData) ? rawData : [rawData];
+
+      return rawItems.map((item: MasterItem) => ({
         ...item,
-        active_flag: item.active_flag == 'Y',
-        in_stock: item.in_stock == 'Y',
+        id: Number(item.id),
+        active_flag: item.active_flag === 'Y',
+        in_stock: item.in_stock === 'Y',
       }));
     } catch (e) {
+      console.error('Error detail di Service:', e);
       throw errorHandler.parseError(e,
         Validations.getErrorMessageCodeFromMasterItem,
         FALLBACK_MESSAGE

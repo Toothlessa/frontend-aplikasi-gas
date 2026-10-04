@@ -1,5 +1,6 @@
 export interface MasterItemState {
   mItems: MasterItem[];
+  mItemsGasIsi: MasterItem[]; // Tambahkan ini
   categories: CategoryItem[];
   loading: boolean;
   hasSaved: boolean;

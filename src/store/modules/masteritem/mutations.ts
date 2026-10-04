@@ -21,7 +21,7 @@ const mutations: MutationTree<MasterItemState> = {
     state.categories = payload;
   },
   [SET_DATA_MITEM_GASISI](state, payload: MasterItem[]) {
-    state.mItems = payload;
+    state.mItemsGasIsi = payload;
   },
   [SET_LOADING](state, loading: boolean) {
     state.loading = loading;

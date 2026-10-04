@@ -135,28 +135,37 @@
               Select Item
             </v-card-title>
             <v-card-text class="pa-5">
-              <v-autocomplete
-                v-model="transactionData.item_id"
-                :items="mItems"
-                item-title="item_name"
-                item-value="id"
-                label="Item"
-                :readonly="!isEditing"
-                :hint="!isEditing ? 'Click lock to edit' : 'Click lock to save'"
-                :disabled="!fieldDisabled"
-                persistent-hint
-                variant="filled"
-                rounded="lg"
-                prepend-inner-icon="mdi-cube-outline"
-              >
-                <template v-slot:append>
-                   <v-icon
-                    :color="isEditing ? 'error' : 'success'"
-                    :icon="isEditing ? 'mdi-lock-open-variant-outline' : 'mdi-lock-outline'"
-                    @click="isEditing = !isEditing"
-                  />
-                </template>
-              </v-autocomplete>
+                <v-autocomplete
+                  v-model="transactionData.item_id"
+                  :items="mItemsGasIsi"
+                  item-title="item_name"
+                  item-value="id"
+                  label="Item"
+                  :readonly="!isEditing"
+                  :hint="!isEditing ? 'Click lock to edit' : 'Click lock to save'"
+                  :disabled="!fieldDisabled"
+                  persistent-hint
+                  variant="filled"
+                  rounded="lg"
+                  prepend-inner-icon="mdi-cube-outline"
+                >
+                  <!-- Slot Custom Item Dropdown -->
+                  <template v-slot:item="{ props, item }">
+                    <v-list-item
+                      v-bind="props"
+                      :title="item.raw.item_name || item.raw.name"
+                    />
+                  </template>
+
+                  <!-- Lock Icon Toggle -->
+                  <template v-slot:append>
+                    <v-icon
+                      :color="isEditing ? 'error' : 'success'"
+                      :icon="isEditing ? 'mdi-lock-open-variant-outline' : 'mdi-lock-outline'"
+                      @click="isEditing = !isEditing"
+                    />
+                  </template>
+                </v-autocomplete>
             </v-card-text>
           </v-card>
         </v-col>
@@ -333,7 +342,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { VNumberInput } from 'vuetify/lib/labs/components.mjs';
 import { useTransaction } from '@/composables/useTransaction';
 import { useCustomer } from '@/composables/useCustomer';
@@ -411,10 +420,21 @@ const {
 } = useCustomer();
 
 const {
-  mItems,
+  //mItems,
   //loadMasterItemByType,
+  mItemsGasIsi,
   loadMitemGasIsi,
 } = useMasterItem();
+
+watch(
+  mItemsGasIsi,
+  (newItems) => {
+    if (newItems && newItems.length > 0 && !transactionData.item_id) {
+      transactionData.item_id = Number(newItems[0].id);
+    }
+  },
+  { immediate: true }
+);
 
   /* -----------------------------------------------------*
    * LIFECYCLE                                            *
@@ -486,7 +506,12 @@ onMounted(() => {
   // };
   const onLoadMasterItemGasIsi = async () => {
     try {
-      await loadMitemGasIsi();
+      const data = await loadMitemGasIsi();
+      const items = (data && data.length > 0) ? data : mItemsGasIsi.value;
+
+      if (items && items.length > 0) {
+        transactionData.item_id = Number(items[0].id);
+      }
     } catch (e) {
       validationError(e);
     }

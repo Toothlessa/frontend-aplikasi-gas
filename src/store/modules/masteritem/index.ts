@@ -9,6 +9,7 @@ import mutations from './mutations';
 
 const state = (): MasterItemState => ({
   mItems: [],
+  mItemsGasIsi: [], // Tambahkan initial state di sini
   categories: [],
   loading: false,
   hasSaved: false,

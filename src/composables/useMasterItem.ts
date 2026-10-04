@@ -106,9 +106,13 @@ export function useMasterItem() {
 
     const loadMitemGasIsi = () =>
         store.dispatch(`masteritem/${LOAD_MITEM_GASISI}`);
+    // Getter reactive dari Vuex Store
+    const mItemsGasIsi = computed(
+      () => store.getters['masteritem/getMItemsGasIsi']
+    );
 
-  const deactiveItem = () =>
-        store.dispatch(`masteritem/${DEACTIVATE_ITEM}`, editedItem.id);
+    const deactiveItem = () =>
+          store.dispatch(`masteritem/${DEACTIVATE_ITEM}`, editedItem.id);
 
     /* ======================================================*
      * EXPORT                                                *
@@ -139,6 +143,7 @@ export function useMasterItem() {
         loadMasterItem,
         loadMasterItemByType,
         loadMitemGasIsi,
+        mItemsGasIsi,
         loadCategories,
         deactiveItem,
         // createCategory,

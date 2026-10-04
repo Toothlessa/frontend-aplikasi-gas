@@ -48,22 +48,46 @@ export function useTransaction() {
   /* -----------------------------------------------------*
    * LOCALS FUNCTIONS                                     *
    * -----------------------------------------------------*/
-  const defaultItem: Partial<Transaction> = {
-    id: null,
-    quantity: null,
-    stock: 0,
-    amount: 19000,
-    total: 0,
-    description: "",
-    item_id: 1902,
-    stockId: 0,
-    customer_id: null
-  };
-
+//    const transactionData = reactive<Partial<Transaction>>({
+//      amount: 19000,
+//      //item_id: 1902
+//    });
+//
+//   const defaultItem: Partial<Transaction> = {
+//     id: null,
+//     quantity: null,
+//     stock: 0,
+//     amount: 19000,
+//     total: 0,
+//     description: "",
+//     //item_id: 0,
+//     stockId: 0,
+//     customer_id: null
+//   };
   const transactionData = reactive<Partial<Transaction>>({
     amount: 19000,
-    //item_id: 1902
+    quantity: null,
+    stock: 0,
+    total: 0,
+    description: "",
+    customer_id: null,
+    item_id: store.getters['masteritem/getMItemsGasIsi']?.[0]?.id ?? undefined
   });
+
+  const getDefaultItem = (currentItemId?: Transaction['item_id']): Partial<Transaction> => {
+    const defaultGasItemId = store.getters['masteritem/getMItemsGasIsi']?.[0]?.id;
+    return {
+      id: null,
+      quantity: null,
+      stock: 0,
+      amount: 19000,
+      total: 0,
+      description: "",
+      item_id: currentItemId ?? transactionData.item_id ?? defaultGasItemId,
+      stockId: 0,
+      customer_id: null
+    };
+  };
 
   // Price Options
   const price = [
@@ -75,13 +99,28 @@ export function useTransaction() {
   ];
 
   const resetTransactionData = () => {
-    Object.assign(transactionData, defaultItem);
+    const defaultGasItemId = store.getters['masteritem/getMItemsGasIsi']?.[0]?.id;
+    const currentItemId = transactionData.item_id ?? defaultGasItemId;
+
+    // Langsung assign default tanpa delete key
+    Object.assign(transactionData, {
+      id: null,
+      quantity: null,
+      stock: 0,
+      amount: 19000,
+      total: 0,
+      description: "",
+      customer_id: null,
+      stockId: 0,
+      item_id: currentItemId // Pertahankan item_id yang aktif
+    });
+
     editedIndex.value = -1;
     isSend.value = false;
   };
 
   const resetTransactionUpdate = () => {
-    Object.assign(transactionUpdate, defaultItem);
+    Object.assign(transactionUpdate, getDefaultItem());
     editedIndex.value = -1;
     isSend.value = false;
   };
@@ -118,6 +157,8 @@ export function useTransaction() {
 
     if (item.item_id) {
       transactionUpdate.item_id = Number(item.item_id);
+    } else {
+      transactionUpdate.item_id = transactionData.item_id ?? store.getters['masteritem/getMItemsGasIsi']?.[0]?.id;
     }
 
     console.log("transactionUpdate.customer_id:", transactionUpdate.customer_id);
@@ -165,7 +206,7 @@ export function useTransaction() {
   );
 
   const isSaveDisabled = computed(
-    () => !(transactionData.customer_id && transactionData.quantity)
+    () => !(transactionData.customer_id && transactionData.quantity && transactionData.item_id)
   );
 
   const isUpdateDisabled = computed(
