@@ -69,7 +69,6 @@ export const MasterItemService = {
         in_stock: item.in_stock === 'Y',
       }));
     } catch (e) {
-      console.error('Error detail di Service:', e);
       throw errorHandler.parseError(e,
         Validations.getErrorMessageCodeFromMasterItem,
         FALLBACK_MESSAGE

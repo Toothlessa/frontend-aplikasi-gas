@@ -48,22 +48,6 @@ export function useTransaction() {
   /* -----------------------------------------------------*
    * LOCALS FUNCTIONS                                     *
    * -----------------------------------------------------*/
-//    const transactionData = reactive<Partial<Transaction>>({
-//      amount: 19000,
-//      //item_id: 1902
-//    });
-//
-//   const defaultItem: Partial<Transaction> = {
-//     id: null,
-//     quantity: null,
-//     stock: 0,
-//     amount: 19000,
-//     total: 0,
-//     description: "",
-//     //item_id: 0,
-//     stockId: 0,
-//     customer_id: null
-//   };
   const transactionData = reactive<Partial<Transaction>>({
     amount: 19000,
     quantity: null,
