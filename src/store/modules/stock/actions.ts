@@ -87,10 +87,10 @@ const actions: ActionTree<StockState, RootState> = {
         }
     },
 
-    async [LOAD_DISPLAY_STOCK]({ commit }, payload: { filledId: number, emptyId: number }) {
+    async [LOAD_DISPLAY_STOCK]({ commit }) {
         commit(SET_LOADING, true);
         try {
-            const data = await StockService.fetchDataDisplayStock(payload.filledId, payload.emptyId);
+            const data = await StockService.fetchDataDisplayStock();
             commit(SET_DATA_DISPLAY_STOCK, data);
         } catch (e) {
             console.error('Failed to load data display stock');

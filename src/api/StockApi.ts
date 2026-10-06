@@ -6,5 +6,7 @@ export const StockApi = {
     update: (id: number, data: Stock | UpdateStockPayload) => AxiosInstance.put(`stockitems/${id}`, data),
     get: () => AxiosInstance.get('stockitems/current'),
     getDetail: (itemId: number) => AxiosInstance.get(`stockitems/detail/${itemId}`),
-    fetchDataDisplayStock: (filledId: number, emptyId: number) => AxiosInstance.get(`stockitems/display/${filledId}/${emptyId}`),
+    //fetchDataDisplayStock: (filledId: number, emptyId: number) => AxiosInstance.get(`stockitems/display/${filledId}/${emptyId}`),
+    fetchDataDisplayStock: () => AxiosInstance.get(`stockitems/displayStock`),
+
 }

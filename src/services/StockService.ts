@@ -53,9 +53,9 @@ export const StockService = {
         }
     },
 
-    async fetchDataDisplayStock(filledId: number, emptyId: number): Promise<StockDisplay[]> {
+    async fetchDataDisplayStock(): Promise<StockDisplay[]> {
         try {
-            const response = await StockApi.fetchDataDisplayStock(filledId, emptyId);
+            const response = await StockApi.fetchDataDisplayStock();
             return response.data.data;
         } catch (e) {
             throw errorHandler.parseError(e,

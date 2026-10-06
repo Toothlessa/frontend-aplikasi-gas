@@ -114,7 +114,7 @@ import { SnackbarError, SnackbarSuccess } from '@/components/globalComponent';
   /* -------------------------------------------------------*
    * 📌 COMPOSABLES                                         *
    * -------------------------------------------------------*/
-  const { 
+  const {
     validationError,
     validationShowError,
     validationErrorMessages,

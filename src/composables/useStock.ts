@@ -73,7 +73,7 @@ export function useStock() {
     const loadDetailStock = (item_id: number) => store.dispatch(`stock/${LOAD_DETAIL_STOCK}`, item_id);
     const resetStockDetail = () => store.dispatch(`stock/${RESET_DETAIL_STOCK}`);
     const loadCurrentStock = () => store.dispatch(`stock/${LOAD_STOCK}`);
-    const loadDisplayStock = () => store.dispatch(`stock/${LOAD_DISPLAY_STOCK}`, { filledId: 1902, emptyId: 1903 });
+    const loadDisplayStock = () => store.dispatch(`stock/${LOAD_DISPLAY_STOCK}`);
     const updateStock = (id: number, payload: UpdateStockPayload) => store.dispatch(`stock/${UPDATE_STOCK}`, {
         id,
         stock: payload
