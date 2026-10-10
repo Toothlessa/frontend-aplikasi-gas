@@ -6,7 +6,8 @@ export const MasterItemApi = {
     update: (id:number, data:MasterItem) => AxiosInstance.put(`/masteritems/${id}`, data),
 
     getAll: () => AxiosInstance.get('/masteritems/all'),
-    getMItemGasIsi: () => AxiosInstance.get('/masteritems/itemGasIsi'),
+  getMItemGasIsi: () => AxiosInstance.get('/masteritems/itemGasIsi'),
+    getMItemGas: () => AxiosInstance.get('/masteritems/itemGas'),
     fetchItemByType: (itemType: string) => AxiosInstance.get(`masteritems/itemtype/${itemType}`),
     deactive: (id:number) => AxiosInstance.patch(`/masteritems/inactive/${id}`),
 }
